@@ -1,10 +1,12 @@
-# v0 runtime files
-__v0_runtime_loader.js
-__v0_devtools.tsx
-__v0_jsx-dev-runtime.ts
+# Git ignore for PropAuto AI
 
-# Common ignores
+.env
+.env.local
+.next
 node_modules
-.next/
-.env*.local
 .DS_Store
+coverage
+npm-debug.log*
+pnpm-lock.yaml
+.vscode
+.idea
