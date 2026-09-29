@@ -34,3 +34,5 @@ export interface AnalyticsVisit {
   path: string
   count: number
 }
+
+export type SiteLocale = 'en' | 'ar' | 'fr' | 'es'
