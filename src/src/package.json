@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint . --ext .ts,.tsx",
+    "lint:fix": "eslint . --ext .ts,.tsx --fix",
+    "format": "prettier --write .",
+    "ci:check": "pnpm --dir src/src lint && pnpm --dir src/src build",
+    "package:zip": "zip -r ../../propauto-clean.zip . -x node_modules/** .git/**",
+    "prepare": "husky install"
   },
   "dependencies": {
     "@ai-sdk/react": "^4.0.69",
@@ -39,14 +44,11 @@
     "@types/react-dom": "^19",
     "postcss": "^8.5",
     "tailwindcss": "^4.3.3",
-    "typescript": "5.7.3"
-  },
-  "pnpm": {
-    "overrides": {
-      "hono": "4.12.25"
-    }
-  },
-  "engines": {
-    "node": "24.x"
+    "typescript": "5.7.3",
+    "eslint": "^8.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "prettier": "^2.0.0",
+    "husky": "^8.0.0"
   }
 }
