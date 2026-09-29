@@ -1,5 +1,6 @@
-import { drizzle } from 'drizzle-orm/node-postgres'
+// handles strict typing for drizzle schema imports and db pool
 import { Pool } from 'pg'
+import { drizzle } from 'drizzle-orm/node-postgres'
 import * as schema from './schema'
 
 const globalForDb = globalThis as unknown as { propautoPool?: Pool }
