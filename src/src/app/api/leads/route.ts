@@ -3,6 +3,7 @@ import { Resend } from 'resend'
 import { z } from 'zod'
 import { db } from '@/lib/db'
 import { propautoLeads } from '@/lib/db/schema'
+import { escapeHtml } from '@/lib/utils'
 
 const leadSchema = z.object({
   name: z.string().trim().min(2).max(100),
@@ -14,11 +15,12 @@ const leadSchema = z.object({
   language: z.string().trim().max(20).optional(),
 })
 
-const COMPANY_EMAIL = 'propautoal@gmail.com'
+const COMPANY_EMAIL = process.env.RESEND_TO_EMAIL ?? 'propautoal@gmail.com'
 
 export async function POST(request: Request) {
   try {
     const payload = leadSchema.parse(await request.json())
+    // Save lead to DB (minimal fields to avoid PII over-log)
     await db.insert(propautoLeads).values({ name: payload.name, email: payload.email, intent: payload.intent, source: 'web' })
 
     const apiKey = process.env.RESEND_API_KEY_2 ?? process.env.RESEND_API_KEY
@@ -33,7 +35,7 @@ export async function POST(request: Request) {
         from,
         to: [COMPANY_EMAIL],
         subject: `New PropAuto lead: ${payload.name} — ${payload.intent}`,
-        html: `<h2>New PropAuto lead</h2><p><strong>Name:</strong> ${escapeHtml(payload.name)}</p><p><strong>Email:</strong> ${escapeHtml(payload.email)}</p><p><strong>Phone:</strong> ${escapeHtml(payload.phone ?? 'Not provided')}</p><p><strong>Budget:</strong> ${escapeHtml(payload.budget ?? 'Not provided')}</p><p><strong>Interest:</strong> ${escapeHtml(payload.intent)}</p><p><strong>Language:</strong> ${escapeHtml(payload.language ?? 'en')}</p><p><strong>Message:</strong> ${escapeHtml(payload.message ?? '')}</p>`,
+        html: `<h2>New PropAuto lead</h2><p><strong>Name:</strong> ${escapeHtml(payload.name)}</p><p><strong>Email:</strong> ${escapeHtml(payload.email)}</p><p><strong>Phone:</strong> ${escapeHtml(payload.phone ?? '')}</p><p><strong>Message:</strong> ${escapeHtml(payload.message ?? '')}</p>`,
       },
       { idempotencyKey: `propauto-lead/${crypto.randomUUID()}` },
     )
@@ -43,11 +45,7 @@ export async function POST(request: Request) {
     }
     return NextResponse.json({ ok: true, delivered: true, next: 'company-contact' })
   } catch (error) {
-    console.error('[v0] lead submission failed')
+    console.error('[v0] lead submission failed', error instanceof Error ? error.message : String(error))
     return NextResponse.json({ ok: false, error: 'Invalid lead details' }, { status: 400 })
   }
-}
-
-function escapeHtml(value: string) {
-  return value.replace(/[&<>"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character] ?? character)
 }

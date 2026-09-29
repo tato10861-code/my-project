@@ -7,10 +7,11 @@ const geist = Geist({ subsets: ['latin'], variable: '--font-geist' })
 const arabic = Noto_Sans_Arabic({ subsets: ['arabic'], variable: '--font-arabic' })
 import './globals.css'
 
+// metadata improved for SEO and social previews
 export const metadata: Metadata = {
   title: 'PropAuto | Luxury Properties & Cars AI Platform',
   description: 'Discover verified luxury real estate, rare cars, and investment opportunities with PropAuto AI.',
-  metadataBase: new URL('https://propauto-ai-al-closer-saas.vercel.app'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? 'https://propauto.example'),
   alternates: {
     canonical: '/',
     languages: { en: '/', ar: '/?lang=ar' },
@@ -18,13 +19,13 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'PropAuto | Luxury Properties & Cars AI Platform',
     description: 'Discover verified luxury real estate, rare cars, and investment opportunities with PropAuto AI.',
-    url: 'https://propauto-ai-al-closer-saas.vercel.app',
+    url: process.env.NEXT_PUBLIC_APP_URL ?? 'https://propauto.example',
     siteName: 'PropAuto AI',
     type: 'website',
   },
   generator: 'PropAuto AI',
   verification: {
-    google: '9fr9l891XdYIz0EUFHozAKU4McwO5ukbj-JQLzoP08c',
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION ?? undefined,
   },
   icons: {
     icon: [{ url: '/icon.svg', type: 'image/svg+xml' }],
@@ -39,11 +40,7 @@ export const viewport: Viewport = {
   ],
 }
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode
-}>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" dir="ltr" className={`${geist.variable} ${arabic.variable} bg-[#071014]`}>
       <body className="antialiased">
