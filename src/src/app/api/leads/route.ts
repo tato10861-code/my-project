@@ -42,7 +42,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, delivered: false, message: 'Lead saved, but the owner email could not be delivered.' }, { status: 502 })
     }
     return NextResponse.json({ ok: true, delivered: true, next: 'company-contact' })
-  } catch (error) {
+  } catch {
     console.error('[v0] lead submission failed')
     return NextResponse.json({ ok: false, error: 'Invalid lead details' }, { status: 400 })
   }

@@ -17,14 +17,16 @@ export async function POST(request: Request) {
     language = parsed.language
     const latestMessage = messages[messages.length - 1]?.content ?? ''
     const hotLead = /\b(book|booking|viewing|test drive|human|price|interested|buy|rent)\b|حجز|معاينة|موظف|السعر|شراء|إيجار/i.test(latestMessage)
-    if (hotLead && (process.env.RESEND_API_KEY_2 ?? process.env.RESEND_API_KEY)) {
-      const resend = new Resend(process.env.RESEND_API_KEY_2 ?? process.env.RESEND_API_KEY!)
-      await resend.emails.send({
+    const resendKey = process.env.RESEND_API_KEY_2 ?? process.env.RESEND_API_KEY
+    if (hotLead && resendKey) {
+      const resend = new Resend(resendKey)
+      const { error } = await resend.emails.send({
         from: process.env.RESEND_FROM_EMAIL ?? 'PropAuto Sales <onboarding@resend.dev>',
         to: 'propautoal@gmail.com',
         subject: 'PropAuto hot lead from Sarah',
         text: `A visitor may be ready to buy or book. Latest message: ${latestMessage}`,
       })
+      if (error) console.error('[v0] Sarah owner alert failed:', error.message)
     }
     const result = await generateText({
       model: 'google/gemini-2.5-flash',

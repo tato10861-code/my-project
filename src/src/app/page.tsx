@@ -5,7 +5,6 @@ import { PropAutoChatbot } from '@/components/propauto-chatbot'
 import {
   ArrowLeft,
   ArrowUpLeft,
-  Bell,
   Building2,
   Check,
   ChevronDown,
@@ -125,7 +124,7 @@ export default function Page() {
   const [horizon, setHorizon] = useState(5)
   const [query, setQuery] = useState('')
   const [videoPlaying, setVideoPlaying] = useState(false)
-  const [muted, setMuted] = useState(false)
+  const muted = false
   const [activeBot, setActiveBot] = useState<'buyer' | 'investor' | 'seller' | null>(null)
   const [showVisitorDashboard, setShowVisitorDashboard] = useState(false)
   const [showPriceBoard, setShowPriceBoard] = useState(false)
