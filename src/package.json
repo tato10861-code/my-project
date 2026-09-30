@@ -1,5 +1,4 @@
 {
-	"dependencies": {
-		"mammoth": "^1.12.1"
-	}
+  "note": "This file is deprecated and intentionally left minimal. Dependencies were merged into the root package.json. Remove this file if not required.\n",
+  "deprecated": true
 }
