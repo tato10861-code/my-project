@@ -1,0 +1,54 @@
+name: Enterprise CI - PropAuto AI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  enterprise-quality-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: ESLint Quality Gate
+        run: pnpm run lint -- --max-warnings=0
+
+      - name: TypeScript Strict Validation
+        run: pnpm exec tsc --noEmit --pretty
+
+      - name: Production Build Verification
+        run: pnpm run build
+        env:
+          CI: true
+          NODE_ENV: production
+
+      - name: Security Audit
+        run: pnpm audit --audit-level high
