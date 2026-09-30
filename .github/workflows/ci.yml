@@ -8,7 +8,7 @@ on:
 
 jobs:
   enterprise-quality-gate:
-    name: التكامل المؤسسي - بوابة جودة المؤسسة
+    name: build-and-test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
