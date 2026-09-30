@@ -2,16 +2,17 @@
   "name": "propauto-ai",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@8",
+  "workspaces": [
+    "src/src"
+  ],
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint ."
+    "dev": "pnpm --filter my-project dev",
+    "build": "pnpm --filter my-project build && rm -rf .next && cp -R src/src/.next .next",
+    "start": "pnpm --filter my-project start",
+    "lint": "pnpm --filter my-project lint"
   },
-  "dependencies": {
-    "@vercel/blob": "^2.8.0",
-    "next": "16.3.0",
-    "react": "^19",
-    "react-dom": "^19"
+  "engines": {
+    "node": "24.x"
   }
 }
