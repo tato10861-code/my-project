@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "pnpm --dir src/src dev",
-    "build": "pnpm --dir src/src install --frozen-lockfile && pnpm --dir src/src build && rm -rf .next && cp -R src/src/.next .next",
-    "start": "pnpm --dir src/src start",
-    "lint": "pnpm --dir src/src lint"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint ."
   },
   "dependencies": {
     "@vercel/blob": "^2.8.0",
