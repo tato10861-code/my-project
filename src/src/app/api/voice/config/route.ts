@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 
 export async function GET() {
-  const publicKey = process.env.NEXT_PUBLIC_VAPI_PUBLIC_KEY ?? process.env.apiKey_2 ?? process.env.apiKey
+  const publicKey = process.env.NEXT_PUBLIC_VAPI_PUBLIC_KEY
 
   if (!publicKey) {
     return NextResponse.json({ enabled: false }, { status: 503 })

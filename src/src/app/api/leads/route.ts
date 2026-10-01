@@ -17,8 +17,14 @@ const leadSchema = z.object({
 const COMPANY_EMAIL = 'propautoal@gmail.com'
 
 export async function POST(request: Request) {
+  let payload: z.infer<typeof leadSchema>
   try {
-    const payload = leadSchema.parse(await request.json())
+    payload = leadSchema.parse(await request.json())
+  } catch {
+    return NextResponse.json({ ok: false, error: 'Invalid lead details' }, { status: 400 })
+  }
+
+  try {
     await db.insert(propautoLeads).values({ name: payload.name, email: payload.email, intent: payload.intent, source: 'web' })
 
     const apiKey = process.env.RESEND_API_KEY_2 ?? process.env.RESEND_API_KEY
