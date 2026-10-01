@@ -44,6 +44,6 @@ export async function POST(request: Request) {
         : language === 'es'
           ? 'Hola, soy Sarah de PropAuto. ¿Buscas una propiedad o un coche hoy?'
           : 'Hi, Sarah from PropAuto here. Are you looking for a property or a car today?'
-    return Response.json({ reply: fallback }, { status: 200 })
+    return Response.json({ reply: fallback, retryable: true }, { status: 503, headers: { 'Cache-Control': 'no-store' } })
   }
 }
