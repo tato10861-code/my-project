@@ -14,8 +14,14 @@ const eventSchema = z.object({
 })
 
 export async function POST(request: Request) {
+  let payload: z.infer<typeof eventSchema>
   try {
-    const payload = eventSchema.parse(await request.json())
+    payload = eventSchema.parse(await request.json())
+  } catch {
+    return NextResponse.json({ error: 'Invalid event details' }, { status: 400, headers: { 'Cache-Control': 'no-store' } })
+  }
+
+  try {
     await db.insert(propautoEvents).values(payload)
     return NextResponse.json({ ok: true }, { status: 201, headers: { 'Cache-Control': 'no-store' } })
   } catch (error) {
