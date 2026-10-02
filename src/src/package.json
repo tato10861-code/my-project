@@ -15,6 +15,7 @@
     "@vapi-ai/web": "^2.7.1",
     "@vercel/analytics": "1.6.1",
     "@vercel/connect": "0.4.3",
+    "@vercel/speed-insights": "^2.0.0",
     "ai": "^7.0.66",
     "better-auth": "^1.6.29",
     "class-variance-authority": "^0.7.1",

@@ -1,4 +1,5 @@
 import { Analytics } from '@vercel/analytics/next'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 import { Geist, Noto_Sans_Arabic } from 'next/font/google'
 import type { Metadata, Viewport } from 'next'
 import { PropAutoVoiceConcierge } from '@/components/propauto-voice-concierge'
@@ -49,6 +50,7 @@ export default function RootLayout({
       <body className="antialiased">
         {children}
         {process.env.NODE_ENV === 'production' && <Analytics />}
+        {process.env.NODE_ENV === 'production' && <SpeedInsights />}
         <PropAutoVoiceConcierge />
       </body>
     </html>
