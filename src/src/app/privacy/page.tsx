@@ -1,7 +1,7 @@
-import Link from 'next/link'
+import type { Metadata } from 'next'
 
-export const metadata = { title: 'Privacy Policy | PropAuto AI', description: 'Privacy policy for PropAuto AI.' }
+export const metadata: Metadata = { title: 'Privacy Policy | PropAuto AI', description: 'How PropAuto AI handles visitor and lead information.' }
 
 export default function PrivacyPage() {
-  return <main className="min-h-screen bg-[#071015] px-6 py-16 text-[#f4f1e9] md:px-12"><article className="mx-auto max-w-3xl"><Link href="/" className="text-sm text-[#d9b56f]">← Back to PropAuto AI</Link><h1 className="mt-16 text-5xl font-semibold">Privacy Policy</h1><p className="mt-8 leading-8 text-white/70">PropAuto AI collects information you submit through contact and lead forms to respond to requests and improve the service. We do not sell submitted personal information. Analytics may collect technical usage data such as pages viewed, device information, and session identifiers.</p><p className="mt-5 leading-8 text-white/70">For privacy questions or data requests, contact <a className="text-[#d9b56f]" href="mailto:tato10861@gmail.com">tato10861@gmail.com</a>.</p></article></main>
+  return <main className="min-h-screen bg-[#071014] px-6 py-20 text-[#f5f1e8]"><article className="mx-auto max-w-3xl space-y-6"><p className="text-sm text-[#d5b77b]">PropAuto AI</p><h1 className="text-4xl font-semibold">Privacy Policy</h1><p className="text-white/70">We collect only the information needed to respond to inquiries, improve the service, and protect the platform. We do not sell personal information.</p><h2 className="text-2xl font-semibold">Information we receive</h2><p className="text-white/70">Contact details and messages submitted through the site may be stored securely and shared with service providers required to operate the platform.</p><h2 className="text-2xl font-semibold">Your choices</h2><p className="text-white/70">To request access, correction, or deletion of your information, contact propautoal@gmail.com.</p></article></main>
 }
