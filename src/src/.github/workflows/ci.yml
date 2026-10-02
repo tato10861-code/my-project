@@ -24,6 +24,8 @@ jobs:
         run: corepack enable
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      - name: Smoke tests
+        run: pnpm test
       - name: Lint
         run: pnpm lint
       - name: Type check
