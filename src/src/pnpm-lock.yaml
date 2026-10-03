@@ -11,7 +11,7 @@ overrides:
   ip-address: 10.3.1
   js-yaml: 4.3.2
   nanoid: 3.3.18
-  postcss: 8.5.18
+  postcss: 8.5.23
   undici: 8.10.2
 
 packageExtensionsChecksum: sha256-BFhBLA/f31bB0k2tXO+iMR5SW/1jSh3kajFaFo0OpeI=
@@ -71,9 +71,6 @@ importers:
       resend:
         specifier: ^6.28.1
         version: 6.28.1
-      shadcn:
-        specifier: ^4.8.0
-        version: 4.10.0(@types/node@24.10.4)(typescript@5.7.3)
       stripe:
         specifier: ^22.5.0
         version: 22.5.0(@types/node@24.10.4)
@@ -112,8 +109,11 @@ importers:
         specifier: ^16.3.8
         version: 16.3.8(@typescript-eslint/parser@8.71.0(eslint@9.39.5(jiti@2.7.0))(typescript@5.7.3))(eslint@9.39.5(jiti@2.7.0))(typescript@5.7.3)
       postcss:
-        specifier: 8.5.18
-        version: 8.5.18
+        specifier: 8.5.23
+        version: 8.5.23
+      shadcn:
+        specifier: ^4.8.0
+        version: 4.10.0(@types/node@24.10.4)(typescript@5.7.3)
       tailwindcss:
         specifier: ^4.3.3
         version: 4.3.3
@@ -3318,8 +3318,8 @@ packages:
     resolution: {integrity: sha512-orRsuYpJVw8LdAwqqLykBj9ecS5/cRHlI5+nvTo8LcCKmzDmqVORXtOIYEEQuL9D4BxtA1lm5isAqzQZCoQ6Eg==}
     engines: {node: '>=4'}
 
-  postcss@8.5.18:
-    resolution: {integrity: sha512-xdB1oSLHbz1vRWgCDalrCqEFTWzFlhqFC5tIHLMOSUIjhm3XXQ1qrFy8S/ESr1JYRRXqM3c1QFiMZUJdUTqyMQ==}
+  postcss@8.5.23:
+    resolution: {integrity: sha512-g50586zr4bZmwFiTlflMu8E0bDTb5I5gertgwAKmsdUlTQIhZtunzUlD1WSzwcVWPoAVpsrA6vlfCD7oXvRwgg==}
     engines: {node: ^10 || ^12 || >=14}
 
   postgres-array@2.0.0:
@@ -4935,7 +4935,7 @@ snapshots:
       '@alloc/quick-lru': 5.2.0
       '@tailwindcss/node': 4.3.3
       '@tailwindcss/oxide': 4.3.3
-      postcss: 8.5.18
+      postcss: 8.5.23
       tailwindcss: 4.3.3
 
   '@ts-morph/common@0.27.0':
@@ -6785,7 +6785,7 @@ snapshots:
       '@swc/helpers': 0.5.23
       baseline-browser-mapping: 2.11.26
       caniuse-lite: 1.0.30001814
-      postcss: 8.5.18
+      postcss: 8.5.23
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
       styled-jsx: 5.1.6(@babel/core@7.29.7)(react@19.2.4)
@@ -7091,7 +7091,7 @@ snapshots:
       cssesc: 3.0.0
       util-deprecate: 1.0.2
 
-  postcss@8.5.18:
+  postcss@8.5.23:
     dependencies:
       nanoid: 3.3.18
       picocolors: 1.1.1
@@ -7366,7 +7366,7 @@ snapshots:
       node-fetch: 3.3.2
       open: 11.0.0
       ora: 8.2.0
-      postcss: 8.5.18
+      postcss: 8.5.23
       postcss-selector-parser: 7.1.1
       prompts: 2.4.2
       recast: 0.23.11
