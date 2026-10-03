@@ -35,6 +35,9 @@ importers:
       '@vercel/connect':
         specifier: 0.4.3
         version: 0.4.3(@ai-sdk/mcp@2.0.32(zod@4.4.3))(ai@7.0.66(zod@4.4.3))(better-auth@1.6.29(drizzle-orm@0.45.2(@types/pg@8.21.0)(kysely@0.29.5)(pg@8.23.0))(next@16.3.8(@babel/core@7.29.7)(@types/node@24.10.4)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(pg@8.23.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(eve@0.38.3(ai@7.0.66(zod@4.4.3))(dotenv@17.4.2)(drizzle-orm@0.45.2(@types/pg@8.21.0)(kysely@0.29.5)(pg@8.23.0))(jiti@2.7.0))
+      '@vercel/speed-insights':
+        specifier: ^2.0.0
+        version: 2.0.0(next@16.3.8(@babel/core@7.29.7)(@types/node@24.10.4)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)
       ai:
         specifier: ^7.0.66
         version: 7.0.66(zod@4.4.3)
@@ -68,9 +71,6 @@ importers:
       resend:
         specifier: ^6.28.1
         version: 6.28.1
-      shadcn:
-        specifier: ^4.8.0
-        version: 4.10.0(@types/node@24.10.4)(typescript@5.7.3)
       stripe:
         specifier: ^22.5.0
         version: 22.5.0(@types/node@24.10.4)
@@ -111,6 +111,9 @@ importers:
       postcss:
         specifier: 8.5.18
         version: 8.5.18
+      shadcn:
+        specifier: ^4.8.0
+        version: 4.10.0(@types/node@24.10.4)(typescript@5.7.3)
       tailwindcss:
         specifier: ^4.3.3
         version: 4.3.3
@@ -1382,6 +1385,32 @@ packages:
   '@vercel/oidc@3.8.1':
     resolution: {integrity: sha512-ufdalm2MWOYksyj8KVpWjoOFPJO6zoYpuyvIggIQ2bB0CFCjTCiTkGXHqAKwG77GVRjOaN3/8S5ITlZpXWmqOw==}
     engines: {node: '>= 20'}
+
+  '@vercel/speed-insights@2.0.0':
+    resolution: {integrity: sha512-jwkNcrTeafWxjmWq4AHBaptSqZiJkYU5adLC9QBSqeim0GcqDMgN5Ievh8OG1rJ6W3A4l1oiP7qr9CWxGuzu3w==}
+    peerDependencies:
+      '@sveltejs/kit': ^1 || ^2
+      next: '>= 13'
+      nuxt: '>= 3'
+      react: ^18 || ^19 || ^19.0.0-rc
+      svelte: '>= 4'
+      vue: ^3
+      vue-router: ^4
+    peerDependenciesMeta:
+      '@sveltejs/kit':
+        optional: true
+      next:
+        optional: true
+      nuxt:
+        optional: true
+      react:
+        optional: true
+      svelte:
+        optional: true
+      vue:
+        optional: true
+      vue-router:
+        optional: true
 
   '@workflow/serde@4.1.0':
     resolution: {integrity: sha512-pav4F2BoirECWR7Nf1TKt+2eETcBj7jj4cBefQ8VXQCA6NPkaKeLfj/zMgi+3zYV5ZIBT4GuUiphsj0/b9hPQQ==}
@@ -5148,6 +5177,11 @@ snapshots:
       '@vercel/cli-config': 0.2.1
       '@vercel/cli-exec': 1.0.0
       jose: 5.10.0
+
+  '@vercel/speed-insights@2.0.0(next@16.3.8(@babel/core@7.29.7)(@types/node@24.10.4)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)':
+    optionalDependencies:
+      next: 16.3.8(@babel/core@7.29.7)(@types/node@24.10.4)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      react: 19.2.4
 
   '@workflow/serde@4.1.0': {}
 
