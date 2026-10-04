@@ -9,7 +9,10 @@ const arabic = Noto_Sans_Arabic({ subsets: ['arabic'], variable: '--font-arabic'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'PropAuto | Luxury Properties & Cars AI Platform',
+  title: {
+    default: 'PropAuto AI | Luxury assets, smarter ownership',
+    template: '%s | PropAuto AI',
+  },
   description: 'Discover verified luxury real estate, rare cars, and investment opportunities with PropAuto AI.',
   metadataBase: new URL('https://propauto-ai-al-closer-saas.vercel.app'),
   alternates: {
@@ -17,7 +20,7 @@ export const metadata: Metadata = {
     languages: { en: '/', ar: '/?lang=ar' },
   },
   openGraph: {
-    title: 'PropAuto | Luxury Properties & Cars AI Platform',
+    title: 'PropAuto AI | Luxury assets, smarter ownership',
     description: 'Discover verified luxury real estate, rare cars, and investment opportunities with PropAuto AI.',
     url: 'https://propauto-ai-al-closer-saas.vercel.app',
     siteName: 'PropAuto AI',

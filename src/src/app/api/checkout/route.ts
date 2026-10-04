@@ -17,7 +17,7 @@ export async function POST(request: Request) {
       mode: 'payment',
       line_items: [{ price_data: { currency: 'usd', product_data: { name: product.name, description: product.description }, unit_amount: product.priceInCents }, quantity: 1 }],
       client_reference_id: `propauto_${crypto.randomUUID()}`,
-      success_url: `${origin}/?payment=success`,
+      success_url: `${origin}/?payment=success&session_id={CHECKOUT_SESSION_ID}` ,
       cancel_url: `${origin}/?payment=cancelled`,
       integration_identifier: `propauto_${Math.random().toString(36).slice(2, 10)}`,
       metadata: { product_id: product.id, source: 'propauto-web' },

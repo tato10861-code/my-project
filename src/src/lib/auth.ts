@@ -19,26 +19,34 @@ if (!authSecret && !isProductionBuild) {
 }
 
 const effectiveAuthSecret = authSecret ?? 'build-only-secret-not-used-at-runtime'
+const runtimeOrigins = [
+  process.env.V0_RUNTIME_URL,
+  process.env.V0_DEV_APP_URL,
+  process.env.V0_BUILD_URL,
+  process.env.V0_SANDBOX_URL,
+].filter((origin): origin is string => Boolean(origin))
+const productionOrigins = [
+  process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null,
+  process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : null,
+  PRODUCTION_URL,
+].filter((origin): origin is string => Boolean(origin))
 
 export const auth = betterAuth({
   database: pool,
   secret: effectiveAuthSecret,
   baseURL,
   emailAndPassword: { enabled: true, autoSignIn: true },
-  trustedOrigins: [
-    ...(process.env.NODE_ENV === 'development' && process.env.V0_RUNTIME_URL ? [process.env.V0_RUNTIME_URL] : []),
-    ...(process.env.NODE_ENV === 'production'
-      ? [
-          ...(process.env.VERCEL_URL ? [`https://${process.env.VERCEL_URL}`] : []),
-          ...(process.env.VERCEL_PROJECT_PRODUCTION_URL ? [`https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`] : []),
-          PRODUCTION_URL,
-        ]
-      : []),
-  ],
+  trustedOrigins: process.env.NODE_ENV === 'development'
+    ? ['http://localhost:3000', ...runtimeOrigins]
+    : productionOrigins,
   session: { expiresIn: 60 * 60 * 24 * 7, updateAge: 60 * 60 * 24 },
-  advanced: {
-    defaultCookieAttributes: { sameSite: 'none', secure: true },
-  },
+  ...(process.env.NODE_ENV === 'development'
+    ? {
+        advanced: {
+          defaultCookieAttributes: { sameSite: 'none' as const, secure: true },
+        },
+      }
+    : {}),
 })
 
 export async function requireOwner(headers: Headers) {
