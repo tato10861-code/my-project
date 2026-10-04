@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "test": "node tests/smoke.mjs"
+    "typecheck": "tsc --noEmit",
+    "test": "node tests/smoke.mjs",
+    "check": "pnpm test && pnpm lint && pnpm typecheck && pnpm audit --prod --audit-level high && pnpm build"
   },
   "dependencies": {
     "@ai-sdk/react": "^4.0.69",
