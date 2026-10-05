@@ -12,7 +12,8 @@ export async function POST(request: Request) {
     if (!secretKey) return NextResponse.json({ error: 'Payments are not configured yet.' }, { status: 503 })
 
     const stripe = new Stripe(secretKey)
-    const origin = new URL(request.url).origin
+    const configuredOrigin = process.env.BETTER_AUTH_URL ?? process.env.NEXT_PUBLIC_SITE_URL
+    const origin = configuredOrigin ? new URL(configuredOrigin).origin : new URL(request.url).origin
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       line_items: [{ price_data: { currency: 'usd', product_data: { name: product.name, description: product.description }, unit_amount: product.priceInCents }, quantity: 1 }],

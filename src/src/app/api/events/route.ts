@@ -7,13 +7,24 @@ import { db } from '@/lib/db'
 import { propautoEvents } from '@/lib/db/schema'
 
 const eventSchema = z.object({
-  sessionId: z.string().min(8).max(120),
-  eventName: z.string().min(1).max(80),
-  path: z.string().max(300).default('/'),
-  metadata: z.record(z.string(), z.unknown()).default({}),
+  sessionId: z.string().trim().regex(/^[A-Za-z0-9._:-]{8,120}$/),
+  eventName: z.enum(['page_view', 'cta_click', 'lead_started', 'lead_submitted', 'checkout_started', 'chat_started']),
+  path: z.string().trim().regex(/^\/[A-Za-z0-9/_?&=.%#-]{0,299}$/).default('/'),
+  metadata: z.record(z.string(), z.string().max(200)).refine((value) => Object.keys(value).length <= 20).default({}),
 })
 
+const MAX_BODY_BYTES = 16_384
+
+function isBodyTooLarge(request: Request) {
+  const length = request.headers.get('content-length')
+  return length !== null && Number(length) > MAX_BODY_BYTES
+}
+
 export async function POST(request: Request) {
+  if (request.method !== 'POST' || isBodyTooLarge(request)) {
+    return NextResponse.json({ error: 'Request too large' }, { status: 413, headers: { 'Cache-Control': 'no-store' } })
+  }
+
   let payload: z.infer<typeof eventSchema>
   try {
     payload = eventSchema.parse(await request.json())
