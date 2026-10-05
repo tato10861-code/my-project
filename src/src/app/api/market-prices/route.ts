@@ -5,6 +5,11 @@ export const dynamic = 'force-dynamic'
 const providerUrl = process.env.MARKET_DATA_API_URL ?? process.env.api
 const providerKey = process.env.MARKET_DATA_API_KEY ?? process.env.apiKey_2
 
+function parseFiniteNumber(value: unknown) {
+  const number = typeof value === 'number' ? value : typeof value === 'string' && value.trim() !== '' ? Number(value) : NaN
+  return Number.isFinite(number) ? number : null
+}
+
 function isMarketRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
@@ -14,13 +19,16 @@ function extractMarkets(payload: unknown) {
   const candidate = payload.markets ?? payload.data ?? payload.results
   if (!Array.isArray(candidate)) return null
 
-  return candidate.filter(isMarketRecord).map((market) => ({
-    city: typeof market.city === 'string' ? market.city : typeof market.name === 'string' ? market.name : 'Unknown',
-    property: typeof market.property === 'number' ? market.property : null,
-    supercar: typeof market.supercar === 'number' ? market.supercar : null,
-    currency: typeof market.currency === 'string' ? market.currency : 'USD',
-    signal: market.signal === 'up' || market.signal === 'down' ? market.signal : 'steady',
-  }))
+  return candidate
+    .filter(isMarketRecord)
+    .map((market) => ({
+      city: typeof market.city === 'string' && market.city.trim() ? market.city.trim() : typeof market.name === 'string' && market.name.trim() ? market.name.trim() : null,
+      property: parseFiniteNumber(market.property),
+      supercar: parseFiniteNumber(market.supercar),
+      currency: typeof market.currency === 'string' && market.currency.trim() ? market.currency.trim().toUpperCase() : 'USD',
+      signal: market.signal === 'up' || market.signal === 'down' ? market.signal : 'steady',
+    }))
+    .filter((market) => market.city !== null && (market.property !== null || market.supercar !== null))
 }
 
 export async function GET() {
