@@ -3,6 +3,7 @@ import { Resend } from 'resend'
 import { z } from 'zod'
 import { db } from '@/lib/db'
 import { propautoLeads } from '@/lib/db/schema'
+import { getClientKey, hasOversizedBody, rateLimit, tooManyRequests } from '@/lib/request-security'
 
 const leadSchema = z.object({
   name: z.string().trim().min(2).max(100),
@@ -17,6 +18,10 @@ const leadSchema = z.object({
 const COMPANY_EMAIL = 'propautoal@gmail.com'
 
 export async function POST(request: Request) {
+  const limit = rateLimit(getClientKey(request, 'leads'), 5)
+  if (!limit.allowed) return tooManyRequests(limit.retryAfter)
+  if (hasOversizedBody(request, 16_384)) return NextResponse.json({ ok: false, error: 'Request too large' }, { status: 413, headers: { 'Cache-Control': 'no-store' } })
+
   let payload: z.infer<typeof leadSchema>
   try {
     payload = leadSchema.parse(await request.json())

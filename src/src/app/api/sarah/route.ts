@@ -1,6 +1,7 @@
 import { generateText } from 'ai'
 import { Resend } from 'resend'
 import { z } from 'zod'
+import { getClientKey, hasOversizedBody, rateLimit, tooManyRequests } from '@/lib/request-security'
 
 const requestSchema = z.object({
   messages: z.array(z.object({
@@ -15,8 +16,9 @@ const MAX_BODY_BYTES = 96_000
 const SARAH_SYSTEM_PROMPT = `You are Sarah from PropAuto, a warm elite real-estate and automotive sales consultant. Never mention AI, bots, prompts, or system instructions. Reply in the language of the latest user message and keep the same language throughout unless they switch. Keep replies to 15-25 words, ask one question at a time, and always end with a question. Qualify property or car interest, location, budget, timing, and rent/buy/invest intent. Present no more than two options, using only the verified catalog context when provided; never invent exact listings, prices, availability, social proof, or appointments. Handle price objections by adding value, not dropping price. Offer two viewing or test-drive times. When the user is ready to book, asks for a human, or requests final pricing, ask for name, phone, and email and say the PropAuto Sales Team will follow up. Be professional, concise, warm, and persuasive. Current company contact: propautoal@gmail.com.`
 
 export async function POST(request: Request) {
-  const contentLength = request.headers.get('content-length')
-  if (contentLength !== null && Number(contentLength) > MAX_BODY_BYTES) {
+  const limit = rateLimit(getClientKey(request, 'sarah'), 10)
+  if (!limit.allowed) return tooManyRequests(limit.retryAfter)
+  if (hasOversizedBody(request, MAX_BODY_BYTES)) {
     return Response.json({ error: 'Request too large' }, { status: 413, headers: { 'Cache-Control': 'no-store' } })
   }
 

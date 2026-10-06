@@ -5,6 +5,7 @@ export const revalidate = 0
 import { z } from 'zod'
 import { db } from '@/lib/db'
 import { propautoEvents } from '@/lib/db/schema'
+import { getClientKey, hasOversizedBody, rateLimit, tooManyRequests } from '@/lib/request-security'
 
 const eventSchema = z.object({
   sessionId: z.string().trim().regex(/^[A-Za-z0-9._:-]{8,120}$/),
@@ -15,13 +16,10 @@ const eventSchema = z.object({
 
 const MAX_BODY_BYTES = 16_384
 
-function isBodyTooLarge(request: Request) {
-  const length = request.headers.get('content-length')
-  return length !== null && Number(length) > MAX_BODY_BYTES
-}
-
 export async function POST(request: Request) {
-  if (request.method !== 'POST' || isBodyTooLarge(request)) {
+  const limit = rateLimit(getClientKey(request, 'events'), 30)
+  if (!limit.allowed) return tooManyRequests(limit.retryAfter)
+  if (request.method !== 'POST' || hasOversizedBody(request, MAX_BODY_BYTES)) {
     return NextResponse.json({ error: 'Request too large' }, { status: 413, headers: { 'Cache-Control': 'no-store' } })
   }
 
