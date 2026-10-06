@@ -1,26 +1,26 @@
 name: Run Datadog Synthetic tests
 
 on:
-  workflow_dispatch:
+            سير العمل_إرسال             :
 permissions:
-  contents: read
+ المحتويات.  : قراءة.
 
 jobs:
-  synthetics:
-    runs-on: ubuntu-latest
-    env:
-      DD_API_KEY: ${{ secrets.DD_API_KEY }}
-      DD_APP_KEY: ${{ secrets.DD_APP_KEY }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Run Datadog Synthetic tests
-        if: ${{ env.DD_API_KEY != '' && env.DD_APP_KEY != '' }}
-        uses: DataDog/synthetics-ci-github-action@v1.4.0
-        with:
-          apiKey: ${{ env.DD_API_KEY }}
-          appKey: ${{ env.DD_APP_KEY }}
-          testSearchQuery: tag:e2e-tests
-      - name: Explain skipped Datadog tests
-        if: ${{ env.DD_API_KEY == '' || env.DD_APP_KEY == '' }}
-        run: echo 'Datadog tests skipped because DD_API_KEY and DD_APP_KEY are not configured.'
+ المواد التركيبية.  :
+ يعمل على.  : أوبونتو-الأحدث.
+ إنف.  :
+ Dd_api_مفتاح.  : ${{ أسرار. Dd_api_مفتاح. }}
+ Dd_app_key.Dd_app_key.Dd_app_key. Dd_app_key. : ${{  أسرار. Dd_app_key.  اختبارالبحثالاستفسارات  }
+ خطواتAppKeyAppKey       : 
+ خطوات الاسم.: C.. .. .. .. .. .. . .          الاستخدامات.            
+                                       الاستخدامات.                                        : الإجراءات/الخروج @v4
+ - name: ت........شغيل اختبارات Datadog الاصطناعية           إذا... 
+                             إذا...                               : ${{                  env.DD_API_KEY!=             الاستخدامات.                  }}}}
+                                  الاستخدامات.                                   : DataDog/synthetics-ci-github-action@v1.4.0
+ مع... :
+                                         أبيكي                                          : ${{                       إنف. Dd_api_مفتاح.                       }}
+ AppKey   : اختبارالبحثالاستفسارات       اختبارالبحثالاستفسارات {{}
+                                                                                                             اختبارالبحثالاستفسارات                                                                                                             : علامة.:اختبارات E2E.
+ - "تم تخطي اختبارات Datadog لأن DD_API_KEY و DD_APP_KEY غير مهيأين"
+                                  إذا...                                  : ${{ env.DD_API_KEY == " | env.DD_APP_KEY == "}}}}
+                       تشغيل.                        :      صدى.         "تم تخطي اختبارات Datadog لأن DD_API_KEY و DD_APP_KEY غير مهيأين"...
