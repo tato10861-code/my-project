@@ -34,6 +34,15 @@ const crypto = require("crypto");
 const ROOT = __dirname;
 const PORT = parseInt(process.env.PORT || "5173", 10);
 const DATA_DIR = process.env.DATA_DIR || path.join(ROOT, "data");
+const MAX_BODY_BYTES = 64 * 1024;
+const MAX_ANALYTICS_EVENTS = 50;
+const TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+
+/* Only these extensions are ever served as static files. */
+const PUBLIC_EXTENSIONS = new Set([".html", ".css", ".svg", ".xml", ".png", ".jpg", ".jpeg", ".webp", ".ico", ".woff2", ".woff", ".ttf"]);
+/* Scripts are served only from the asset folder, never server code. */
+const PUBLIC_SCRIPT_DIR = "assets" + path.sep;
+const PUBLIC_TEXT_FILES = new Set(["robots.txt"]);
 
 const MIME = {
   ".html": "text/html; charset=utf-8",
@@ -119,10 +128,41 @@ function publicUser(user) {
   return { id: user.id, name: user.name, email: user.email, created_at: user.created_at };
 }
 
+function hashToken(token) {
+  return crypto.createHash("sha256").update(String(token)).digest("hex");
+}
+
+function safeEqual(a, b) {
+  const left = Buffer.from(String(a));
+  const right = Buffer.from(String(b));
+  return left.length === right.length && crypto.timingSafeEqual(left, right);
+}
+
+/** Issues a fresh session token; only its hash is stored. */
+function issueToken(user) {
+  const token = crypto.randomBytes(32).toString("hex");
+  user.token_hash = hashToken(token);
+  user.token_expires_at = new Date(Date.now() + TOKEN_TTL_MS).toISOString();
+  delete user.token; // legacy plaintext token
+  return token;
+}
+
 function findUserByToken(token) {
   if (!token) return null;
+  const digest = hashToken(token);
   const users = loadStore("users", []);
-  return users.find((u) => u.token === token) || null;
+  const user = users.find((u) => (u.token_hash && safeEqual(u.token_hash, digest)) || (u.token && safeEqual(u.token, token)));
+  if (!user) return null;
+  if (user.token_expires_at && Date.parse(user.token_expires_at) < Date.now()) return null;
+  return user;
+}
+
+/** Bearer check for operator-only endpoints (ADMIN_TOKEN env). */
+function isAdmin(req) {
+  const expected = process.env.ADMIN_TOKEN;
+  if (!expected) return false;
+  const auth = req.headers.authorization || "";
+  return auth.startsWith("Bearer ") && safeEqual(auth.slice(7), expected);
 }
 
 /* ── HTTP helpers ─────────────────────────────────────────────────────── */
@@ -145,7 +185,7 @@ function readBody(req, limit) {
     const chunks = [];
     req.on("data", (chunk) => {
       size += chunk.length;
-      if (size > (limit || 1024 * 1024)) {
+      if (size > (limit || MAX_BODY_BYTES)) {
         reject(new Error("payload too large"));
         req.destroy();
         return;
@@ -183,6 +223,8 @@ async function handleAPI(req, res, pathname) {
   /* leads */
   if (pathname === "/api/v1/leads") {
     if (method === "GET") {
+      // Leads hold personal data: operator-only.
+      if (!isAdmin(req)) return sendJSON(res, 401, { success: false, error: "unauthorized" });
       const url = new URL(req.url, "http://localhost");
       const status = url.searchParams.get("status");
       const lang = url.searchParams.get("lang");
@@ -256,6 +298,11 @@ async function handleAPI(req, res, pathname) {
 
   /* webhook */
   if (pathname === "/api/v1/webhook" && method === "POST") {
+    const secret = process.env.WEBHOOK_SECRET;
+    if (!secret) return sendJSON(res, 503, { success: false, error: "webhook_not_configured" });
+    if (!safeEqual(req.headers["x-webhook-secret"] || "", secret)) {
+      return sendJSON(res, 401, { success: false, error: "unauthorized" });
+    }
     let body;
     try {
       body = await readBody(req);
@@ -291,7 +338,7 @@ async function handleAPI(req, res, pathname) {
     } catch (_) {
       return sendJSON(res, 400, { success: false, error: "invalid_json" });
     }
-    const events = Array.isArray(body.events) ? body.events : [];
+    const events = Array.isArray(body.events) ? body.events.slice(0, MAX_ANALYTICS_EVENTS) : [];
     const rows = loadStore("analytics", []);
     events.forEach((event, i) => {
       rows.push({
@@ -333,12 +380,12 @@ async function handleAPI(req, res, pathname) {
       email: email,
       salt: salt,
       hash: hashPassword(password, salt),
-      token: crypto.randomBytes(24).toString("hex"),
       created_at: now(),
     };
+    const token = issueToken(user);
     users.push(user);
     saveStore("users", users);
-    return sendJSON(res, 201, { success: true, data: { token: user.token, user: publicUser(user) } });
+    return sendJSON(res, 201, { success: true, data: { token: token, user: publicUser(user) } });
   }
 
   if (pathname === "/api/auth/signin" && method === "POST") {
@@ -350,11 +397,16 @@ async function handleAPI(req, res, pathname) {
     }
     const email = String(body.email || "").trim().toLowerCase();
     const password = String(body.password || "");
-    const user = loadStore("users", []).find((u) => u.email === email);
-    if (!user || user.hash !== hashPassword(password, user.salt)) {
+    const users = loadStore("users", []);
+    const user = users.find((u) => u.email === email);
+    // Hash even for unknown emails so response time does not reveal accounts.
+    const candidate = hashPassword(password, user ? user.salt : "propauto-no-such-user");
+    if (!user || !safeEqual(user.hash, candidate)) {
       return sendJSON(res, 401, { success: false, error: "invalid_credentials" });
     }
-    return sendJSON(res, 200, { success: true, data: { token: user.token, user: publicUser(user) } });
+    const token = issueToken(user);
+    saveStore("users", users);
+    return sendJSON(res, 200, { success: true, data: { token: token, user: publicUser(user) } });
   }
 
   if (pathname === "/api/auth/reset" && method === "POST") {
@@ -404,10 +456,9 @@ async function handleAPI(req, res, pathname) {
     sessions.push(session);
     saveStore("checkouts", sessions);
     if (process.env.STRIPE_SECRET_KEY) {
-      return sendJSON(res, 201, {
-        success: true,
-        data: { session_id: session.id, redirect: "https://checkout.stripe.com/pay/" + session.id, mode: "stripe" },
-      });
+      // A real Stripe session is created by the Next.js app (/api/checkout).
+      // This dev server must not hand out a checkout.stripe.com link it never created.
+      return sendJSON(res, 501, { success: false, error: "stripe_checkout_not_available_on_dev_server", session_id: session.id });
     }
     return sendJSON(res, 201, {
       success: true,
@@ -419,7 +470,7 @@ async function handleAPI(req, res, pathname) {
     const sessionId = new URL(req.url, "http://localhost").searchParams.get("session") || "";
     const session = loadStore("checkouts", []).find((s) => s.id === sessionId);
     if (!session) return sendJSON(res, 404, { success: false, error: "session_not_found" });
-    return sendJSON(res, 200, { success: true, data: session });
+    return sendJSON(res, 200, { success: true, data: { id: session.id, product: session.product, status: session.status, created_at: session.created_at } });
   }
 
   return sendJSON(res, 404, { success: false, error: "not_found" });
@@ -427,16 +478,37 @@ async function handleAPI(req, res, pathname) {
 
 /* ── static files ─────────────────────────────────────────────────────── */
 
+/**
+ * True only for files meant for the browser. Everything else in the project
+ * folder -- .env, data/ (the database and user store), server.js, lib/,
+ * scripts/, recovery/, package files -- is never served.
+ */
+function isPublicFile(rel) {
+  if (rel.split(/[\\/]/).some((part) => part.startsWith("."))) return false;
+  const ext = path.extname(rel).toLowerCase();
+  if (PUBLIC_TEXT_FILES.has(rel)) return true;
+  if (ext === ".js" || ext === ".mjs" || ext === ".map") return rel.startsWith(PUBLIC_SCRIPT_DIR) || rel.startsWith("assets/");
+  if (!PUBLIC_EXTENSIONS.has(ext)) return false;
+  return !/^(data|lib|scripts|recovery|original-source|node_modules)([\\/]|$)/.test(rel);
+}
+
 function serveStatic(req, res, pathname) {
-  let rel = decodeURIComponent(pathname);
+  let rel;
+  try {
+    rel = decodeURIComponent(pathname);
+  } catch (_) {
+    return sendJSON(res, 400, { success: false, error: "bad_request" });
+  }
   if (rel === "/") rel = "/index.html";
   if (rel.startsWith("/")) rel = rel.slice(1);
+  // Clean URLs, matching vercel.json: /terms -> terms.html
+  if (rel && !path.extname(rel)) rel += ".html";
 
   const file = path.join(ROOT, rel);
   if (!file.startsWith(ROOT + path.sep) && file !== ROOT) {
     return sendJSON(res, 403, { success: false, error: "forbidden" });
   }
-  if (!fs.existsSync(file) || !fs.statSync(file).isFile()) {
+  if (!isPublicFile(path.relative(ROOT, file)) || !fs.existsSync(file) || !fs.statSync(file).isFile()) {
     const notFound = path.join(ROOT, "404.html");
     if (fs.existsSync(notFound)) {
       const html = fs.readFileSync(notFound);

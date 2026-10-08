@@ -34,8 +34,6 @@
 
   <link rel="icon" href="icon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="assets/css/styles.css" />
-  <link rel="sitemap" type="application/xml" href="sitemap.xml" />
-  <link rel="robots" href="robots.txt" />
 
   <script type="application/ld+json">
   {
@@ -74,12 +72,12 @@
         <div class="lang" data-lang-root>
           <button class="lang__btn" type="button" data-lang-toggle aria-haspopup="true" aria-expanded="false" data-i18n="nav.language">Language</button>
           <ul class="lang__menu" data-lang-menu role="menu">
-            <li><button type="button" data-lang="en" role="menuitem"><span class="lang__code">EN</span>English</button></li>
-            <li><button type="button" data-lang="ar" role="menuitem"><span class="lang__code">AR</span>العربية</button></li>
-            <li><button type="button" data-lang="fr" role="menuitem"><span class="lang__code">FR</span>Français</button></li>
-            <li><button type="button" data-lang="es" role="menuitem"><span class="lang__code">ES</span>Español</button></li>
-            <li><button type="button" data-lang="de" role="menuitem"><span class="lang__code">DE</span>Deutsch</button></li>
-            <li><button type="button" data-lang="tr" role="menuitem"><span class="lang__code">TR</span>Türkçe</button></li>
+            <li role="none"><button type="button" data-lang="en" role="menuitem"><span class="lang__code">EN</span>English</button></li>
+            <li role="none"><button type="button" data-lang="ar" role="menuitem"><span class="lang__code">AR</span>العربية</button></li>
+            <li role="none"><button type="button" data-lang="fr" role="menuitem"><span class="lang__code">FR</span>Français</button></li>
+            <li role="none"><button type="button" data-lang="es" role="menuitem"><span class="lang__code">ES</span>Español</button></li>
+            <li role="none"><button type="button" data-lang="de" role="menuitem"><span class="lang__code">DE</span>Deutsch</button></li>
+            <li role="none"><button type="button" data-lang="tr" role="menuitem"><span class="lang__code">TR</span>Türkçe</button></li>
           </ul>
         </div>
         <a class="btn btn--ghost btn--sm" href="sign-in.html" data-i18n="nav.signin">Sign in</a>
@@ -195,7 +193,7 @@
           <p class="dim" data-i18n="calc.lead">Model a position before you talk to anyone. Adjust the inputs and read the result instantly.</p>
         </div>
 
-        <form class="card card--flush" data-calculator novalidate>
+        <form class="card card--flush" data-calculator method="post" action="#" novalidate>
           <div class="grid grid-2">
             <div class="stack">
               <label class="field" for="calc-budget">
@@ -341,7 +339,7 @@
               <button class="chip" type="button" data-ask="pricing" data-i18n="chat.chip.pricing">Pricing</button>
               <button class="chip" type="button" data-ask="investors" data-i18n="chat.chip.investors">Investor brief</button>
             </div>
-            <form class="chat__form" data-chat-form>
+            <form class="chat__form" data-chat-form method="post" action="#">
               <label class="sr-only" for="chat-input" data-i18n="sarah.placeholder">Ask about yield, taxes or a specific asset…</label>
               <input id="chat-input" type="text" data-ask-input placeholder="Ask about yield, taxes or a specific asset…" autocomplete="off" />
               <button class="btn btn--primary btn--sm" type="submit" data-i18n="sarah.send">Send</button>
@@ -403,7 +401,7 @@
             </div>
           </div>
 
-          <form class="card" data-contact-form novalidate>
+          <form class="card" data-contact-form method="post" action="/api/v1/leads" novalidate>
             <div class="stack">
               <label class="field" for="c-name">Name
                 <input id="c-name" name="name" type="text" required />

@@ -17,14 +17,17 @@ const path = require("path");
 const PORT = 5199;
 const BASE = "http://127.0.0.1:" + PORT;
 const DATA_DIR = "/tmp/propauto-api-test";
+const ADMIN_TOKEN = "api-test-admin-token";
+const WEBHOOK_SECRET = "api-test-webhook-secret";
 
-function request(method, url, body, token) {
+function request(method, url, body, token, extraHeaders) {
   return fetch(BASE + url, {
     method: method,
     headers: Object.assign(
       {},
       body ? { "Content-Type": "application/json" } : {},
-      token ? { Authorization: "Bearer " + token } : {}
+      token ? { Authorization: "Bearer " + token } : {},
+      extraHeaders || {}
     ),
     body: body ? JSON.stringify(body) : undefined
   }).then(async (res) => {
@@ -52,7 +55,7 @@ async function main() {
   fs.rmSync(DATA_DIR, { recursive: true, force: true });
   const child = spawn(process.execPath, ["server.js"], {
     cwd: path.join(__dirname, ".."),
-    env: Object.assign({}, process.env, { PORT: String(PORT), DATA_DIR: DATA_DIR }),
+    env: Object.assign({}, process.env, { PORT: String(PORT), DATA_DIR: DATA_DIR, ADMIN_TOKEN: ADMIN_TOKEN, WEBHOOK_SECRET: WEBHOOK_SECRET }),
     stdio: ["ignore", "pipe", "pipe"]
   });
   child.stdout.on("data", () => {});
@@ -75,7 +78,10 @@ async function main() {
     assert(leadPost.status === 201 && leadPost.json.success, "lead creation failed");
     const leadId = leadPost.json.data.id;
 
-    const leadList = await request("GET", "/api/v1/leads?status=new");
+    const leadListAnon = await request("GET", "/api/v1/leads?status=new");
+    assert(leadListAnon.status === 401, "lead listing must require the admin token");
+
+    const leadList = await request("GET", "/api/v1/leads?status=new", null, ADMIN_TOKEN);
     assert(leadList.status === 200 && leadList.json.count >= 1, "lead listing failed");
 
     const call = await request("POST", "/api/v1/call", {
@@ -85,10 +91,13 @@ async function main() {
     });
     assert(call.status === 201 && call.json.data.status === "queued", "call queue failed");
 
+    const webhookAnon = await request("POST", "/api/v1/webhook", { event: "lead.created" });
+    assert(webhookAnon.status === 401, "webhook must require the shared secret");
+
     const webhook = await request("POST", "/api/v1/webhook", {
       event: "lead.created",
       lead: { id: leadId }
-    });
+    }, null, { "x-webhook-secret": WEBHOOK_SECRET });
     assert(webhook.status === 200 && webhook.json.received === true, "webhook failed");
 
     const analytics = await request("POST", "/api/analytics", {
@@ -132,6 +141,11 @@ async function main() {
 
     const sessionGet = await request("GET", "/api/checkout?session=" + sessionId);
     assert(sessionGet.status === 200 && sessionGet.json.data.id === sessionId, "checkout lookup failed");
+
+    for (const blocked of ["/.env", "/server.js", "/package.json", "/data/propauto.db", "/lib/storage.js", "/scripts/test.js"]) {
+      const res = await fetch(BASE + blocked);
+      assert(res.status === 404, blocked + " must not be served (got " + res.status + ")");
+    }
 
     console.log("API OK — health, leads, calls, webhooks, analytics, auth and checkout all pass.");
   } finally {

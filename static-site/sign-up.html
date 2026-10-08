@@ -11,6 +11,8 @@
   <link rel="alternate" hreflang="ar" href="https://propauto-ai-al-closer-saas.vercel.app/sign-up?lang=ar" />
   <link rel="alternate" hreflang="fr" href="https://propauto-ai-al-closer-saas.vercel.app/sign-up?lang=fr" />
   <link rel="alternate" hreflang="es" href="https://propauto-ai-al-closer-saas.vercel.app/sign-up?lang=es" />
+  <link rel="alternate" hreflang="de" href="https://propauto-ai-al-closer-saas.vercel.app/sign-up?lang=de" />
+  <link rel="alternate" hreflang="tr" href="https://propauto-ai-al-closer-saas.vercel.app/sign-up?lang=tr" />
   <link rel="alternate" hreflang="x-default" href="https://propauto-ai-al-closer-saas.vercel.app/sign-up" />
   <meta name="robots" content="noindex, follow" />
   <meta name="google-site-verification" content="9fr9l891XdYIz0EUFHozAKU4McwO5ukbj-JQLzoP08c" />
@@ -31,16 +33,14 @@
 
   <link rel="icon" href="icon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="assets/css/styles.css" />
-  <link rel="sitemap" type="application/xml" href="sitemap.xml" />
-  <link rel="robots" href="robots.txt" />
 </head>
 <body data-page="signup">
   <a class="sr-only" href="#main">Skip to content</a>
 
   <header class="site-header">
     <div class="wrap site-header__inner">
-      <a class="brand" href="index.html" data-i18n="nav.brand" aria-label="PropAuto AI">
-        <span class="brand__mark" aria-hidden="true">P</span>PropAuto AI
+      <a class="brand" href="index.html" aria-label="PropAuto AI">
+        <span class="brand__mark" aria-hidden="true">P</span><span data-i18n="nav.brand">PropAuto AI</span>
       </a>
       <nav id="primary-nav" class="nav" aria-label="Primary">
         <a href="properties.html" data-i18n="nav.properties">Properties</a>
@@ -55,12 +55,12 @@
         <div class="lang" data-lang-root>
           <button class="lang__btn" type="button" data-lang-toggle aria-haspopup="true" aria-expanded="false" data-i18n="nav.language">Language</button>
           <ul class="lang__menu" data-lang-menu role="menu">
-            <li><button type="button" data-lang="en" role="menuitem"><span class="lang__code">EN</span>English</button></li>
-            <li><button type="button" data-lang="ar" role="menuitem"><span class="lang__code">AR</span>العربية</button></li>
-            <li><button type="button" data-lang="fr" role="menuitem"><span class="lang__code">FR</span>Français</button></li>
-            <li><button type="button" data-lang="es" role="menuitem"><span class="lang__code">ES</span>Español</button></li>
-            <li><button type="button" data-lang="de" role="menuitem"><span class="lang__code">DE</span>Deutsch</button></li>
-            <li><button type="button" data-lang="tr" role="menuitem"><span class="lang__code">TR</span>Türkçe</button></li>
+            <li role="none"><button type="button" data-lang="en" role="menuitem"><span class="lang__code">EN</span>English</button></li>
+            <li role="none"><button type="button" data-lang="ar" role="menuitem"><span class="lang__code">AR</span>العربية</button></li>
+            <li role="none"><button type="button" data-lang="fr" role="menuitem"><span class="lang__code">FR</span>Français</button></li>
+            <li role="none"><button type="button" data-lang="es" role="menuitem"><span class="lang__code">ES</span>Español</button></li>
+            <li role="none"><button type="button" data-lang="de" role="menuitem"><span class="lang__code">DE</span>Deutsch</button></li>
+            <li role="none"><button type="button" data-lang="tr" role="menuitem"><span class="lang__code">TR</span>Türkçe</button></li>
           </ul>
         </div>
         <a class="btn btn--ghost btn--sm" href="sign-in.html" data-i18n="nav.signin">Sign in</a>
@@ -76,10 +76,10 @@
     <section class="section hero" id="top">
       <div class="wrap measure">
         <p class="eyebrow" data-i18n="nav.start">Start free</p>
-        <h1 data-i18n="page.signup.title">Create your account</h1>
+        <h1 data-i18n="page.signup.heading">Create your account</h1>
         <p class="lead" data-i18n="page.signup.lead">Start with the free plan — no card required.</p>
 
-        <form class="card" data-auth-form="signup" novalidate>
+        <form class="card" data-auth-form="signup" method="post" action="/api/auth/signup" novalidate>
           <div class="stack">
             <label class="field" for="a-name">
               <span data-i18n="page.signup.name">Full name</span>

@@ -11,6 +11,8 @@
   <link rel="alternate" hreflang="ar" href="https://propauto-ai-al-closer-saas.vercel.app/cars?lang=ar" />
   <link rel="alternate" hreflang="fr" href="https://propauto-ai-al-closer-saas.vercel.app/cars?lang=fr" />
   <link rel="alternate" hreflang="es" href="https://propauto-ai-al-closer-saas.vercel.app/cars?lang=es" />
+  <link rel="alternate" hreflang="de" href="https://propauto-ai-al-closer-saas.vercel.app/cars?lang=de" />
+  <link rel="alternate" hreflang="tr" href="https://propauto-ai-al-closer-saas.vercel.app/cars?lang=tr" />
   <link rel="alternate" hreflang="x-default" href="https://propauto-ai-al-closer-saas.vercel.app/cars" />
   <meta name="robots" content="index, follow" />
   <meta name="google-site-verification" content="9fr9l891XdYIz0EUFHozAKU4McwO5ukbj-JQLzoP08c" />
@@ -31,8 +33,6 @@
 
   <link rel="icon" href="icon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="assets/css/styles.css" />
-  <link rel="sitemap" type="application/xml" href="sitemap.xml" />
-  <link rel="robots" href="robots.txt" />
 
   <script type="application/ld+json">
   {
@@ -51,8 +51,8 @@
   <!-- ── Header ─────────────────────────────────────────────────────────── -->
   <header class="site-header">
     <div class="wrap site-header__inner">
-      <a class="brand" href="index.html" data-i18n="nav.brand" aria-label="PropAuto AI">
-        <span class="brand__mark" aria-hidden="true">P</span>PropAuto AI
+      <a class="brand" href="index.html" aria-label="PropAuto AI">
+        <span class="brand__mark" aria-hidden="true">P</span><span data-i18n="nav.brand">PropAuto AI</span>
       </a>
 
       <nav id="primary-nav" class="nav" aria-label="Primary">
@@ -69,12 +69,12 @@
         <div class="lang" data-lang-root>
           <button class="lang__btn" type="button" data-lang-toggle aria-haspopup="true" aria-expanded="false" data-i18n="nav.language">Language</button>
           <ul class="lang__menu" data-lang-menu role="menu">
-            <li><button type="button" data-lang="en" role="menuitem"><span class="lang__code">EN</span>English</button></li>
-            <li><button type="button" data-lang="ar" role="menuitem"><span class="lang__code">AR</span>العربية</button></li>
-            <li><button type="button" data-lang="fr" role="menuitem"><span class="lang__code">FR</span>Français</button></li>
-            <li><button type="button" data-lang="es" role="menuitem"><span class="lang__code">ES</span>Español</button></li>
-            <li><button type="button" data-lang="de" role="menuitem"><span class="lang__code">DE</span>Deutsch</button></li>
-            <li><button type="button" data-lang="tr" role="menuitem"><span class="lang__code">TR</span>Türkçe</button></li>
+            <li role="none"><button type="button" data-lang="en" role="menuitem"><span class="lang__code">EN</span>English</button></li>
+            <li role="none"><button type="button" data-lang="ar" role="menuitem"><span class="lang__code">AR</span>العربية</button></li>
+            <li role="none"><button type="button" data-lang="fr" role="menuitem"><span class="lang__code">FR</span>Français</button></li>
+            <li role="none"><button type="button" data-lang="es" role="menuitem"><span class="lang__code">ES</span>Español</button></li>
+            <li role="none"><button type="button" data-lang="de" role="menuitem"><span class="lang__code">DE</span>Deutsch</button></li>
+            <li role="none"><button type="button" data-lang="tr" role="menuitem"><span class="lang__code">TR</span>Türkçe</button></li>
           </ul>
         </div>
         <a class="btn btn--ghost btn--sm" href="sign-in.html" data-i18n="nav.signin">Sign in</a>
@@ -91,7 +91,7 @@
     <section class="section hero" id="top">
       <div class="wrap">
         <p class="eyebrow" data-i18n="nav.cars">Rare cars</p>
-        <h1 data-i18n="page.cars.title">Rare cars</h1>
+        <h1 data-i18n="page.cars.heading">Rare cars</h1>
         <p class="lead measure" data-i18n="page.cars.lead">Collector-grade automobiles, each verified by our intake team before it is listed.</p>
       </div>
     </section>
@@ -142,7 +142,7 @@
               <button class="chip" type="button" data-ask="pricing" data-i18n="chat.chip.pricing">Pricing</button>
               <button class="chip" type="button" data-ask="investors" data-i18n="chat.chip.investors">Investor brief</button>
             </div>
-            <form class="chat__form" data-chat-form>
+            <form class="chat__form" data-chat-form method="post" action="#">
               <label class="sr-only" for="chat-input" data-i18n="sarah.placeholder">Ask about yield, taxes or a specific asset…</label>
               <input id="chat-input" type="text" data-ask-input placeholder="Ask about yield, taxes or a specific asset…" autocomplete="off" />
               <button class="btn btn--primary btn--sm" type="submit" data-i18n="sarah.send">Send</button>
