@@ -15,7 +15,7 @@ export const MONEY_DECIMALS = 2
 /** BigInt multiplier used to convert a decimal amount into integer cents. */
 export const CENTS_PER_UNIT = 100n
 
-/** Maximum absolute value, in cents, accepted by {@link toCents} (2^63-1). */
+/** Maximum absolute value, in cents, accepted by {@link toCents} (2^53-1). */
 export const MAX_CENTS = BigInt(Number.MAX_SAFE_INTEGER)
 
 /** Result of a return-on-investment computation. */
@@ -71,29 +71,44 @@ export function toCents(amount: number | string): bigint {
  * @complexity O(1) time, O(1) space.
  */
 export function fromCents(cents: bigint): number {
-  return Number(assertWithinBounds(cents)) / Number(CENTS_PER_UNIT)
+  const bounded = assertWithinBounds(cents)
+  const absolute = bounded < 0n ? -bounded : bounded
+  const whole = absolute / CENTS_PER_UNIT
+  const fraction = (absolute % CENTS_PER_UNIT).toString().padStart(MONEY_DECIMALS, '0')
+  // Parsing the exact decimal string yields the closest double to the true value.
+  return Number(`${bounded < 0n ? '-' : ''}${whole}.${fraction}`)
 }
 
 /**
- * Formats integer cents as a locale-aware currency string.
+ * Formats integer cents as a locale-aware amount prefixed with the currency
+ * code. Grouping and decimal separators follow the locale; the integer part is
+ * grouped from its exact decimal digits, never through a floating-point value,
+ * so amounts up to {@link MAX_CENTS} keep every digit.
  *
  * @param cents - The monetary value in cents (may be negative).
  * @param currency - ISO 4217 currency code, defaults to "USD".
  * @param locale - BCP 47 locale tag, defaults to "en-US".
- * @returns A formatted currency string, e.g. "$4,900.00".
+ * @returns A formatted string, e.g. "USD 4,900.00" or, for de-DE,
+ *   "EUR 4.900,00".
  * @throws {RangeError} When cents exceeds {@link MAX_CENTS}.
- * @complexity O(1) time, O(1) space.
+ * @complexity O(d) time and space, where d is the number of digits.
  */
 export function formatMoney(cents: bigint, currency = 'USD', locale = 'en-US'): string {
   const bounded = assertWithinBounds(cents)
-  const sign = bounded < 0n ? -1n : 1n
   const absolute = bounded < 0n ? -bounded : bounded
-  const whole = absolute / CENTS_PER_UNIT
-  const fraction = absolute % CENTS_PER_UNIT
-  const wholeString = whole.toString()
-  const fractionString = fraction.toString().padStart(MONEY_DECIMALS, '0')
-  const grouped = new Intl.NumberFormat(locale).format(Number(wholeString))
-  return `${sign < 0n ? '-' : ''}${currency} ${grouped}.${fractionString}`
+  const whole = (absolute / CENTS_PER_UNIT).toString()
+  const fraction = (absolute % CENTS_PER_UNIT).toString().padStart(MONEY_DECIMALS, '0')
+  const { group, decimal } = localeSeparators(locale)
+  const grouped = whole.replace(/\B(?=(\d{3})+(?!\d))/g, group)
+  return `${bounded < 0n ? '-' : ''}${currency} ${grouped}${decimal}${fraction}`
+}
+
+function localeSeparators(locale: string): { group: string; decimal: string } {
+  const parts = new Intl.NumberFormat(locale).formatToParts(1234567.5)
+  return {
+    group: parts.find((part) => part.type === 'group')?.value ?? ',',
+    decimal: parts.find((part) => part.type === 'decimal')?.value ?? '.',
+  }
 }
 
 /**
@@ -102,8 +117,9 @@ export function formatMoney(cents: bigint, currency = 'USD', locale = 'en-US'): 
  * @param initialCents - The starting value in cents (may be zero).
  * @param currentCents - The current value in cents.
  * @returns An {@link RoiResult} with basis points, a formatted percent string,
- *   and a positivity flag. A zero initial value yields a neutral result
- *   (0.00%) instead of dividing by zero.
+ *   and a positivity flag. The change is measured against the absolute
+ *   value of the initial amount, so a move from -100 to -50 is a gain. A zero
+ *   initial value, or no change, yields a neutral "0.00%" result.
  * @throws {RangeError} When either value exceeds {@link MAX_CENTS}.
  * @complexity O(1) time, O(1) space.
  */
@@ -114,8 +130,9 @@ export function computeRoi(initialCents: bigint, currentCents: bigint): RoiResul
     return { basisPoints: 0, percent: '0.00%', positive: false }
   }
   const delta = current - initial
-  const basisPoints = Number((delta * 10000n) / initial)
-  const sign = basisPoints < 0 ? '-' : '+'
+  const base = initial < 0n ? -initial : initial
+  const basisPoints = Number((delta * 10000n) / base)
+  const sign = basisPoints < 0 ? '-' : basisPoints > 0 ? '+' : ''
   const absoluteBp = Math.abs(basisPoints)
   const whole = Math.floor(absoluteBp / 100)
   const fraction = Math.abs(absoluteBp % 100)
@@ -155,7 +172,8 @@ export function subCents(leftCents: bigint, rightCents: bigint): bigint {
  * @param cents - The base value in cents.
  * @param numerator - Numerator of the scale ratio.
  * @param denominator - Denominator of the scale ratio; must be non-zero.
- * @returns The scaled value in cents, rounded to the nearest cent.
+ * @returns The scaled value in cents, rounded to the nearest cent with
+ *   halves rounded away from zero (so results are symmetric for negatives).
  * @throws {RangeError} When the denominator is zero or the result exceeds
  *   {@link MAX_CENTS}.
  * @complexity O(1) time, O(1) space.
@@ -165,8 +183,12 @@ export function scaleCents(cents: bigint, numerator: bigint, denominator: bigint
     throw new RangeError('scaleCents: denominator must not be zero')
   }
   const product = cents * numerator
-  const rounded = product / denominator + ((product % denominator) * 2n >= denominator ? 1n : 0n)
-  return assertWithinBounds(rounded)
+  const negative = (product < 0n) !== (denominator < 0n)
+  const absProduct = product < 0n ? -product : product
+  const absDenominator = denominator < 0n ? -denominator : denominator
+  const quotient = absProduct / absDenominator
+  const rounded = (absProduct % absDenominator) * 2n >= absDenominator ? quotient + 1n : quotient
+  return assertWithinBounds(negative ? -rounded : rounded)
 }
 
 /**
@@ -189,14 +211,15 @@ export function safeDivide(numerator: number, denominator: number): number | nul
 /**
  * Clamps an integer to the inclusive [min, max] range.
  *
- * @param value - The value to clamp.
+ * @param value - The value to clamp. NaN clamps to `min`; infinities clamp
+ *   to the nearest bound.
  * @param min - Lower bound (inclusive).
  * @param max - Upper bound (inclusive).
  * @returns The clamped value.
  * @complexity O(1) time, O(1) space.
  */
 export function clampInt(value: number, min: number, max: number): number {
-  if (!Number.isFinite(value)) return min
+  if (Number.isNaN(value)) return min
   return Math.min(Math.max(value, min), max)
 }
 
