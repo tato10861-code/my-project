@@ -1,0 +1,23 @@
+{
+  "name": "propauto-ai",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js",
+    "build": "node scripts/bundle.js",
+    "lint": "node scripts/verify.js",
+    "test": "node scripts/test.js && node scripts/verify.js && node scripts/api-test.js",
+    "verify": "node scripts/verify.js",
+    "dev:next": "pnpm --dir src/src dev",
+    "build:next": "pnpm --dir src/src install --frozen-lockfile && pnpm --dir src/src build && rm -rf .next && cp -R src/src/.next .next",
+    "start:next": "pnpm --dir src/src start",
+    "lint:next": "pnpm --dir src/src lint"
+  },
+  "dependencies": {
+    "@vercel/blob": "^2.8.0",
+    "next": "16.3.0",
+    "react": "^19",
+    "react-dom": "^19"
+  }
+}
