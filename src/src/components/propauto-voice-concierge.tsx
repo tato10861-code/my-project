@@ -64,7 +64,7 @@ export function PropAutoVoiceConcierge() {
     try {
       const response = await fetch('/api/leads', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: form.get('name'), email: form.get('email'), phone: form.get('phone'), intent: 'buyer', language: 'en', message: 'Requested a voice callback from PropAuto Voice Concierge.' }) })
       const result = await response.json().catch(() => null)
-      if (!response.ok || !result?.delivered) throw new Error(result?.message || 'callback request failed')
+      if (!response.ok || !result?.saved) throw new Error(result?.message || 'callback request failed')
       setSubmitted(true)
     } catch {
       setError('Unable to send your request. Please try again.')

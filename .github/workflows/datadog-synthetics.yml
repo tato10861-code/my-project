@@ -1,26 +1,31 @@
-الاسم: تشغيل Datadog الاختبارات الاصطناعية: Run Datadog Synthetic tests
+# Runs Datadog Synthetic tests on demand. Skipped (not failed) until the
+# DD_API_KEY and DD_APP_KEY repository secrets are configured.
+name: Run Datadog Synthetic tests
 
 on:
-                 سير العمل_إرسال                      :              :
+  workflow_dispatch:
+
 permissions:
-                            المحتويات.                                       :   قراءة.                            : قراءة.
+  contents: read
 
 jobs:
-                            المواد التركيبية.                                       : :
-                            يعمل على.                                      : أوبونتو-الأحدث.                            : أوبونتو-الأحدث.
-                     إنف.                       : :
-                            Dd_api_مفتاح.                             : ${{                           أسرار. Dd_api_مفتاح.                           }}  : ${{                           أسرار. Dd_api_مفتاح.                           }}
-  Dd_app_key.Dd_app_key.Dd_app_key. Dd_app_key.    : ${{   أسرار. Dd_app_key.  اختبارالبحثالاستفسارات   } : ${{   أسرار. Dd_app_key.  اختبارالبحثالاستفسارات   }
- خطواتAppKeyAppKey:        : : : 
-                           خطوات الاسم.                                  :   C.. .. .. .. .. .. . .          الاستخدامات.                                      :  C.. .. .. .. .. .. . .          الاستخدامات.                                     
-                                                                 الاستخدامات.                                                                    :  الإجراءات/الخروج @v4                                                                  : الإجراءات/الخروج @v4
-  - name: ت........شغيل اختبارات Datadog الاصطناعية           إذا...  name: ت........شغيل اختبارات Datadog الاصطناعية           إذا...  
-                                                       إذا...                                                           : ${{                                          env.DD_API_KEY!=             الاستخدامات.                                          }}}}                                : ${{                                           env.DD_API_KEY!=             الاستخدامات.                                           }}}}
-                                                            الاستخدامات.                                                                :  DataDog/synthetics-ci-github-action@v1.4.0 : DataDog/synthetics-ci-github-action@v1.4.0
- مع...: :
-                                                                   أبيكي                                                                      : ${{                                               إنف. Dd_api_مفتاح.                                               }}                                           : ${{                                                إنف. Dd_api_مفتاح.                                                }}
-  AppKey     : اختبارالبحثالاستفسارات       اختبارالبحثالاستفسارات {{}    :  اختبارالبحثالاستفسارات       اختبارالبحثالاستفسارات  {{}
-                                                                                                                                       اختبارالبحثالاستفسارات                                                                                                                                         : علامة.: اختبارات E2E. : علامة.:اختبارات E2E.
-  - "تم تخطي اختبارات Datadog لأن DD_API_KEY و DD_APP_KEY غير مهيأين""تم تخطي اختبارات Datadog لأن DD_API_KEY و DD_APP_KEY غير مهيأين"
- إذا......${{env.DD_API_KEY ==" | env.DD_APP_KEY =="}}                                          : ${{ env.DD_API_KEY == " | env.DD_APP_KEY == "}}}}
-                                                 تشغيل.                                                     :       صدى.                                 "تم تخطي اختبارات Datadog لأن DD_API_KEY و DD_APP_KEY غير مهيأين" ... :       صدى.                                  "تم تخطي اختبارات Datadog لأن DD_API_KEY و DD_APP_KEY غير مهيأين"...
+  synthetics:
+    runs-on: ubuntu-latest
+    env:
+      DD_API_KEY: ${{ secrets.DD_API_KEY }}
+      DD_APP_KEY: ${{ secrets.DD_APP_KEY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Datadog Synthetic tests
+        if: ${{ env.DD_API_KEY != '' && env.DD_APP_KEY != '' }}
+        uses: DataDog/synthetics-ci-github-action@v1.4.0
+        with:
+          api_key: ${{ env.DD_API_KEY }}
+          app_key: ${{ env.DD_APP_KEY }}
+          test_search_query: 'tag:e2e-tests'
+
+      - name: Report skipped run
+        if: ${{ env.DD_API_KEY == '' || env.DD_APP_KEY == '' }}
+        run: echo "Datadog tests skipped because DD_API_KEY and DD_APP_KEY are not configured."

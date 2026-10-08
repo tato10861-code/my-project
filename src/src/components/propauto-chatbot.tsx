@@ -60,7 +60,7 @@ export function PropAutoChatbot() {
         body: JSON.stringify({ ...lead, intent: 'buyer', language: locale, message: messages.map((message) => `${message.role}: ${message.text}`).join('\n') }),
       })
       const result = await response.json().catch(() => null)
-      if (!response.ok || !result?.delivered) throw new Error(result?.message || 'lead submission failed')
+      if (!response.ok || !result?.saved) throw new Error(result?.message || 'lead submission failed')
       setSent(true)
     } catch {
       setError(locale === 'ar' ? 'تعذر الإرسال. يرجى المحاولة مرة أخرى.' : 'Unable to send. Please try again.')

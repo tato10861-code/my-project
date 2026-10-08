@@ -1,16 +1,14 @@
 import { NextResponse } from 'next/server'
+import { count, desc, sql } from 'drizzle-orm'
+import { requireOwner } from '@/lib/auth'
+import { db } from '@/lib/db'
+import { propautoEvents, propautoLeads, propautoOperatorLogs } from '@/lib/db/schema'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
-import { count, desc, sql } from 'drizzle-orm'
-import { db } from '@/lib/db'
-import { propautoEvents, propautoLeads, propautoOperatorLogs } from '@/lib/db/schema'
-import { auth, OWNER_EMAIL } from '@/lib/auth'
-import { headers } from 'next/headers'
 
-export async function GET() {
-  const session = await auth.api.getSession({ headers: await headers() })
-  if (!session?.user || session.user.email.toLowerCase() !== OWNER_EMAIL) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+export async function GET(request: Request) {
+  if (!(await requireOwner(request.headers))) return NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers: { 'Cache-Control': 'no-store' } })
   try {
     const [events, leads, operators, recent] = await Promise.all([
       db.select({ total: sql<number>`count(distinct case when ${propautoEvents.eventName} = 'page_view' then ${propautoEvents.sessionId} end)` }).from(propautoEvents),
@@ -27,7 +25,7 @@ export async function GET() {
       source: 'neon',
     })
   } catch (error) {
-    console.error('[v0] admin analytics query failed', error)
+    console.error('[admin-analytics] query failed:', error instanceof Error ? error.message : 'unknown error')
     return NextResponse.json({ error: 'Analytics unavailable' }, { status: 503 })
   }
 }

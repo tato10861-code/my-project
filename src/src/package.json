@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "node tests/smoke.mjs",
-    "test:unit": "node --test tests/unit/",
+    "test:unit": "node --test \"tests/unit/**/*.test.mjs\"",
     "check": "pnpm test && pnpm test:unit && pnpm lint && pnpm typecheck && pnpm audit --prod --audit-level high && pnpm build"
   },
   "dependencies": {
