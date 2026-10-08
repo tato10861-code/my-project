@@ -24,7 +24,7 @@ jobs:
         with:
           version: 10
       - name: Setup Node 24
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version-file: src/src/.nvmrc
           cache: pnpm
