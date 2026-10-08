@@ -1,58 +1,103 @@
 /**
  * @fileoverview Server-side request security primitives for PropAuto AI.
  *
- * Provides fixed-window rate limiting, oversized-body rejection, and origin
- * validation so every API route can defend against abuse, resource-exhaustion,
- * and open-redirect classes of attacks without duplicating logic. All lookups
- * are O(1) hash-map operations; expired buckets are pruned by a background
- * interval so the map cannot grow without bound.
+ * Provides sliding-window rate limiting, body-size enforcement (declared and
+ * actual), and origin validation so every API route can defend against abuse,
+ * resource-exhaustion, and open-redirect classes of attacks without
+ * duplicating logic. The limiter is in-memory and therefore per instance; it
+ * bounds abuse from a single client on a warm instance, not globally.
  */
 
 /** Duration of a rate-limit window in milliseconds. */
-const WINDOW_MS = 60_000
+export const WINDOW_MS = 60_000
 
-/** In-memory bucket store: scope:key -> { count, resetAt }. */
-const buckets = new Map<string, { count: number; resetAt: number }>()
+/** Bucket count above which expired buckets are pruned. */
+const PRUNE_THRESHOLD = 1_000
+
+type Bucket = { windowStart: number; count: number; previousCount: number }
+
+/** In-memory bucket store: scope:key -> sliding-window counters. */
+const buckets = new Map<string, Bucket>()
 
 /**
  * Derives a stable, scope-prefixed client key from the request headers.
  *
+ * Headers written by the hosting platform are preferred over the
+ * client-controllable `x-forwarded-for`: on Vercel `x-real-ip` and
+ * `x-vercel-forwarded-for` are set by the edge and cannot be spoofed by the
+ * caller. `x-forwarded-for` is only used when neither is present (local
+ * development and other hosts).
+ *
  * @param request - The incoming request to inspect.
  * @param scope - A route-scoped namespace (e.g. "leads", "checkout") so that
  *   limits are applied independently per endpoint.
- * @returns A string key of the form `scope:ip` or `scope:unknown` when no IP
+ * @returns A string key of the form `scope:ip`, or `scope:unknown` when no IP
  *   header is present.
  * @complexity O(1) time, O(1) space.
  */
 export function getClientKey(request: Request, scope: string) {
-  const forwarded = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
-  const realIp = request.headers.get('x-real-ip')?.trim()
-  return `${scope}:${forwarded || realIp || 'unknown'}`
+  const firstEntry = (value: string | null) => value?.split(',')[0]?.trim() || undefined
+  const ip =
+    firstEntry(request.headers.get('x-vercel-forwarded-for')) ??
+    firstEntry(request.headers.get('x-real-ip')) ??
+    firstEntry(request.headers.get('x-forwarded-for')) ??
+    'unknown'
+  return `${scope}:${ip}`
 }
 
 /**
- * Checks whether a request is still within its rate-limit budget.
+ * Checks whether a request is still within its rate-limit budget using a
+ * sliding-window counter: the previous window's count is weighted by how much
+ * of it still overlaps the trailing 60 seconds. Unlike a fixed window, a
+ * caller cannot spend twice the budget by straddling a window boundary.
  *
  * @param key - The client key produced by {@link getClientKey}.
- * @param limit - Maximum number of requests allowed per window.
- * @returns An object with an `allowed` flag and the number of seconds until
- *   the window resets (for the Retry-After header).
- * @complexity O(1) time, O(1) space.
+ * @param limit - Maximum number of requests allowed per trailing window.
+ * @param now - Current time in milliseconds (injectable for tests).
+ * @returns An object with an `allowed` flag and the number of seconds the
+ *   client should wait before retrying (for the Retry-After header).
+ * @complexity O(1) amortized time, O(1) space per key.
  */
-export function rateLimit(key: string, limit: number) {
-  const now = Date.now()
-  const current = buckets.get(key)
-  if (!current || current.resetAt <= now) {
-    buckets.set(key, { count: 1, resetAt: now + WINDOW_MS })
-    return { allowed: true, retryAfter: 60 }
-  }
+export function rateLimit(key: string, limit: number, now = Date.now()) {
+  pruneBuckets(now)
+  const bucket = advance(buckets.get(key), now)
+  buckets.set(key, bucket)
 
-  current.count += 1
-  if (current.count > limit) {
-    return { allowed: false, retryAfter: Math.max(1, Math.ceil((current.resetAt - now) / 1000)) }
-  }
+  const elapsed = now - bucket.windowStart
+  const overlap = (WINDOW_MS - elapsed) / WINDOW_MS
+  const estimate = bucket.previousCount * overlap + bucket.count
+  const retryAfter = Math.max(1, Math.ceil((WINDOW_MS - elapsed) / 1000))
 
-  return { allowed: true, retryAfter: Math.max(1, Math.ceil((current.resetAt - now) / 1000)) }
+  if (estimate >= limit) return { allowed: false, retryAfter }
+  bucket.count += 1
+  return { allowed: true, retryAfter }
+}
+
+function advance(bucket: Bucket | undefined, now: number): Bucket {
+  const windowStart = now - (now % WINDOW_MS)
+  if (!bucket) return { windowStart, count: 0, previousCount: 0 }
+  if (bucket.windowStart === windowStart) return bucket
+  const previousCount = bucket.windowStart === windowStart - WINDOW_MS ? bucket.count : 0
+  return { windowStart, count: 0, previousCount }
+}
+
+/**
+ * Drops buckets that can no longer affect a decision (older than two
+ * windows). Runs lazily from {@link rateLimit} instead of on a timer, so the
+ * module has no side effects at import time in any runtime.
+ *
+ * @complexity O(n) time when the store exceeds the threshold, else O(1).
+ */
+function pruneBuckets(now: number) {
+  if (buckets.size < PRUNE_THRESHOLD) return
+  for (const [key, bucket] of buckets) {
+    if (now - bucket.windowStart >= 2 * WINDOW_MS) buckets.delete(key)
+  }
+}
+
+/** Number of tracked rate-limit buckets (exposed for tests). */
+export function bucketCount() {
+  return buckets.size
 }
 
 /**
@@ -72,8 +117,9 @@ export function tooManyRequests(retryAfter: number) {
 /**
  * Resolves and validates the configured public origin for the deployment.
  *
- * @returns The normalized https origin string, or null when unconfigured or
- *   when the configured URL is not https in production.
+ * @returns The normalized origin, or null when unconfigured or malformed.
+ *   Plain http is accepted only when NODE_ENV is "development"; production,
+ *   preview and test builds require https.
  * @complexity O(1) time, O(1) space.
  */
 export function getConfiguredOrigin() {
@@ -81,7 +127,8 @@ export function getConfiguredOrigin() {
   if (!configured) return null
   try {
     const url = new URL(configured)
-    if (url.protocol !== 'https:' && !(process.env.NODE_ENV !== 'production' && url.protocol === 'http:')) return null
+    const allowHttp = process.env.NODE_ENV === 'development'
+    if (url.protocol !== 'https:' && !(allowHttp && url.protocol === 'http:')) return null
     return url.origin
   } catch {
     return null
@@ -89,13 +136,14 @@ export function getConfiguredOrigin() {
 }
 
 /**
- * Detects whether a request body exceeds the configured byte limit using the
- * Content-Length header (no body buffering required).
+ * Detects whether a request declares a body above the byte limit using the
+ * Content-Length header, without reading the body. A missing header is not a
+ * verdict: use {@link readJsonBody} to enforce the limit on the actual bytes.
  *
  * @param request - The incoming request.
  * @param maxBytes - Maximum acceptable body size in bytes.
- * @returns True when the declared length is missing-and-valid, negative,
- *   non-numeric, or above the limit; false otherwise.
+ * @returns True when the declared length is negative, non-numeric, or above
+ *   the limit; false when it is absent or within the limit.
  * @complexity O(1) time, O(1) space.
  */
 export function hasOversizedBody(request: Request, maxBytes: number) {
@@ -105,20 +153,66 @@ export function hasOversizedBody(request: Request, maxBytes: number) {
   return !Number.isFinite(length) || length < 0 || length > maxBytes
 }
 
-/**
- * Prunes expired buckets so the in-memory store stays bounded.
- *
- * @complexity O(n) time where n is the number of buckets — only invoked when
- *   the map exceeds 5000 entries, and never blocks the event loop for long.
- * @complexity O(1) extra space.
- */
-export function trimBuckets() {
-  if (buckets.size < 5000) return
-  const now = Date.now()
-  for (const [key, value] of buckets) {
-    if (value.resetAt <= now) buckets.delete(key)
+/** Thrown by {@link readJsonBody} when the body exceeds its byte limit. */
+export class BodyTooLargeError extends Error {
+  constructor() {
+    super('Request body too large')
+    this.name = 'BodyTooLargeError'
   }
 }
 
-trimBuckets()
-setInterval(trimBuckets, WINDOW_MS).unref()
+/** Thrown by {@link readJsonBody} when the body is not valid JSON. */
+export class InvalidJsonError extends Error {
+  constructor() {
+    super('Request body is not valid JSON')
+    this.name = 'InvalidJsonError'
+  }
+}
+
+/**
+ * Reads and parses a JSON body while enforcing a byte cap on the bytes
+ * actually received, so a chunked request with no Content-Length cannot
+ * bypass the limit. Reading stops as soon as the cap is crossed.
+ *
+ * @param request - The incoming request.
+ * @param maxBytes - Maximum acceptable body size in bytes.
+ * @returns The parsed JSON value.
+ * @throws {BodyTooLargeError} When the declared or actual size exceeds the cap.
+ * @throws {InvalidJsonError} When the body is empty or not valid JSON.
+ * @complexity O(n) time and space in the body size, bounded by maxBytes.
+ */
+export async function readJsonBody(request: Request, maxBytes: number): Promise<unknown> {
+  if (hasOversizedBody(request, maxBytes)) throw new BodyTooLargeError()
+  if (!request.body) throw new InvalidJsonError()
+
+  const reader = request.body.getReader()
+  const chunks: Uint8Array[] = []
+  let received = 0
+  for (;;) {
+    const { done, value } = await reader.read()
+    if (done) break
+    received += value.byteLength
+    if (received > maxBytes) {
+      await reader.cancel().catch(() => undefined)
+      throw new BodyTooLargeError()
+    }
+    chunks.push(value)
+  }
+
+  const bytes = new Uint8Array(received)
+  let offset = 0
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset)
+    offset += chunk.byteLength
+  }
+  try {
+    return JSON.parse(new TextDecoder().decode(bytes))
+  } catch {
+    throw new InvalidJsonError()
+  }
+}
+
+/** Standard 413 response for oversized bodies. */
+export function payloadTooLarge() {
+  return Response.json({ error: 'Request too large' }, { status: 413, headers: { 'Cache-Control': 'no-store' } })
+}

@@ -1,14 +1,17 @@
 import { NextResponse } from 'next/server'
+import { count, eq, sql } from 'drizzle-orm'
+import { requireOwner } from '@/lib/auth'
+import { db } from '@/lib/db'
+import { propautoEvents, propautoLeads } from '@/lib/db/schema'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 const noStoreHeaders = { 'Cache-Control': 'no-store, max-age=0' }
-import { count, eq, sql } from 'drizzle-orm'
-import { db } from '@/lib/db'
-import { propautoEvents, propautoLeads } from '@/lib/db/schema'
 
-export async function GET() {
+export async function GET(request: Request) {
+  // Business aggregates are owner-only, like /api/admin/analytics.
+  if (!(await requireOwner(request.headers))) return NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers: noStoreHeaders })
   try {
     const [visitors, recentVisitors, assetViews, leads, conversations, sources] = await Promise.all([
       db.select({ total: sql<number>`count(distinct ${propautoEvents.sessionId})` }).from(propautoEvents).where(eq(propautoEvents.eventName, 'page_view')),
@@ -36,7 +39,7 @@ export async function GET() {
       sources: sources.map((item) => ({ label: item.source, value: totalSources ? Math.round((Number(item.total) / totalSources) * 100) : 0 })),
     }, { headers: noStoreHeaders })
   } catch (error) {
-    console.error('[v0] public analytics query failed', error)
-    return NextResponse.json({ error: 'Analytics unavailable' }, { status: 503 })
+    console.error('[analytics] query failed:', error instanceof Error ? error.message : 'unknown error')
+    return NextResponse.json({ error: 'Analytics unavailable' }, { status: 503, headers: noStoreHeaders })
   }
 }

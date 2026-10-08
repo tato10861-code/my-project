@@ -1,7 +1,7 @@
 import { generateText } from 'ai'
 import { Resend } from 'resend'
 import { z } from 'zod'
-import { getClientKey, hasOversizedBody, rateLimit, tooManyRequests } from '@/lib/request-security'
+import { BodyTooLargeError, getClientKey, payloadTooLarge, rateLimit, readJsonBody, tooManyRequests } from '@/lib/request-security'
 
 const requestSchema = z.object({
   messages: z.array(z.object({
@@ -18,15 +18,17 @@ const SARAH_SYSTEM_PROMPT = `You are Sarah from PropAuto, a warm elite real-esta
 export async function POST(request: Request) {
   const limit = rateLimit(getClientKey(request, 'sarah'), 10)
   if (!limit.allowed) return tooManyRequests(limit.retryAfter)
-  if (hasOversizedBody(request, MAX_BODY_BYTES)) {
-    return Response.json({ error: 'Request too large' }, { status: 413, headers: { 'Cache-Control': 'no-store' } })
+
+  let parsed: z.infer<typeof requestSchema>
+  try {
+    parsed = requestSchema.parse(await readJsonBody(request, MAX_BODY_BYTES))
+  } catch (error) {
+    if (error instanceof BodyTooLargeError) return payloadTooLarge()
+    return Response.json({ error: 'Invalid chat request' }, { status: 400, headers: { 'Cache-Control': 'no-store' } })
   }
 
-  let language = 'en'
+  const { messages, language } = parsed
   try {
-    const parsed = requestSchema.parse(await request.json())
-    const { messages } = parsed
-    language = parsed.language
     const latestMessage = messages[messages.length - 1]?.content ?? ''
     const hotLead = /\b(book|booking|viewing|test drive|human|price|interested|buy|rent)\b|حجز|معاينة|موظف|السعر|شراء|إيجار/i.test(latestMessage)
     const resendKey = process.env.RESEND_API_KEY_2 ?? process.env.RESEND_API_KEY
@@ -38,7 +40,7 @@ export async function POST(request: Request) {
         subject: 'PropAuto hot lead from Sarah',
         text: `A visitor may be ready to buy or book. Latest message: ${latestMessage}`,
       })
-      if (error) console.error('[v0] Sarah owner alert failed:', error.message)
+      if (error) console.error('[sarah] owner alert failed:', error.message)
     }
     const result = await generateText({
       model: 'google/gemini-2.5-flash',

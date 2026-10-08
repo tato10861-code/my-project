@@ -8,6 +8,10 @@ const requiredFiles = [
   'app/api/checkout/route.ts',
   'app/robots.ts',
   'app/sitemap.ts',
+  'lib/request-security.ts',
+  'lib/leads.ts',
+  'lib/events.ts',
+  'lib/video-proxy.ts',
 ]
 
 for (const file of requiredFiles) {

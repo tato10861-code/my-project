@@ -10,7 +10,7 @@ const connectionCandidates = [
   process.env.POSTGRES_URL_NON_POOLING,
   process.env.POSTGRES_URL,
   process.env.POSTGRES_URL_NO_SSL,
-].filter((value): value is string => typeof value === 'string' && !/localhost|127\.0\.0\.1/.test(value))
+].filter((value): value is string => typeof value === 'string' && value.trim() !== '')
 const connectionString = connectionCandidates[0]
 
 const safeConnectionString = connectionString ?? 'postgresql://not-configured.invalid/propauto'

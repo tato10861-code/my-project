@@ -1,64 +1,51 @@
 import { NextResponse } from 'next/server'
 import { Resend } from 'resend'
-import { z } from 'zod'
 import { db } from '@/lib/db'
 import { propautoLeads } from '@/lib/db/schema'
-import { getClientKey, hasOversizedBody, rateLimit, tooManyRequests } from '@/lib/request-security'
-
-const leadSchema = z.object({
-  name: z.string().trim().min(2).max(100),
-  email: z.string().trim().email().max(160),
-  phone: z.string().trim().min(7).max(30).optional(),
-  intent: z.enum(['buyer', 'investor', 'seller']),
-  message: z.string().trim().max(1000).optional(),
-  budget: z.string().trim().max(120).optional(),
-  language: z.string().trim().max(20).optional(),
-})
+import { buildLeadEmail, LEAD_MAX_BODY_BYTES, leadIdempotencyKey, leadSchema, type Lead } from '@/lib/leads'
+import { BodyTooLargeError, getClientKey, payloadTooLarge, rateLimit, readJsonBody, tooManyRequests } from '@/lib/request-security'
 
 const COMPANY_EMAIL = 'propautoal@gmail.com'
+const noStore = { 'Cache-Control': 'no-store' }
 
 export async function POST(request: Request) {
   const limit = rateLimit(getClientKey(request, 'leads'), 5)
   if (!limit.allowed) return tooManyRequests(limit.retryAfter)
-  if (hasOversizedBody(request, 16_384)) return NextResponse.json({ ok: false, error: 'Request too large' }, { status: 413, headers: { 'Cache-Control': 'no-store' } })
 
-  let payload: z.infer<typeof leadSchema>
+  let payload: Lead
   try {
-    payload = leadSchema.parse(await request.json())
-  } catch {
-    return NextResponse.json({ ok: false, error: 'Invalid lead details' }, { status: 400 })
+    payload = leadSchema.parse(await readJsonBody(request, LEAD_MAX_BODY_BYTES))
+  } catch (error) {
+    if (error instanceof BodyTooLargeError) return payloadTooLarge()
+    return NextResponse.json({ ok: false, error: 'Invalid lead details' }, { status: 400, headers: noStore })
   }
 
   try {
     await db.insert(propautoLeads).values({ name: payload.name, email: payload.email, intent: payload.intent, source: 'web' })
-
-    const apiKey = process.env.RESEND_API_KEY_2 ?? process.env.RESEND_API_KEY
-    if (!apiKey) {
-      return NextResponse.json({ ok: false, delivered: false, message: 'Email delivery is not configured.' }, { status: 503 })
-    }
-
-    const resend = new Resend(apiKey)
-    const from = process.env.RESEND_FROM_EMAIL ?? 'PropAuto Sales Team <onboarding@resend.dev>'
-    const { error } = await resend.emails.send(
-      {
-        from,
-        to: [COMPANY_EMAIL],
-        subject: `New PropAuto lead: ${payload.name} — ${payload.intent}`,
-        html: `<h2>New PropAuto lead</h2><p><strong>Name:</strong> ${escapeHtml(payload.name)}</p><p><strong>Email:</strong> ${escapeHtml(payload.email)}</p><p><strong>Phone:</strong> ${escapeHtml(payload.phone ?? 'Not provided')}</p><p><strong>Budget:</strong> ${escapeHtml(payload.budget ?? 'Not provided')}</p><p><strong>Interest:</strong> ${escapeHtml(payload.intent)}</p><p><strong>Language:</strong> ${escapeHtml(payload.language ?? 'en')}</p><p><strong>Message:</strong> ${escapeHtml(payload.message ?? '')}</p>`,
-      },
-      { idempotencyKey: `propauto-lead/${crypto.randomUUID()}` },
-    )
-    if (error) {
-      console.error('[v0] lead email failed', error.message)
-      return NextResponse.json({ ok: false, delivered: false, message: 'Lead saved, but the owner email could not be delivered.' }, { status: 502 })
-    }
-    return NextResponse.json({ ok: true, delivered: true, next: 'company-contact' })
-  } catch {
-    console.error('[v0] lead submission failed')
-    return NextResponse.json({ ok: false, error: 'Invalid lead details' }, { status: 400 })
+  } catch (error) {
+    console.error('[leads] storage failed:', error instanceof Error ? error.message : 'unknown error')
+    return NextResponse.json({ ok: false, saved: false, retryable: true, error: 'Lead storage is temporarily unavailable.' }, { status: 503, headers: noStore })
   }
-}
 
-function escapeHtml(value: string) {
-  return value.replace(/[&<>"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character] ?? character)
+  // The lead is stored from here on. A notification failure must not invite the
+  // visitor to submit again, so it is reported as accepted-but-not-delivered.
+  const apiKey = process.env.RESEND_API_KEY_2 ?? process.env.RESEND_API_KEY
+  if (!apiKey) {
+    console.error('[leads] owner notification skipped: email delivery is not configured')
+    return NextResponse.json({ ok: true, saved: true, delivered: false }, { status: 202, headers: noStore })
+  }
+
+  try {
+    const { subject, html } = buildLeadEmail(payload)
+    const { error } = await new Resend(apiKey).emails.send(
+      { from: process.env.RESEND_FROM_EMAIL ?? 'PropAuto Sales Team <onboarding@resend.dev>', to: [COMPANY_EMAIL], replyTo: payload.email, subject, html },
+      { idempotencyKey: leadIdempotencyKey(payload) },
+    )
+    if (error) throw new Error(error.message)
+  } catch (error) {
+    console.error('[leads] owner notification failed:', error instanceof Error ? error.message : 'unknown error')
+    return NextResponse.json({ ok: true, saved: true, delivered: false }, { status: 202, headers: noStore })
+  }
+
+  return NextResponse.json({ ok: true, saved: true, delivered: true }, { headers: noStore })
 }
