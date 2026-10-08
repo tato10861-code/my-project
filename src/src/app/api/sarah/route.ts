@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto'
 import { generateText } from 'ai'
 import { Resend } from 'resend'
 import { z } from 'zod'
@@ -32,12 +33,15 @@ export async function POST(request: Request) {
     const resendKey = process.env.RESEND_API_KEY_2 ?? process.env.RESEND_API_KEY
     if (hotLead && resendKey) {
       const resend = new Resend(resendKey)
-      const { error } = await resend.emails.send({
-        from: process.env.RESEND_FROM_EMAIL ?? 'PropAuto Sales <onboarding@resend.dev>',
-        to: 'propautoal@gmail.com',
-        subject: 'PropAuto hot lead from Sarah',
-        text: `A visitor may be ready to buy or book. Latest message: ${latestMessage}`,
-      })
+      const { error } = await resend.emails.send(
+        {
+          from: process.env.RESEND_FROM_EMAIL ?? 'PropAuto Sales <onboarding@resend.dev>',
+          to: 'propautoal@gmail.com',
+          subject: 'PropAuto hot lead from Sarah',
+          text: `A visitor may be ready to buy or book. Latest message: ${latestMessage}`,
+        },
+        { idempotencyKey: `sarah-alert/${createHash('sha256').update(latestMessage).digest('hex').slice(0, 32)}` },
+      )
       if (error) console.error('[v0] Sarah owner alert failed:', error.message)
     }
     const result = await generateText({

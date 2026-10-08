@@ -2,10 +2,11 @@ const buckets = new Map<string, { count: number; resetAt: number }>()
 
 const WINDOW_MS = 60_000
 
-export function getClientKey(request: Request, scope: string) {
-  const forwarded = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+export function getClientKey(request: Request, scope: string): string {
+  // Prefer the platform-provided client address; never trust arbitrary forwarded chains.
+  const vercelIp = request.headers.get('x-vercel-forwarded-for')?.trim()
   const realIp = request.headers.get('x-real-ip')?.trim()
-  return `${scope}:${forwarded || realIp || 'unknown'}`
+  return `${scope}:${vercelIp || realIp || 'unknown'}`
 }
 
 export function rateLimit(key: string, limit: number) {

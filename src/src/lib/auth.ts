@@ -40,13 +40,9 @@ export const auth = betterAuth({
     ? ['http://localhost:3000', ...runtimeOrigins]
     : productionOrigins,
   session: { expiresIn: 60 * 60 * 24 * 7, updateAge: 60 * 60 * 24 },
-  ...(process.env.NODE_ENV === 'development'
-    ? {
-        advanced: {
-          defaultCookieAttributes: { sameSite: 'none' as const, secure: true },
-        },
-      }
-    : {}),
+  advanced: {
+    defaultCookieAttributes: { sameSite: 'lax' as const, secure: process.env.NODE_ENV === 'production', httpOnly: true },
+  },
 })
 
 export async function requireOwner(headers: Headers) {
