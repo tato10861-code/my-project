@@ -528,7 +528,7 @@ function serveStatic(req, res, pathname) {
     "Content-Type": MIME[ext] || "application/octet-stream",
     "Content-Length": data.length,
     "X-Content-Type-Options": "nosniff",
-    "Cache-Control": "no-cache, no-store, must-revalidate",
+    "Cache-Control": ext === ".html" ? "no-cache" : "public, max-age=3600",
   });
   res.end(data);
 }
