@@ -16,7 +16,7 @@ jobs:
       DD_APP_KEY: ${{ secrets.DD_APP_KEY }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Run Datadog Synthetic tests
         if: ${{ env.DD_API_KEY != '' && env.DD_APP_KEY != '' }}
