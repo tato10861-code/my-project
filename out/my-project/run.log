@@ -1,0 +1,238 @@
+[plan] 3 project roots (node), 65 files in 23 directories scanned
+[plan] this looks like a 20 minute run against a 50 minute budget (rough, from repository size and project count): deterministic collectors 5 seconds, census 15 minutes, mining 15 minutes, build probe 5 minutes
+[lane] digest started
+[lane] repo_stats started
+[lane] git_stats started
+[lane] code_structure started
+[lane] git_history started
+[lane] company_identity started
+[lane] material_census started
+[lane] agentic_mining started
+[lane] repo_stats finished after 2.1s
+census: prepared 0 of 0 substantive commits as read-only patches
+[lane] company_identity finished after 3.3s
+[lane] git_history finished after 3.3s
+[lane] git_stats finished after 3.3s
+[lane] digest finished after 3.4s
+[lane] code_structure finished after 3.4s
+[alive] 60s elapsed; still running: agentic_mining 60s, material_census 60s
+[alive] 120s elapsed; still running: agentic_mining 120s, material_census 120s
+[alive] 180s elapsed; still running: agentic_mining 180s, material_census 180s
+[lane] material_census finished after 229.4s
+[alive] 240s elapsed; still running: agentic_mining 240s
+[alive] 300s elapsed; still running: agentic_mining 300s
+[alive] 360s elapsed; still running: agentic_mining 360s
+[lane] agentic_mining finished after 405.4s
+[lane] classify started
+[lane] classify finished after 0.0s
+[lane] build_probe started
+[alive] 420s elapsed; still running: build_probe 15s
+[alive] 480s elapsed; still running: build_probe 75s
+[alive] 540s elapsed; still running: build_probe 135s
+[alive] 600s elapsed; still running: build_probe 195s
+[alive] 660s elapsed; still running: build_probe 255s
+[alive] 720s elapsed; still running: build_probe 315s
+[alive] 780s elapsed; still running: build_probe 375s
+[alive] 840s elapsed; still running: build_probe 435s
+[alive] 900s elapsed; still running: build_probe 495s
+[alive] 960s elapsed; still running: build_probe 555s
+[lane] build_probe finished after 600.9s
+[build] ran at level full; observed_runnability=None, discover_runnability=None
+[build] the full-level index is unscored: the build verdict could not be established across the whole tree, so the index would sum terms that were never observed
+lane wall clock (seconds, offsets from the start of the run):
+  lane                  start      end  elapsed
+  digest                  0.0      3.4      3.4
+  repo_stats              0.0      2.1      2.1
+  git_stats               0.0      3.3      3.3
+  code_structure          0.0      3.4      3.4
+  git_history             0.0      3.3      3.3
+  company_identity        0.0      3.3      3.3
+  material_census         0.0    229.4    229.4
+  agentic_mining          0.0    405.4    405.4
+  classify              405.4    405.4      0.0
+  build_probe           405.4   1006.2    600.9
+  total                   0.0   1006.3   1006.3
+  budget: 1006s of 3000s used
+  build probe ran alone: yes
+WARNING: this run is PARTIAL (lanes_timed_out); the lanes that did not run report NULL, not zero. Read logic_depth_unavailable_reason and mine_unavailable_reason before treating any number here as a verdict.
+partial repo-808d6e42eccc (digest 808d6e42eccc)
+  wrote /tmp/claude-0/-home-user-my-project/39e46aff-aa8a-52d2-a31f-80bf6d928be3/scratchpad/out/my-project/codebase_repos.json
+  wrote /tmp/claude-0/-home-user-my-project/39e46aff-aa8a-52d2-a31f-80bf6d928be3/scratchpad/out/my-project/codebase_repos.csv
+  wrote /tmp/claude-0/-home-user-my-project/39e46aff-aa8a-52d2-a31f-80bf6d928be3/scratchpad/out/my-project/codebase_repo_mining.json
+  wrote /tmp/claude-0/-home-user-my-project/39e46aff-aa8a-52d2-a31f-80bf6d928be3/scratchpad/out/my-project/measurement.json
+
+REVIEW -- this is everything the four output files contain. No file has been sent
+anywhere. You own the repository and you own these files: read this, then decide.
+
+Separately, and not undone by declining to send them: if the model lanes ran, the
+provider CLI read your source and your development history during this run, under
+your own account. That disclosure has already happened. It is the only copy -- the
+session was not persisted, so no transcript was written outside this directory, and
+credential-shaped files were withheld from the history the model was shown.
+references/client-runbook.md sections 3 and 5.
+
+NUMBERS -- 156
+
+BOOLEANS -- 49
+
+CLOSED-VOCABULARY VALUES -- 55
+    1.0, 1:15, Dependabot, Dev Container, GitHub Actions, JavaScript, React, TIMEOUT, TypeScript, boilerplate_readme, build, claude, claude-opus-5, code_structure, deterministic, ext, frontend, full, git_history, git_remote, github, lanes_timed_out, material_census, next, node, node-pnpm, node@22.22.0, node@24, npm/yarn/pnpm, package-lock.json or yarn.lock or pnpm-lock.yaml, package.json, parser_unavailable, partial, pnpm-lock.yaml, react, react-dom, repo-quality-evaluation-measure-ext@2, tato10861-code, tato10861-code/my-project, uncertain
+
+CONTENT DIGEST AND DISPLAY HANDLE -- 4
+    codebase_repos.json.repo_digest = 808d6e42eccc3195a2f64cd7fef11fc0799a1ffef7563d6c94bb9d3337146033
+    codebase_repos.json.fake_repo_name = repo-808d6e42eccc
+    codebase_repo_mining.json.repo_id = repo-808d6e42eccc
+    measurement.json.repo_digest = 808d6e42eccc3195a2f64cd7fef11fc0799a1ffef7563d6c94bb9d3337146033
+
+TIMESTAMPS -- 7
+
+TASK IDEAS MINED FROM YOUR CODE (one line each, shown in full) -- 57
+    Each line is the SHAPE of an exercise a coding model could be asked to perform against
+    a sandboxed copy of a codebase like this one. This tool never writes to your repository,
+    applies a change, or acts on any of these ideas. They are shapes of work, recorded as
+    text.
+    codebase_repo_mining.json.mined_task_summaries[0] = bug_repair: a reporting endpoint aggregates by event names that the ingestion endpoint never accepts, so several funnel counters are permanently zero
+    codebase_repo_mining.json.mined_task_summaries[1] = bug_repair: a page links to a mutating endpoint with a read method, so the call fails with a method error instead of starting the purchase flow
+    codebase_repo_mining.json.mined_task_summaries[2] = bug_repair: a payment session request includes an unsupported field that the provider rejects, breaking every checkout attempt
+    codebase_repo_mining.json.mined_task_summaries[3] = bug_repair: integer division based half-up rounding is wrong for negative operands and for a negative divisor in a money scaling helper
+    codebase_repo_mining.json.mined_task_summaries[4] = bug_repair: a currency formatter mixes locale aware grouping with a hard coded decimal separator and code prefix, contradicting its own documented output and an existing test
+    codebase_repo_mining.json.mined_task_summaries[5] = bug_repair: a money formatter funnels a wide integer through a floating point conversion before grouping, losing digits near the supported maximum
+    codebase_repo_mining.json.mined_task_summaries[6] = bug_repair: a return calculation inverts the sign of its result when the baseline value is negative, reporting a gain as a loss
+    codebase_repo_mining.json.mined_task_summaries[7] = bug_repair: a submission handler maps every unexpected failure including a storage outage to a client side validation error status
+    codebase_repo_mining.json.mined_task_summaries[8] = bug_repair: a form collects several contact fields that the persistence layer silently discards because the table has no columns for them
+    codebase_repo_mining.json.mined_task_summaries[9] = bug_repair: an idempotency token for an outbound notification is regenerated on every attempt, so a retry sends the message twice
+    codebase_repo_mining.json.mined_task_summaries[10] = bug_repair: a client treats a partial success where the record was stored but the notification was not as a total failure and invites a duplicate submission
+    codebase_repo_mining.json.mined_task_summaries[11] = bug_repair: a handler conflates a wrong request method with an oversized payload and answers both with the payload too large status
+    codebase_repo_mining.json.mined_task_summaries[12] = bug_repair: a size guard trusts a declared length header and lets a request with no declared length through, so the cap can be bypassed
+    codebase_repo_mining.json.mined_task_summaries[13] = bug_repair: a throttling key is derived from a client supplied forwarding header without trusted proxy depth, letting a caller rotate keys and bypass limits
+    codebase_repo_mining.json.mined_task_summaries[14] = bug_repair: a fixed window counter lets a caller spend double the intended budget by straddling the window boundary
+    codebase_repo_mining.json.mined_task_summaries[15] = bug_repair: a byte range proxy marks a partial response as publicly cacheable without varying on the range header, so a shared cache can serve truncated content to other callers
+    codebase_repo_mining.json.mined_task_summaries[16] = bug_repair: a proxy endpoint has no upstream timeout or cancellation, so a hung origin holds the request open indefinitely while a sibling endpoint handles it correctly
+    codebase_repo_mining.json.mined_task_summaries[17] = bug_repair: a compiler target too old for large integer literals breaks the type check of a new numeric module
+    codebase_repo_mining.json.mined_task_summaries[18] = bug_repair: a pipeline enables the dependency cache for a package manager before the step that installs it, so the cache step fails
+    codebase_repo_mining.json.mined_task_summaries[19] = bug_repair: a tracked secret scan only matches one vendor token prefix in a few source extensions, missing configuration and documentation files
+    codebase_repo_mining.json.mined_task_summaries[20] = bug_repair: three checked in tooling configuration files are structurally corrupt with duplicated keys and mangled text, so the tools that read them cannot parse them
+    codebase_repo_mining.json.mined_task_summaries[21] = bug_repair: an in memory throttle store only prunes expired entries above a large threshold and starts a timer at import time in every runtime
+    codebase_repo_mining.json.mined_task_summaries[22] = bug_repair: an origin validator accepts an insecure scheme in every environment that is not the production one, including preview and test
+    codebase_repo_mining.json.mined_task_summaries[23] = bug_repair: a form submit handler short circuits on a type check against a global that is absent in some runtimes, so submitting does nothing
+    codebase_repo_mining.json.mined_task_summaries[24] = bug_repair: a metrics endpoint serves business aggregates with no authentication while an equivalent owner scoped endpoint requires a session
+    codebase_repo_mining.json.mined_task_summaries[25] = bug_repair: a database module filters out loopback connection strings and falls back to an unreachable placeholder, so local development fails every query with a service unavailable answer
+    codebase_repo_mining.json.mined_task_summaries[26] = bug_repair: a conversion back from integer minor units uses floating point division, so the documented exact round trip does not hold for large values
+    codebase_repo_mining.json.mined_task_summaries[27] = net_new: add a signed provider callback receiver that verifies the signature and records the resulting order exactly once under replay
+    codebase_repo_mining.json.mined_task_summaries[28] = net_new: replace a per instance in memory throttle with a shared store sliding window that degrades gracefully when the store is unreachable
+    codebase_repo_mining.json.mined_task_summaries[29] = net_new: add request level protection for a private area so an unauthenticated visitor is redirected before the protected shell renders
+    codebase_repo_mining.json.mined_task_summaries[30] = net_new: replace a single hard coded administrator identity with a role model, membership storage, and checks at every privileged entry point
+    codebase_repo_mining.json.mined_task_summaries[31] = net_new: convert a buffered assistant endpoint to incremental streaming with cancellation while keeping the existing non streaming fallback contract
+    codebase_repo_mining.json.mined_task_summaries[32] = net_new: add a caching layer with background refresh and a failure breaker in front of a slow third party data source
+    codebase_repo_mining.json.mined_task_summaries[33] = net_new: add duplicate detection and merging to an inbound contact pipeline using a normalized contact fingerprint and a time window
+    codebase_repo_mining.json.mined_task_summaries[34] = net_new: write operator actions to an existing but unused audit table with a consistent shape and read them back in a dashboard
+    codebase_repo_mining.json.mined_task_summaries[35] = net_new: wire an existing exact integer money library into the interface estimator and the catalog so displayed figures stop using floating point
+    codebase_repo_mining.json.mined_task_summaries[36] = net_new: build an integration test harness for request handlers with injectable storage, mailer, and clock so routes can be exercised without network access
+    codebase_repo_mining.json.mined_task_summaries[37] = net_new: replace client generated analytics identity with a server issued session, an origin check, and automated traffic filtering
+    codebase_repo_mining.json.mined_task_summaries[38] = net_new: implement a projection engine that compounds a return over a horizon entirely in integer minor units with documented rounding
+    codebase_repo_mining.json.mined_task_summaries[39] = net_new: add a time series metrics endpoint with range selection, server side bucketing, and stable ordering
+    codebase_repo_mining.json.mined_task_summaries[40] = net_new: add consent gating so a page level beacon only fires after the visitor has agreed, with a durable preference
+    codebase_repo_mining.json.mined_task_summaries[41] = net_new: add an outbound notification queue with bounded retries, exponential backoff, and a dead letter path
+    codebase_repo_mining.json.mined_task_summaries[42] = net_new: implement correct partial content serving with range validation, resumable transfers, and accurate length and range headers
+    codebase_repo_mining.json.mined_task_summaries[43] = net_new: move a hard coded catalog array into the database and expose filtering and cursor pagination over it
+    codebase_repo_mining.json.mined_task_summaries[44] = repo_evolution: flatten a duplicated nested project layout, drop committed binary archives, and repair a root build script that copies build output by hand
+    codebase_repo_mining.json.mined_task_summaries[45] = repo_evolution: introduce schema migration tooling and a first migration for a project whose tables were only ever declared in code
+    codebase_repo_mining.json.mined_task_summaries[46] = repo_evolution: extract translation strings from a large client page into a message catalog with locale negotiation and real translations for the aliased languages
+    codebase_repo_mining.json.mined_task_summaries[47] = repo_evolution: split a single oversized client page into server rendered sections and small client islands, moving data fetching to the server
+    codebase_repo_mining.json.mined_task_summaries[48] = repo_evolution: factor two near identical upstream streaming proxies into one helper parameterized by its access policy
+    codebase_repo_mining.json.mined_task_summaries[49] = repo_evolution: centralize scattered environment variable reads with multiple fallback names into one validated configuration module
+    codebase_repo_mining.json.mined_task_summaries[50] = repo_evolution: replace module level singletons for the connection pool and the throttle store with injected context so handlers become testable
+    codebase_repo_mining.json.mined_task_summaries[51] = repo_evolution: unify two overlapping conversation endpoints and three separate chat surfaces behind one shared conversation module
+    codebase_repo_mining.json.mined_task_summaries[52] = repo_evolution: replace ad hoc standalone test scripts with one runner that covers handlers and is wired into the quality gate
+    codebase_repo_mining.json.mined_task_summaries[53] = repo_evolution: move duplicated provider model identifiers and assistant identifiers into one typed configuration shared by server and client
+    codebase_repo_mining.json.mined_task_summaries[54] = agentic: make a full quality gate pass from a clean checkout with no provider credentials, including a module that throws at import when a secret is missing
+    codebase_repo_mining.json.mined_task_summaries[55] = agentic: identify and remove unreachable endpoints and an unused library with evidence that nothing calls them, then prove the application still builds
+    codebase_repo_mining.json.mined_task_summaries[56] = agentic: regenerate a documented source size and structure report from the tree and reconcile the claims in the documentation with what is actually present
+
+ONE-LINE DESCRIPTIONS (the only other free text, shown in full) -- 28
+    measurement.json.material.themes[0] = luxury real estate marketplace
+    measurement.json.material.themes[1] = automotive sales leads
+    measurement.json.material.themes[2] = lead capture and qualification
+    measurement.json.material.themes[3] = conversational sales concierge
+    measurement.json.material.themes[4] = visitor analytics
+    measurement.json.material.minable_ideas.complex_logic[0] = A monetary arithmetic core that represents amounts as integer cents in arbitrary-precision integers, refuses decimal strings carrying more than two fraction digits, rounds scaled ratios half upward, and bounds every operation against an overflow limit.
+    measurement.json.material.minable_ideas.complex_logic[1] = A shared request defence layer combining per-endpoint fixed-window throttling keyed on proxy-supplied client addresses, rejection of oversized declared bodies without reading them, environment-dependent origin validation, and periodic pruning so the bucket store cannot grow unbounded.
+    measurement.json.material.minable_ideas.work_units[0] = Replace the single-process fixed-window request throttle with a limiter that stays correct across several server instances and restarts, preserving per-endpoint budgets, accurate retry-after reporting, atomic counting under concurrency, and bounded memory.
+    measurement.json.material.minable_ideas.work_units[1] = Make visitor event ingestion idempotent and loss-tolerant by deduplicating retried beacons on a client-supplied key, batching writes, and reconciling the funnel so a later stage can never report more entries than the one above it.
+    measurement.json.material.minable_ideas.work_units[2] = Extend the money arithmetic into a currency-aware formatter and converter handling currencies with zero or three fractional digits, locale-specific grouping and sign placement, and right-to-left rendering, while guaranteeing exact round-tripping in every case.
+    measurement.json.material.minable_ideas.work_units[3] = Build a behavioural test harness for the lead intake path against a disposable database and stubbed notification and payment providers, asserting validation rejections, throttle responses, oversized-body rejection, and the partial-failure path where a record persists but notification fails.
+    measurement.json.material.minable_ideas.work_units[4] = Implement a byte-range aware media proxy that validates and normalizes incoming range requests, handles unsatisfiable and multiple ranges, propagates partial-content status and length headers correctly, and streams the payload without buffering it in memory.
+    measurement.json.material.minable_ideas.net_new_capabilities[0] = A payment reconciliation and entitlement subsystem that verifies signed provider callbacks, grants premium access idempotently under duplicate and out-of-order delivery, handles refunds and disputes, and keeps a ledger reconciling charges against granted access.
+    measurement.json.material.minable_ideas.net_new_capabilities[1] = A listing catalogue with a verification workflow moving owner-submitted assets through intake, document checks, approval and publication states, with per-state permissions, reviewer assignment and an audit trail, replacing the hard-coded showcase items.
+    measurement.json.material.minable_ideas.net_new_capabilities[2] = An investment return model built on the precise arithmetic, compounding over a chosen horizon with per-market growth assumptions, acquisition and holding costs, taxes and fees, and producing sensitivity ranges instead of a single slider-derived estimate.
+    measurement.json.material.minable_ideas.net_new_capabilities[3] = A role and permission model replacing the single hard-coded owner comparison, with distinct operator, agent and viewer capabilities, per-resource authorisation, invitation and revocation flows, and audit logging of privileged reads.
+    measurement.json.material.minable_ideas.net_new_capabilities[4] = A market price ingestion pipeline polling several feeds on a schedule, normalizing currencies and units, versioning cached snapshots, detecting stale or contradictory sources, and serving historical series to the price board.
+    measurement.json.material.minable_ideas.net_new_capabilities[5] = A lead scoring and routing engine deriving intent and urgency from conversation transcripts and browsing behaviour, deduplicating people across chat, voice and form entries, assigning an owner, and escalating on a timed follow-up schedule.
+    measurement.json.material.minable_ideas.net_new_capabilities[6] = A conversation persistence and handoff layer keeping concierge context across sessions and devices, summarizing long threads to stay within model input limits, and transferring a visitor to a human with the transcript intact.
+    measurement.json.material.minable_ideas.net_new_capabilities[7] = A search and ranking surface over asset inventory with structured filters on price, location and type, relevance ordering, pagination that stays stable while inventory changes, and query handling across every supported language.
+    measurement.json.material.minable_ideas.net_new_capabilities[8] = A localization pipeline moving interface strings out of inline dictionaries, supporting plural and gender-aware forms, right-to-left layout and alternative numeral systems, and falling back per missing string rather than per language.
+    measurement.json.material.minable_ideas.net_new_capabilities[9] = An appointment scheduler for viewings and test drives with availability windows across time zones, double-booking prevention, confirmations and reminders, cancellation and rescheduling rules, and reconciliation against external calendars.
+    measurement.json.material.minable_ideas.net_new_capabilities[10] = A consent and data-retention subsystem covering visitor tracking, lead records and conversation transcripts, with regional consent gating, export and erasure handling, and automatic expiry of stale personal information.
+    measurement.json.material.minable_ideas.hardening_work[0] = A defensive layer applied across the public write endpoints giving each its own throttle budget, rejecting oversized declared bodies before reading, and constraining payment return destinations to a validated secure origin so the redirect cannot be steered elsewhere.
+    measurement.json.material.minable_ideas.integration_work[0] = An external market feed adapter tolerating several response envelope shapes and field aliases, coercing mixed-type numbers, defaulting currency and trend direction, discarding incomplete records, and separating timeout, upstream failure and unsupported-shape conditions into distinct client outcomes.
+    measurement.json.material.minable_ideas.integration_work[1] = A browser voice agent integration that fetches its own enablement and public credential at runtime, refuses to initialise when unconfigured, probes and releases microphone permission before starting, tracks call lifecycle events, and degrades to a callback form.
+    measurement.json.material.material_summary = A multilingual marketplace front end for luxury property and rare cars, built around lead capture, visitor event tracking, a conversational sales concierge in both text and voice, owner-only reporting, and a single paid access product. The two pieces of genuinely careful engineering are an exact integer-cent arithmetic core with a boundary-focused test suite, and a shared request defence layer covering throttling, body-size limits and origin validation. Almost everything else is presentation, validation schemas and thin adapters onto hosted services.
+    measurement.json.material.what_i_could_not_assess = The prepared history held no substantive commits, so nothing about how this code evolved could be measured.
+
+THIS TOOL'S OWN STATUS NOTES -- 7
+    measurement.json.ext_signals.history.ref_choice_reason = the model was unavailable; used the deepest reachable history
+    measurement.json.ext_signals.history.development_substance_error = the model was unavailable
+    measurement.json.ext_signals.build.runtime_resolution_note = the tree asks for node 24 and the closest this host offers is 22.22.0, so any failure in this lane belongs to the runner rather than to the repository
+    measurement.json.ext_signals.build.coverage_unsupported_reason = no test suite executed, so there was nothing to instrument
+    measurement.json.ext_signals.build.build_remediation_notes = The build did not finish inside the time limit, so nothing can be concluded about whether it would have succeeded. Re-run with a longer --timeout-build to classify it.
+    measurement.json.ext_signals.build.observed_runnability_reason = the build verdict could not be established across the whole tree, so the index would sum terms that were never observed
+    measurement.json.material.census_platform_note = lane wall clock in seconds: digest 3, tree scan 2, history scan 3, structure 3, history depth 3, company identity 3, census 229, mining 405, classify 0, build probe 601, total 1006; independent lanes ran at the same time, so the total is below their sum
+
+EMITTED WITH NO VALUE (the field ships, the value was not collected) -- 59
+
+NOT COLLECTED BY POLICY -- 35 declared fields, never filled in
+    anonymizer_commit: commit and object hashes are not collected
+    author_email_domains: the email domains of the people who committed are not collected: a most-common domain is derived from author addresses, which the identity rule above forbids by name, and the four families that are read settle the question without it
+    build_commands_tried: the exact commands run inside the repository are not collected
+    candidates: commit subjects and messages are not collected
+    ci_config_files: file and directory names are not collected
+    class_a_commits: commit subjects and messages are not collected
+    class_b_commits: commit subjects and messages are not collected
+    class_c_pre_commits: commit subjects and messages are not collected
+    class_d_bug_commits: commit subjects and messages are not collected
+    codebase_id: assigned by the platform on ingest
+    commit_sha: commit and object hashes are not collected
+    commit_subjects: commit subjects and messages are not collected
+    config_and_ci_identity: internal hostnames, registry paths and cloud project names are not collected: they are paths and hosts as much as they are identity, and they are the weakest of the six company signals -- the widest widening for the least evidence
+    effective_tip_sha: commit and object hashes are not collected
+    env_example_file: environment variable names are not collected
+    env_files_committed: file and directory names are not collected
+    env_vars_in_example: environment variable names are not collected
+    env_vars_missing_from_example: environment variable names are not collected
+    env_vars_referenced_in_source: environment variable names are not collected
+    hardcoded_secret_hits: no credential scan is performed anywhere in this skill: it never greps a repository for its own secrets and never records where one lives
+    head_sha: commit and object hashes are not collected
+    id: assigned by the platform on ingest
+    latest_tag: branch and tag names are not collected, they routinely carry product identity
+    path: file and directory names are not collected
+    real_repo_name: author names, addresses and repository names are not collected
+    ref_analysed: branch and tag names are not collected, they routinely carry product identity
+    repo_name: author names, addresses and repository names are not collected
+    repo_path: author names, addresses and repository names are not collected
+    scanned_commits: commit subjects and messages are not collected
+    secret_hit_details: no credential scan is performed anywhere in this skill: it never greps a repository for its own secrets and never records where one lives
+    service_id: assigned by the platform on ingest
+    structure_agentic_languages: file and directory names are not collected
+    structure_unknown_exts: file and directory names are not collected
+    test_spec_sample: file and directory names are not collected
+    top_authors: author names, addresses and repository names are not collected
+
+Nothing in this skill searches your source for secret-shaped strings. No author
+name or address, no commit message, no branch or tag name and no file path is
+emitted. Every value above was checked against a declared allowlist before it was
+written. Two disclosed exceptions sit beside that, both described in
+references/client-runbook.md section 4: the content digest reads every file's
+bytes, and a --build authentication failure checks the checkout's own registry
+configuration. Neither retains anything it read.
+
+Run again with --review to see every field and its value before you send.
