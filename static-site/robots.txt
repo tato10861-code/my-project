@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# PropAuto AI — public marketing surface
+Sitemap: https://propauto-ai-al-closer-saas.vercel.app/sitemap.xml
