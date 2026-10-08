@@ -1,0 +1,14 @@
+node_modules
+.next
+.vercel
+.agents
+.env
+.env.local
+.env.*.local
+!.env.example
+*.log
+.DS_Store
+.agents/
+.claude/
+agent/skills/
+skills-lock.json
