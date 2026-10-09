@@ -17,4 +17,6 @@ module.exports = {
   },
   collectCoverageFrom: ['lib/**/*.ts', '!lib/db/**', '!lib/auth.ts', '!lib/auth-client.ts'],
   coverageReporters: ['text', 'json-summary'],
+  // CI fails if coverage of the business logic in lib/ drops below these floors.
+  coverageThreshold: { global: { lines: 95, statements: 95, functions: 90, branches: 85 } },
 }

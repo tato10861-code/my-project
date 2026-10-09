@@ -2,7 +2,7 @@
 
 All notable changes to PropAuto are documented here.
 
-## Unreleased
+## [1.0.0] - 2026-10-09
 
 ### Security
 - Account creation is limited to the owner's email: the public sign-up endpoint can no longer be used to create arbitrary accounts.
@@ -16,6 +16,9 @@ All notable changes to PropAuto are documented here.
 - `.env` and `.env.*` are now gitignored at the repository root.
 
 ### Added
+- `GET /api/health` liveness endpoint for uptime monitors; it reports the deployed commit and never touches the database.
+- Coverage floors enforced in CI (lines 95%, statements 95%, functions 90%, branches 85%).
+- Repository-level README with architecture overview, issue templates and contribution conventions.
 - Signed Stripe webhook (`/api/webhooks/stripe`): each paid checkout is verified, recorded once and emailed to the owner.
 - Leads keep phone, budget, message and language (`db/migrations/0001_lead_details.sql`); until the migration is applied, intake falls back to the core fields instead of failing.
 - Generated 1200×630 PNG share image for social networks.
