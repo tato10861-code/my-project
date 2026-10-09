@@ -1,0 +1,28 @@
+name: Bug report
+description: Something in PropAuto AI does not work as expected.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: "1. Open /...\n2. Submit ...\n3. See ..."
+    validations:
+      required: true
+  - type: input
+    id: where
+    attributes:
+      label: Page or endpoint
+      placeholder: /api/leads
+  - type: textarea
+    id: notes
+    attributes:
+      label: Logs or screenshots
+      description: Never paste credentials, tokens or customer data. Report security issues privately (see SECURITY.md).
