@@ -5,6 +5,7 @@ All notable changes to PropAuto are documented here.
 ## Unreleased
 
 ### Security
+- Account creation is limited to the owner's email: the public sign-up endpoint can no longer be used to create arbitrary accounts.
 - Business analytics (`/api/analytics`) now require the owner session, like `/api/admin/analytics`.
 - Rate limiting uses a sliding window keyed on platform-set client IP headers; a caller can no longer double its budget at a window boundary or rotate `x-forwarded-for` to bypass it.
 - Request body limits are enforced on the bytes actually received, so chunked requests without `Content-Length` cannot bypass them.
@@ -24,6 +25,7 @@ All notable changes to PropAuto are documented here.
 - `test:unit` ran nothing in CI (directory argument); it now runs every suite.
 
 ### Tooling
+- CI runs smoke tests, unit tests, lint, typecheck, dependency audit and build as separate named steps, so a failure names its stage.
 - CI moved to the repository root, where GitHub actually runs it; pnpm is set up before Node's pnpm cache; secret scanning covers all tracked files and common key formats.
 - Repaired the corrupted Dependabot, Datadog Synthetics and devcontainer configuration files.
 - Added `.nvmrc` (Node 24) and unit suites for leads, events and the video proxy (50 tests).
