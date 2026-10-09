@@ -15,7 +15,14 @@ All notable changes to PropAuto are documented here.
 - Root `next` upgraded 16.3.0 → 16.3.8 with patched `sharp` and `source-map-js`: `pnpm audit` is clean at both package roots.
 - `.env` and `.env.*` are now gitignored at the repository root.
 
+### Added
+- Signed Stripe webhook (`/api/webhooks/stripe`): each paid checkout is verified, recorded once and emailed to the owner.
+- Leads keep phone, budget, message and language (`db/migrations/0001_lead_details.sql`); until the migration is applied, intake falls back to the core fields instead of failing.
+- Generated 1200×630 PNG share image for social networks.
+- Full terms of use and a privacy policy that lists what is collected and who processes it.
+
 ### Fixed
+- Market prices are rate limited and cached at the edge for a minute instead of calling the provider on every visit.
 - Checkout: removed the `integration_identifier` field Stripe rejects, and the contact-section payment link now POSTs instead of a GET that answered 405.
 - Leads: a storage outage answers 503 instead of 400; a stored lead whose email notification fails answers 202 so the visitor is not invited to submit twice; notification retries are deduplicated with a stable idempotency key; chatbot transcripts over 1000 characters are accepted.
 - Events: the ingestion vocabulary now includes `asset_view` and `conversation_started`, which the reports count.

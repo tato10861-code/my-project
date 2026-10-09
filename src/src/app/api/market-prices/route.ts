@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server'
+import { getClientKey, rateLimit, tooManyRequests } from '@/lib/request-security'
 
 export const dynamic = 'force-dynamic'
+
+/** Prices change slowly; let the CDN serve one answer per minute instead of calling the provider per visit. */
+const CACHED = { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300' }
 
 const providerUrl = process.env.MARKET_DATA_API_URL ?? process.env.api
 const providerKey = process.env.MARKET_DATA_API_KEY ?? process.env.apiKey_2
@@ -31,7 +35,9 @@ function extractMarkets(payload: unknown) {
     .filter((market) => market.city !== null && (market.property !== null || market.supercar !== null))
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  const limit = rateLimit(getClientKey(request, 'market-prices'), 30)
+  if (!limit.allowed) return tooManyRequests(limit.retryAfter)
   if (!providerUrl) {
     return NextResponse.json(
       { error: 'Market data provider is not configured.', code: 'MARKET_DATA_NOT_CONFIGURED' },
@@ -69,7 +75,7 @@ export async function GET() {
 
     return NextResponse.json(
       { source: 'verified-provider', updatedAt: new Date().toISOString(), markets },
-      { headers: { 'Cache-Control': 'no-store' } },
+      { headers: CACHED },
     )
   } catch (error) {
     const code = error instanceof DOMException && error.name === 'AbortError' ? 'MARKET_DATA_TIMEOUT' : 'MARKET_DATA_UNAVAILABLE'
