@@ -17,6 +17,9 @@ const requiredFiles = [
   'app/api/webhooks/stripe/route.ts',
   'db/migrations/0001_lead_details.sql',
   'app/api/health/route.ts',
+  'lib/billing.ts',
+  'lib/plans.ts',
+  'db/migrations/0002_subscriptions.sql',
 ]
 
 for (const file of requiredFiles) {

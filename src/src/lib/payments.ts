@@ -32,12 +32,13 @@ export function verifyStripeEvent(rawBody: string, signature: string | null, sec
 /**
  * Extracts the payment record from a completed, paid checkout session.
  * Returns null for every other event (including sessions still awaiting an
- * asynchronous payment), which the webhook acknowledges without storing.
+ * asynchronous payment, and subscription checkouts), which the webhook acknowledges without storing.
  */
 export function paymentRecord(event: Stripe.Event): PaymentRecord | null {
   if (event.type !== 'checkout.session.completed' && event.type !== 'checkout.session.async_payment_succeeded') return null
   const session = event.data.object as Stripe.Checkout.Session
-  if (session.payment_status !== 'paid') return null
+  // Subscription checkouts are reported by lib/billing.ts instead.
+  if (session.mode === 'subscription' || session.payment_status !== 'paid') return null
   return {
     eventId: event.id,
     sessionId: session.id,
