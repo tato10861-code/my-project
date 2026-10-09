@@ -10,6 +10,13 @@ updates:
     groups:
       minor-and-patch:
         update-types: ["minor", "patch"]
+    ignore:
+      # @types/node tracks the Node major in .nvmrc; bump both together.
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+      # 2.x depends on @modelcontextprotocol/sdk < 1.31 (high) and proxy-addr < 2.0.8 (critical).
+      - dependency-name: "@vercel/connect"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "github-actions"
     directory: "/"

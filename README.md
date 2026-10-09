@@ -51,6 +51,16 @@ pnpm dev
 - Every push is scanned for credential patterns.
 - Security headers (HSTS, CSP `frame-ancestors`, `X-Frame-Options`) are set in [`next.config.mjs`](src/src/next.config.mjs).
 
+## Project history
+
+| Period | Milestone |
+|---|---|
+| August 2026 | Product design and first builds in v0, linked to the Vercel project `propauto-ai-al-closer-saas` (first PropAuto design session on 14 August) |
+| September 2026 | Sara closing agent (24 September); the app moves to this Git repository (29 September) |
+| October 2026 | Security hardening, payments webhook, legal pages, test suite and CI; release 1.0.0 |
+
+Early iterations lived in v0 and Vercel before the code moved to Git, so the Git history starts in late September.
+
 ## Documentation
 
 - [CHANGELOG.md](CHANGELOG.md): release history
