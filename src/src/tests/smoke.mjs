@@ -16,6 +16,7 @@ const requiredFiles = [
   'lib/owner.ts',
   'app/api/webhooks/stripe/route.ts',
   'db/migrations/0001_lead_details.sql',
+  'app/api/health/route.ts',
 ]
 
 for (const file of requiredFiles) {
