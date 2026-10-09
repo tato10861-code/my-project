@@ -25,12 +25,12 @@ export async function POST(request: Request) {
       client_reference_id: `propauto_${crypto.randomUUID()}`,
       success_url: `${origin}/?payment=success&session_id={CHECKOUT_SESSION_ID}` ,
       cancel_url: `${origin}/?payment=cancelled`,
-      integration_identifier: `propauto_${Math.random().toString(36).slice(2, 10)}`,
       metadata: { product_id: product.id, source: 'propauto-web' },
     })
 
     return NextResponse.redirect(session.url ?? origin, 303)
-  } catch {
-    return NextResponse.json({ error: 'Unable to start checkout' }, { status: 502 })
+  } catch (error) {
+    console.error('[checkout] session creation failed:', error instanceof Error ? error.message : 'unknown error')
+    return NextResponse.json({ error: 'Unable to start checkout' }, { status: 502, headers: { 'Cache-Control': 'no-store' } })
   }
 }

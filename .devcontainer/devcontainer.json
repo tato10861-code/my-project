@@ -1,4 +1,7 @@
 {
-  "image": "mcr.microsoft.com/devcontainers/universal:2","image": "mcr.microsoft.com/devcontainers/universal:2",
-  "features": {}"مواصفات": {}
+  "name": "PropAuto AI",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:24",
+  "features": {},
+  "postCreateCommand": "corepack enable && cd src/src && pnpm install --frozen-lockfile",
+  "forwardPorts": [3000]
 }

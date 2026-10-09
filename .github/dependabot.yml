@@ -1,11 +1,17 @@
-# للبدء في تحديثات إصدار Dependabot، ستحتاج إلى تحديد أيهما
-# حزمة النظم الإيكولوجية لتحديث وحيث توجد بيانات الحزمة.
-# يرجى الاطلاع على الوثائق لجميع خيارات التكوين:
+# Dependabot version updates.
 # https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/src/src"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        update-types: ["minor", "patch"]
 
-النسخة.: 2.: 2
-تحديثات:
- - نظام الحزمة البيئية.: "" # انظر الوثائق للقيم الممكنة package-ecosystem: "" # انظر الوثائق للقيم الممكنة
- دليل.  : "/" # موقع بيانات الحزمة: "/" # موقع بيانات الحزمة
- الجدول الزمني.  : :
- الفاصل الزمني.  : "أسبوعي" : "أسبوعية"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"

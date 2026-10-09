@@ -12,3 +12,6 @@ node_modules
 .claude/
 agent/skills/
 skills-lock.json
+
+# Build artifacts
+tsconfig.tsbuildinfo

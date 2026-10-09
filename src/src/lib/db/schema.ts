@@ -15,6 +15,11 @@ export const propautoLeads = pgTable('propauto_leads', {
   email: text('email').notNull(),
   intent: text('intent').notNull(),
   source: text('source').notNull().default('web'),
+  // Added by db/migrations/0001_lead_details.sql
+  phone: text('phone'),
+  budget: text('budget'),
+  message: text('message'),
+  language: text('language'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 })
 
