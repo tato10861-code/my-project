@@ -1,9 +1,8 @@
 /**
  * @fileoverview Unit tests for lead validation and owner notification helpers.
  */
-import { test } from 'vitest'
 import assert from 'node:assert/strict'
-import { buildLeadEmail, escapeHtml, leadIdempotencyKey, leadSchema } from '../../lib/leads.ts'
+import { buildLeadEmail, escapeHtml, isMissingColumnError, leadIdempotencyKey, leadRow, leadSchema } from '../../lib/leads'
 
 const lead = leadSchema.parse({ name: 'Ada Lovelace', email: 'ada@example.com', intent: 'investor', phone: '+15550100', budget: '2M', message: 'Hello' })
 
@@ -43,13 +42,11 @@ test('leadIdempotencyKey is stable for a retry and differs for a different lead'
   assert.match(leadIdempotencyKey(lead, now), /^propauto-lead\/[0-9a-f]{40}$/)
 })
 
-test('leadRow keeps every optional detail the forms collect', async () => {
-  const { leadRow } = await import('../../lib/leads.ts')
+test('leadRow keeps every optional detail the forms collect', () => {
   assert.deepEqual(leadRow(lead), { name: 'Ada Lovelace', email: 'ada@example.com', intent: 'investor', source: 'web', phone: '+15550100', budget: '2M', message: 'Hello', language: null })
 })
 
-test('isMissingColumnError finds the SQLSTATE through ORM wrapping', async () => {
-  const { isMissingColumnError } = await import('../../lib/leads.ts')
+test('isMissingColumnError finds the SQLSTATE through ORM wrapping', () => {
   const pgError = Object.assign(new Error('column "phone" does not exist'), { code: '42703' })
   const wrapped = Object.assign(new Error('Failed query'), { cause: pgError })
   assert.equal(isMissingColumnError(wrapped), true)

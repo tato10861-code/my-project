@@ -2,14 +2,14 @@
  * @fileoverview The reporting queries may only count event names that the
  * ingestion endpoint accepts.
  */
-import { test } from 'vitest'
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
-import { EVENT_NAMES, eventSchema } from '../../lib/events.ts'
+import path from 'node:path'
+import { EVENT_NAMES, eventSchema } from '../../lib/events'
 
 test('every event name counted by analytics is accepted by ingestion', async () => {
   for (const file of ['app/api/analytics/route.ts', 'app/api/admin/analytics/route.ts']) {
-    const source = await readFile(new URL(`../../${file}`, import.meta.url), 'utf8')
+    const source = await readFile(path.join(__dirname, '..', '..', file), 'utf8')
     const counted = [...source.matchAll(/'([a-z_]+)'/g)].map((match) => match[1]).filter((name) => /_(view|started|click|submitted)$/.test(name))
     for (const name of counted) assert.ok(EVENT_NAMES.includes(name), `${file} counts "${name}" which ingestion rejects`)
   }
