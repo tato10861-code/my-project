@@ -5,7 +5,7 @@ All notable changes to PropAuto are documented here.
 ## [1.1.0] - 2026-10-09
 
 ### Added
-- Monthly subscriptions: Starter ($49), Growth ($149) and Pro ($399) with a 14-day free trial (card collected up front), sold through Stripe-hosted Checkout from a new pricing section. Prices are resolved from Stripe lookup keys, so test and live accounts need no code change.
+- Monthly subscriptions: Starter ($49), Growth ($149) and Scale ($399) with a 14-day free trial (card collected up front), sold through Stripe-hosted Checkout from a new pricing section. Prices are resolved from Stripe lookup keys, so test and live accounts need no code change.
 - Subscription state synced to `propauto_subscriptions` (`db/migrations/0002_subscriptions.sql`) from `customer.subscription.*` webhooks; out-of-order events never overwrite newer state.
 - Owner emails for new subscriptions and failed renewal payments (`invoice.payment_failed`).
 - Optional Stripe Tax (`STRIPE_AUTOMATIC_TAX=true`), business tax-id collection and a customer-portal link (`NEXT_PUBLIC_STRIPE_PORTAL_URL`).
