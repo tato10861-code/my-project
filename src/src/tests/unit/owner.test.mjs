@@ -1,7 +1,7 @@
 /**
  * @fileoverview The owner check gates sign-up and every owner-only route.
  */
-import { test } from 'node:test'
+import { test } from 'vitest'
 import assert from 'node:assert/strict'
 import { OWNER_EMAIL, isOwnerEmail } from '../../lib/owner.ts'
 

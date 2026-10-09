@@ -6,7 +6,7 @@
  * Node test runner:
  *   node --test tests/unit/
  */
-import { test } from 'node:test'
+import { test } from 'vitest'
 import assert from 'node:assert/strict'
 import {
   getClientKey,

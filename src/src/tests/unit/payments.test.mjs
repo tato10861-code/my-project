@@ -1,7 +1,7 @@
 /**
  * @fileoverview Stripe webhook verification and payment extraction.
  */
-import { test } from 'node:test'
+import { test } from 'vitest'
 import assert from 'node:assert/strict'
 import Stripe from 'stripe'
 import { paymentRecord, verifyStripeEvent } from '../../lib/payments.ts'

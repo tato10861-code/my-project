@@ -1,7 +1,7 @@
 /**
  * @fileoverview Unit tests for the byte-range video proxy.
  */
-import { test } from 'node:test'
+import { test } from 'vitest'
 import assert from 'node:assert/strict'
 import { proxyVideo, videoResponseHeaders } from '../../lib/video-proxy.ts'
 

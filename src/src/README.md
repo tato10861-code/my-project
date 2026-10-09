@@ -31,8 +31,8 @@ pnpm dev
 
 | Step | Command |
 |---|---|
-| Smoke test | `pnpm test` |
-| Unit tests (Node test runner) | `pnpm test:unit` |
+| Smoke test | `pnpm test:smoke` |
+| Unit tests (Vitest) | `pnpm test` (`pnpm test:coverage` adds a coverage report) |
 | Lint | `pnpm lint` |
 | Typecheck | `pnpm typecheck` |
 | Dependency audit | `pnpm audit --prod --audit-level high` |

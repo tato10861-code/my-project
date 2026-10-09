@@ -2,7 +2,7 @@
  * @fileoverview The reporting queries may only count event names that the
  * ingestion endpoint accepts.
  */
-import { test } from 'node:test'
+import { test } from 'vitest'
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import { EVENT_NAMES, eventSchema } from '../../lib/events.ts'

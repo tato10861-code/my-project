@@ -8,7 +8,7 @@
  * floating-point traps, and overflow limits to guarantee the financial math
  * never drifts or throws unexpected errors in production.
  */
-import { test } from 'node:test'
+import { test } from 'vitest'
 import assert from 'node:assert/strict'
 import {
   MONEY_DECIMALS,

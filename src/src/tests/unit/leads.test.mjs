@@ -1,7 +1,7 @@
 /**
  * @fileoverview Unit tests for lead validation and owner notification helpers.
  */
-import { test } from 'node:test'
+import { test } from 'vitest'
 import assert from 'node:assert/strict'
 import { buildLeadEmail, escapeHtml, leadIdempotencyKey, leadSchema } from '../../lib/leads.ts'
 
