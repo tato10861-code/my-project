@@ -1,9 +1,8 @@
 /**
  * @fileoverview Unit tests for the byte-range video proxy.
  */
-import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { proxyVideo, videoResponseHeaders } from '../../lib/video-proxy.ts'
+import { proxyVideo, videoResponseHeaders } from '../../lib/video-proxy'
 
 test('partial responses are never publicly cacheable and always vary on Range', () => {
   const upstream = new Headers({ 'content-type': 'video/mp4', 'content-range': 'bytes 0-99/1000', 'content-length': '100' })

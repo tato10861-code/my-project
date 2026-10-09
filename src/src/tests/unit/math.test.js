@@ -8,7 +8,6 @@
  * floating-point traps, and overflow limits to guarantee the financial math
  * never drifts or throws unexpected errors in production.
  */
-import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
   MONEY_DECIMALS,
@@ -23,7 +22,7 @@ import {
   scaleCents,
   safeDivide,
   clampInt,
-} from '../../lib/math.ts'
+} from '../../lib/math'
 
 test('toCents converts whole numbers exactly', () => {
   assert.equal(toCents(0), 0n)

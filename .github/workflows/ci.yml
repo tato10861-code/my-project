@@ -32,9 +32,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Smoke test
-        run: pnpm test
-      - name: Unit tests
-        run: pnpm test:unit
+        run: pnpm test:smoke
+      - name: Unit tests with coverage
+        run: pnpm test:coverage
       - name: Lint
         run: pnpm lint
       - name: Typecheck

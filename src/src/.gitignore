@@ -15,3 +15,6 @@ skills-lock.json
 
 # Build artifacts
 tsconfig.tsbuildinfo
+
+# Test coverage reports
+coverage/

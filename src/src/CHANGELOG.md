@@ -32,6 +32,8 @@ All notable changes to PropAuto are documented here.
 - `test:unit` ran nothing in CI (directory argument); it now runs every suite.
 
 ### Tooling
+- Unit tests run on Jest with coverage (58 tests, about 98% of statements in `lib/`); CI runs them with the coverage report.
+- The incomplete static-site workspace and the archive zip snapshots moved to the `archive/static-site-and-snapshots` branch (see `ARCHIVE.md`).
 - CI runs smoke tests, unit tests, lint, typecheck, dependency audit and build as separate named steps, so a failure names its stage.
 - CI moved to the repository root, where GitHub actually runs it; pnpm is set up before Node's pnpm cache; secret scanning covers all tracked files and common key formats.
 - Repaired the corrupted Dependabot, Datadog Synthetics and devcontainer configuration files.

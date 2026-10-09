@@ -6,7 +6,6 @@
  * Node test runner:
  *   node --test tests/unit/
  */
-import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
   getClientKey,
@@ -19,7 +18,7 @@ import {
   InvalidJsonError,
   bucketCount,
   WINDOW_MS,
-} from '../../lib/request-security.ts'
+} from '../../lib/request-security'
 
 test('getClientKey falls back to unknown when no IP headers exist', () => {
   const request = new Request('https://example.com')

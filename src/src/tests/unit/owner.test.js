@@ -1,9 +1,8 @@
 /**
  * @fileoverview The owner check gates sign-up and every owner-only route.
  */
-import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { OWNER_EMAIL, isOwnerEmail } from '../../lib/owner.ts'
+import { OWNER_EMAIL, isOwnerEmail } from '../../lib/owner'
 
 test('isOwnerEmail accepts the owner regardless of case and surrounding space', () => {
   assert.equal(isOwnerEmail(OWNER_EMAIL), true)
