@@ -12,6 +12,10 @@ const requiredFiles = [
   'lib/leads.ts',
   'lib/events.ts',
   'lib/video-proxy.ts',
+  'lib/payments.ts',
+  'lib/owner.ts',
+  'app/api/webhooks/stripe/route.ts',
+  'db/migrations/0001_lead_details.sql',
 ]
 
 for (const file of requiredFiles) {

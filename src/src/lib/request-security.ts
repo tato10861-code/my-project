@@ -170,20 +170,19 @@ export class InvalidJsonError extends Error {
 }
 
 /**
- * Reads and parses a JSON body while enforcing a byte cap on the bytes
- * actually received, so a chunked request with no Content-Length cannot
- * bypass the limit. Reading stops as soon as the cap is crossed.
+ * Reads the raw body as text while enforcing a byte cap on the bytes actually
+ * received, so a chunked request with no Content-Length cannot bypass the
+ * limit. Reading stops as soon as the cap is crossed.
  *
  * @param request - The incoming request.
  * @param maxBytes - Maximum acceptable body size in bytes.
- * @returns The parsed JSON value.
+ * @returns The body decoded as UTF-8 ("" when there is no body).
  * @throws {BodyTooLargeError} When the declared or actual size exceeds the cap.
- * @throws {InvalidJsonError} When the body is empty or not valid JSON.
  * @complexity O(n) time and space in the body size, bounded by maxBytes.
  */
-export async function readJsonBody(request: Request, maxBytes: number): Promise<unknown> {
+export async function readTextBody(request: Request, maxBytes: number): Promise<string> {
   if (hasOversizedBody(request, maxBytes)) throw new BodyTooLargeError()
-  if (!request.body) throw new InvalidJsonError()
+  if (!request.body) return ''
 
   const reader = request.body.getReader()
   const chunks: Uint8Array[] = []
@@ -205,8 +204,20 @@ export async function readJsonBody(request: Request, maxBytes: number): Promise<
     bytes.set(chunk, offset)
     offset += chunk.byteLength
   }
+  return new TextDecoder().decode(bytes)
+}
+
+/**
+ * Reads and parses a JSON body under the same byte cap as {@link readTextBody}.
+ *
+ * @throws {BodyTooLargeError} When the declared or actual size exceeds the cap.
+ * @throws {InvalidJsonError} When the body is empty or not valid JSON.
+ */
+export async function readJsonBody(request: Request, maxBytes: number): Promise<unknown> {
+  const text = await readTextBody(request, maxBytes)
+  if (text === '') throw new InvalidJsonError()
   try {
-    return JSON.parse(new TextDecoder().decode(bytes))
+    return JSON.parse(text)
   } catch {
     throw new InvalidJsonError()
   }

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { db } from '@/lib/db'
 import { propautoLeads } from '@/lib/db/schema'
-import { buildLeadEmail, LEAD_MAX_BODY_BYTES, leadIdempotencyKey, leadSchema, type Lead } from '@/lib/leads'
+import { buildLeadEmail, isMissingColumnError, LEAD_MAX_BODY_BYTES, leadIdempotencyKey, leadRow, leadSchema, type Lead } from '@/lib/leads'
 import { BodyTooLargeError, getClientKey, payloadTooLarge, rateLimit, readJsonBody, tooManyRequests } from '@/lib/request-security'
 
 const COMPANY_EMAIL = 'propautoal@gmail.com'
@@ -21,7 +21,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    await db.insert(propautoLeads).values({ name: payload.name, email: payload.email, intent: payload.intent, source: 'web' })
+    await saveLead(payload)
   } catch (error) {
     console.error('[leads] storage failed:', error instanceof Error ? error.message : 'unknown error')
     return NextResponse.json({ ok: false, saved: false, retryable: true, error: 'Lead storage is temporarily unavailable.' }, { status: 503, headers: noStore })
@@ -48,4 +48,19 @@ export async function POST(request: Request) {
   }
 
   return NextResponse.json({ ok: true, saved: true, delivered: true }, { headers: noStore })
+}
+
+/**
+ * Stores the lead with all its details. If the details migration has not been
+ * applied yet, stores the core fields rather than losing the lead.
+ */
+async function saveLead(lead: Lead) {
+  const row = leadRow(lead)
+  try {
+    await db.insert(propautoLeads).values(row)
+  } catch (error) {
+    if (!isMissingColumnError(error)) throw error
+    console.error('[leads] detail columns missing; apply db/migrations/0001_lead_details.sql')
+    await db.insert(propautoLeads).values({ name: row.name, email: row.email, intent: row.intent, source: row.source })
+  }
 }

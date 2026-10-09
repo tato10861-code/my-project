@@ -55,3 +55,32 @@ export function buildLeadEmail(lead: Lead) {
     ].join(''),
   }
 }
+
+/** Postgres SQLSTATE for a column that does not exist. */
+const UNDEFINED_COLUMN = '42703'
+
+/**
+ * True when a database error (possibly wrapped by the ORM) says a column is
+ * missing, i.e. a migration has not been applied yet.
+ */
+export function isMissingColumnError(error: unknown): boolean {
+  for (let current = error, depth = 0; current && depth < 5; depth++) {
+    if (typeof current === 'object' && 'code' in current && (current as { code?: unknown }).code === UNDEFINED_COLUMN) return true
+    current = typeof current === 'object' && 'cause' in current ? (current as { cause?: unknown }).cause : undefined
+  }
+  return false
+}
+
+/** Row to store for a lead, including the optional details. */
+export function leadRow(lead: Lead) {
+  return {
+    name: lead.name,
+    email: lead.email,
+    intent: lead.intent,
+    source: 'web',
+    phone: lead.phone ?? null,
+    budget: lead.budget ?? null,
+    message: lead.message ?? null,
+    language: lead.language ?? null,
+  }
+}
