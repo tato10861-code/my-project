@@ -2,6 +2,15 @@
 
 All notable changes to PropAuto are documented here.
 
+## [1.0.1] - 2026-10-09
+
+### Changed
+- Dependencies: Stripe SDK 23, `@vercel/analytics` 2, and current minor and patch releases of the AI SDK, Better Auth, Drizzle, Zod, Resend, `pg` and UI packages. `pnpm audit` remains clean.
+- CI: `actions/checkout` v7, `actions/setup-node` v6, `pnpm/action-setup` v6, Datadog synthetics v4.1.1.
+
+### Security
+- `@vercel/connect` stays on 0.4.x: 2.x depends on `@modelcontextprotocol/sdk` < 1.31 and `proxy-addr` < 2.0.8, both with published advisories.
+
 ## [1.0.0] - 2026-10-09
 
 ### Security
