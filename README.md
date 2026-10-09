@@ -19,8 +19,8 @@ PropAuto AI is a multilingual sales platform for luxury real estate and collecto
 Browser ──► Next.js app (Vercel)
               ├─ /api/leads, /api/events        validated intake (Zod), rate limited, size capped
               ├─ /api/sarah, /api/concierge     multilingual concierge (AI SDK, Vercel AI Gateway)
-              ├─ /api/checkout                  Stripe Checkout session
-              ├─ /api/webhooks/stripe           signed webhook, each payment recorded once
+              ├─ /api/checkout                  Stripe Checkout: monthly plans with a 14-day trial
+              ├─ /api/webhooks/stripe           signed webhook: payments recorded once, subscriptions synced
               ├─ /api/admin/*, /api/analytics   owner-only reporting (Better Auth session)
               └─ /api/health                    liveness probe
                     │
