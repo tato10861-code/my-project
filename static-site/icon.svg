@@ -1,5 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="PropAuto AI">
-  <rect width="32" height="32" rx="8" fill="#071014"/>
-  <path d="M10 24V8h7.2c3.4 0 5.8 2.1 5.8 5.2 0 2.9-2.1 4.8-5.2 4.8H13.6V24H10zm3.6-8.3h3.2c1.7 0 2.7-.9 2.7-2.4s-1-2.4-2.7-2.4h-3.2v4.8z" fill="#d5b77b"/>
-  <circle cx="25" cy="7" r="2.4" fill="#d5b77b" opacity="0.9"/>
-</svg>
