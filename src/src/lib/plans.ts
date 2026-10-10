@@ -5,7 +5,7 @@
  * display only and must match the Stripe prices.
  */
 
-export type PlanId = 'starter' | 'growth' | 'pro'
+export type PlanId = 'starter' | 'growth' | 'scale'
 
 export interface Plan {
   id: PlanId
@@ -41,9 +41,9 @@ export const PLANS: readonly Plan[] = [
     },
   },
   {
-    id: 'pro',
-    name: 'Pro',
-    lookupKey: 'propauto_pro_monthly',
+    id: 'scale',
+    name: 'Scale',
+    lookupKey: 'propauto_scale_monthly',
     priceInCents: 39_900,
     features: {
       en: ['Everything in Growth', 'Multi-branch agencies and showrooms', 'Priority support and onboarding'],
