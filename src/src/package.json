@@ -8,8 +8,8 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "jest",
-    "test:unit": "jest",
+    "test": "jest --runInBand",
+    "test:unit": "jest --runInBand",
     "check": "pnpm test:smoke && pnpm test && pnpm lint && pnpm typecheck && pnpm audit --prod --audit-level high && pnpm build",
     "test:smoke": "node tests/smoke.mjs",
     "test:coverage": "jest --coverage"
