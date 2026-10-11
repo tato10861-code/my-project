@@ -21,7 +21,8 @@ export type Booking = {
   kind: "viewing" | "test_drive";
   startsAt: string;
   listingRef: string;
-  status: "confirmed" | "cancelled";
+  // pending: waiting for the advisor's confirmation from the email link.
+  status: "pending" | "confirmed" | "cancelled";
 };
 
 const leads = new Map<string, Lead>();
@@ -54,6 +55,21 @@ export function addBooking(booking: Booking): Booking {
   return booking;
 }
 
+export function getBooking(id: string): Booking | undefined {
+  return bookings.get(id);
+}
+
+export function setBookingStatus(id: string, status: Booking["status"]): Booking | undefined {
+  const booking = bookings.get(id);
+  if (!booking) return undefined;
+  const next = { ...booking, status };
+  bookings.set(id, next);
+  return next;
+}
+
+// A slot is taken while a booking is pending or confirmed.
 export function bookingsAt(startsAt: string): Booking[] {
-  return [...bookings.values()].filter((b) => b.startsAt === startsAt && b.status === "confirmed");
+  return [...bookings.values()].filter(
+    (b) => b.startsAt === startsAt && (b.status === "pending" || b.status === "confirmed"),
+  );
 }
