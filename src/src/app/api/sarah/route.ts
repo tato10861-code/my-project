@@ -24,13 +24,25 @@ const sarahTools = {
     inputSchema: z.object({ days: z.number().int().min(1).max(7).default(3) }),
     execute: async ({ days }) => {
       if (!bookingConfig()) return { slots: [], note: 'Booking is not configured; offer an advisor call instead.' }
-      return { slots: await freeSlots(new Date(), days) }
+      try {
+        return { slots: await freeSlots(new Date(), days) }
+      } catch (error) {
+        console.error('[sarah] availability lookup failed:', error instanceof Error ? error.message : error)
+        return { slots: [], note: 'Availability is unavailable right now; offer an advisor call instead.' }
+      }
     },
   }),
   request_booking: tool({
     description: 'Request a viewing or test drive at a slot from check_availability. Needs the customer name and phone. The booking stays pending until the team confirms it.',
     inputSchema: bookingRequestSchema,
-    execute: async (input) => requestBooking(input),
+    execute: async (input) => {
+      try {
+        return await requestBooking(input)
+      } catch (error) {
+        console.error('[sarah] booking request failed:', error instanceof Error ? error.message : error)
+        return { ok: false, error: 'Booking is unavailable right now. Tell the customer an advisor will call them to confirm.' }
+      }
+    },
   }),
 }
 
