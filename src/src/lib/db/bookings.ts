@@ -40,10 +40,17 @@ export async function createPendingBooking(input: BookingRequest): Promise<Creat
   }
 }
 
-/** Cancels a request that could not be announced, so the slot is released. */
-export async function cancelBooking(id: string): Promise<void> {
+/**
+ * Cancels a request that could not be announced, so the slot is released. The
+ * reason is kept in the row, so the cause can be read from the database
+ * without the runtime logs.
+ */
+export async function cancelBooking(id: string, reason: string): Promise<void> {
   await ensureBookingSchema()
-  await pool.query(`UPDATE propauto_bookings SET status = 'cancelled' WHERE id = $1`, [id])
+  await pool.query(
+    `UPDATE propauto_bookings SET status = 'cancelled', failure_reason = $2 WHERE id = $1`,
+    [id, reason.slice(0, 500)],
+  )
 }
 
 export type ConfirmResult = 'confirmed' | 'already_confirmed' | 'cancelled' | 'not_found'

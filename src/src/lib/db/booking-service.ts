@@ -79,8 +79,8 @@ export async function requestBooking(input: BookingRequest, now: Date = new Date
   const error = await config.send(mail)
   if (error) {
     console.error('[sarah] owner email failed:', error)
-    // Nothing is held without the team seeing it: release the slot and say so.
-    await cancelBooking(created.id)
+    // Nothing is held without the team seeing it: release the slot and keep the reason.
+    await cancelBooking(created.id, `email: ${error}`)
     return { ok: false, error: 'Could not send the confirmation request. Offer another time or ask the customer to wait for a call.' }
   }
   return { ok: true, bookingId: created.id, status: 'pending' }

@@ -17,8 +17,10 @@ CREATE TABLE IF NOT EXISTS propauto_bookings (
   language text,
   status text NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'confirmed', 'cancelled')),
   created_at timestamptz NOT NULL DEFAULT now(),
-  confirmed_at timestamptz
+  confirmed_at timestamptz,
+  failure_reason text
 );
+ALTER TABLE propauto_bookings ADD COLUMN IF NOT EXISTS failure_reason text;
 CREATE UNIQUE INDEX IF NOT EXISTS propauto_bookings_live_slot
   ON propauto_bookings (starts_at)
   WHERE status <> 'cancelled';
