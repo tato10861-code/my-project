@@ -3,23 +3,54 @@
  * a request, email the team a confirmation link, and release the slot if the
  * email cannot be sent. Kept in lib/db because it touches the database.
  */
+import nodemailer from 'nodemailer'
 import { Resend } from 'resend'
 import { bookingNotificationEmail, buildSlots, confirmationUrl, isBookableSlot, type BookingRequest } from '@/lib/bookings'
 import { cancelBooking, createPendingBooking, takenStarts } from '@/lib/db/bookings'
 
 const DAY_MS = 24 * 60 * 60 * 1000
-const DEFAULT_FROM = 'PropAuto Sales <onboarding@resend.dev>'
 
-type Config = { secret: string; baseUrl: string; notifyTo: string; apiKey: string; from: string }
+type Mail = { subject: string; text: string }
+type Config = { secret: string; baseUrl: string; notifyTo: string; send: (mail: Mail) => Promise<string | null> }
+
+/**
+ * Sends the owner notification. A verified sender on RESEND_FROM_EMAIL uses
+ * Resend. Otherwise the team's own Gmail account sends through SMTP with an
+ * app password (GMAIL_APP_PASSWORD), which needs no domain.
+ */
+function mailSender(notifyTo: string): ((mail: Mail) => Promise<string | null>) | null {
+  const resendKey = process.env.RESEND_API_KEY_2 ?? process.env.RESEND_API_KEY
+  if (process.env.RESEND_FROM_EMAIL && resendKey) {
+    const from = process.env.RESEND_FROM_EMAIL
+    return async (mail) => {
+      const { error } = await new Resend(resendKey).emails.send({ from, to: notifyTo, subject: mail.subject, text: mail.text })
+      return error ? error.message : null
+    }
+  }
+  const password = process.env.GMAIL_APP_PASSWORD
+  if (password) {
+    const transport = nodemailer.createTransport({ service: 'gmail', auth: { user: notifyTo, pass: password } })
+    return async (mail) => {
+      try {
+        await transport.sendMail({ from: notifyTo, to: notifyTo, subject: mail.subject, text: mail.text })
+        return null
+      } catch (error) {
+        return error instanceof Error ? error.message : 'SMTP send failed'
+      }
+    }
+  }
+  return null
+}
 
 /** Reads the booking settings. Returns null until every required value is set. */
 export function bookingConfig(): Config | null {
   const secret = process.env.BOOKING_SECRET
   const baseUrl = process.env.PUBLIC_APP_URL
   const notifyTo = process.env.BOOKING_NOTIFY_EMAIL
-  const apiKey = process.env.RESEND_API_KEY_2 ?? process.env.RESEND_API_KEY
-  if (!secret || secret.length < 32 || !baseUrl || !notifyTo || !apiKey) return null
-  return { secret, baseUrl, notifyTo, apiKey, from: process.env.RESEND_FROM_EMAIL ?? DEFAULT_FROM }
+  if (!secret || secret.length < 32 || !baseUrl || !notifyTo) return null
+  const send = mailSender(notifyTo)
+  if (!send) return null
+  return { secret, baseUrl, notifyTo, send }
 }
 
 export async function freeSlots(now: Date, days: number): Promise<string[]> {
@@ -45,13 +76,9 @@ export async function requestBooking(input: BookingRequest, now: Date = new Date
 
   const link = confirmationUrl(config.baseUrl, created.id, config.secret)
   const mail = bookingNotificationEmail({ ...input, id: created.id }, link)
-  const { error } = await new Resend(config.apiKey).emails.send({
-    from: config.from,
-    to: config.notifyTo,
-    subject: mail.subject,
-    text: mail.text,
-  })
+  const error = await config.send(mail)
   if (error) {
+    console.error('[sarah] owner email failed:', error)
     // Nothing is held without the team seeing it: release the slot and say so.
     await cancelBooking(created.id)
     return { ok: false, error: 'Could not send the confirmation request. Offer another time or ask the customer to wait for a call.' }
