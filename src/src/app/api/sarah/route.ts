@@ -65,20 +65,26 @@ export async function POST(request: Request) {
     const hotLead = /\b(book|booking|viewing|test drive|human|price|interested|buy|rent)\b|حجز|معاينة|موظف|السعر|شراء|إيجار/i.test(latestMessage)
     const resendKey = process.env.RESEND_API_KEY_2 ?? process.env.RESEND_API_KEY
     if (hotLead && resendKey) {
-      const resend = new Resend(resendKey)
-      // Keyed on visitor + message so a retried request does not alert twice,
-      // while the same words from a different visitor still do.
-      const alertKey = createHash('sha256').update(`${clientKey}\u0000${latestMessage}`).digest('hex').slice(0, 32)
-      const { error } = await resend.emails.send(
-        {
-          from: process.env.RESEND_FROM_EMAIL ?? 'PropAuto Sales <onboarding@resend.dev>',
-          to: 'propautoal@gmail.com',
-          subject: 'PropAuto hot lead from Sarah',
-          text: `A visitor may be ready to buy or book. Latest message: ${latestMessage}`,
-        },
-        { idempotencyKey: `sarah-alert/${alertKey}` },
-      )
-      if (error) console.error('[sarah] owner alert failed:', error.message)
+      // The alert is a courtesy to the team: a bad key or a provider outage must
+      // never take the customer's conversation down with it.
+      try {
+        const resend = new Resend(resendKey)
+        // Keyed on visitor + message so a retried request does not alert twice,
+        // while the same words from a different visitor still do.
+        const alertKey = createHash('sha256').update(`${clientKey}\u0000${latestMessage}`).digest('hex').slice(0, 32)
+        const { error } = await resend.emails.send(
+          {
+            from: process.env.RESEND_FROM_EMAIL ?? 'PropAuto Sales <onboarding@resend.dev>',
+            to: 'propautoal@gmail.com',
+            subject: 'PropAuto hot lead from Sarah',
+            text: `A visitor may be ready to buy or book. Latest message: ${latestMessage}`,
+          },
+          { idempotencyKey: `sarah-alert/${alertKey}` },
+        )
+        if (error) console.error('[sarah] owner alert failed:', error.message)
+      } catch (error) {
+        console.error('[sarah] owner alert failed:', error instanceof Error ? error.message : 'unknown error')
+      }
     }
     const result = await generateText({
       model: 'google/gemini-2.5-flash',
@@ -90,7 +96,9 @@ export async function POST(request: Request) {
       stopWhen: stepCountIs(4),
     })
     return Response.json({ reply: result.text })
-  } catch {
+  } catch (error) {
+    // Only the error class and message: never the customer's text or any key.
+    console.error('[sarah] chat failed:', error instanceof Error ? `${error.name}: ${error.message}` : 'unknown error')
     const fallback = language === 'ar'
       ? 'هلا! معك سارة من PropAuto. تدور عقار أو سيارة اليوم؟'
       : language === 'fr'
