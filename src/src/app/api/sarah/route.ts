@@ -6,10 +6,7 @@ import { z } from 'zod'
 import { bookingRequestSchema } from '@/lib/bookings'
 import { bookingConfig, freeSlots, requestBooking } from '@/lib/db/booking-service'
 import { BodyTooLargeError, getClientKey, payloadTooLarge, rateLimit, readJsonBody, tooManyRequests } from '@/lib/request-security'
-
-// Google retires Gemini versions for new accounts without notice (2.5-flash
-// already is), so the model is a setting. SARAH_MODEL overrides this default.
-const SARAH_MODEL = process.env.SARAH_MODEL?.trim() || 'gemini-3.8-flash'
+import { sarahModelNames } from '@/lib/sarah-models'
 
 const requestSchema = z.object({
   messages: z.array(z.object({
@@ -91,21 +88,49 @@ export async function POST(request: Request) {
         console.error('[sarah] owner alert failed:', error instanceof Error ? error.message : 'unknown error')
       }
     }
-    const result = await generateText({
-      // A Gemini key from Google AI Studio calls Google directly and needs no
-      // card on file. Without it the request goes through Vercel AI Gateway.
-      model: process.env.GOOGLE_GENERATIVE_AI_API_KEY ? google(SARAH_MODEL) : `google/${SARAH_MODEL}`,
-      system: `${SARAH_SYSTEM_PROMPT}\nPreferred language code: ${language}.`,
-      messages,
-      maxOutputTokens: 240,
-      temperature: 0.6,
-      tools: sarahTools,
-      stopWhen: stepCountIs(4),
-    })
+    // A Gemini key from Google AI Studio calls Google directly and needs no card
+    // on file. Without it the request goes through Vercel AI Gateway.
+    const direct = Boolean(process.env.GOOGLE_GENERATIVE_AI_API_KEY)
+    // Each free-tier model has its own daily allowance, so when one is spent (or
+    // overloaded) the next listed model answers instead of the visitor seeing an error.
+    const names = sarahModelNames()
+    let toolRan = false
+    const attempt = (name: string) =>
+      generateText({
+        model: direct ? google(name) : `google/${name}`,
+        system: `${SARAH_SYSTEM_PROMPT}\nPreferred language code: ${language}.`,
+        messages,
+        maxOutputTokens: 240,
+        temperature: 0.6,
+        tools: sarahTools,
+        stopWhen: stepCountIs(4),
+        // With a spare model, moving on beats retrying the one that just refused:
+        // retries on a spent allowance only burn more of it.
+        maxRetries: names.length > 1 ? 0 : 1,
+        onStepFinish: (step) => {
+          if (step.toolCalls?.length) toolRan = true
+        },
+      })
+    let result: Awaited<ReturnType<typeof attempt>> | undefined
+    let used = names[0]
+    let lastError: unknown
+    for (const name of names) {
+      try {
+        result = await attempt(name)
+        used = name
+        break
+      } catch (error) {
+        lastError = error
+        console.error('[sarah] model failed:', name, error instanceof Error ? `${error.name}: ${error.message}` : 'unknown error')
+        // A booking may already be stored: never replay the turn on another model.
+        if (toolRan) break
+      }
+    }
+    if (!result) throw lastError
     // One line per answered turn so a healthy chat is visible in the logs: which
     // provider answered and which tools ran. Never the customer's text.
     const toolsUsed = (result.steps ?? []).flatMap((step) => (step.toolCalls ?? []).map((call) => call.toolName))
-    console.info('[sarah] ok', { provider: process.env.GOOGLE_GENERATIVE_AI_API_KEY ? 'google' : 'gateway', tools: toolsUsed })
+    console.info('[sarah] ok', { provider: direct ? 'google' : 'gateway', model: used, tools: toolsUsed })
     return Response.json({ reply: result.text })
   } catch (error) {
     // Only the error class and message: never the customer's text or any key.
