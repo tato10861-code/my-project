@@ -7,6 +7,10 @@ import { bookingRequestSchema } from '@/lib/bookings'
 import { bookingConfig, freeSlots, requestBooking } from '@/lib/db/booking-service'
 import { BodyTooLargeError, getClientKey, payloadTooLarge, rateLimit, readJsonBody, tooManyRequests } from '@/lib/request-security'
 
+// Google retires Gemini versions for new accounts without notice (2.5-flash
+// already is), so the model is a setting. SARAH_MODEL overrides this default.
+const SARAH_MODEL = process.env.SARAH_MODEL?.trim() || 'gemini-3.8-flash'
+
 const requestSchema = z.object({
   messages: z.array(z.object({
     role: z.enum(['user', 'assistant']),
@@ -90,7 +94,7 @@ export async function POST(request: Request) {
     const result = await generateText({
       // A Gemini key from Google AI Studio calls Google directly and needs no
       // card on file. Without it the request goes through Vercel AI Gateway.
-      model: process.env.GOOGLE_GENERATIVE_AI_API_KEY ? google('gemini-2.5-flash') : 'google/gemini-2.5-flash',
+      model: process.env.GOOGLE_GENERATIVE_AI_API_KEY ? google(SARAH_MODEL) : `google/${SARAH_MODEL}`,
       system: `${SARAH_SYSTEM_PROMPT}\nPreferred language code: ${language}.`,
       messages,
       maxOutputTokens: 240,
