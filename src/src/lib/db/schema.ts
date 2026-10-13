@@ -47,3 +47,19 @@ export const propautoSubscriptions = pgTable('propauto_subscriptions', {
   lastEventCreated: bigint('last_event_created', { mode: 'number' }).notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 })
+
+// Added by db/migrations/0003_bookings.sql. Viewing and test-drive requests
+// from Sarah; 'pending' until the team confirms from the email link.
+export const propautoBookings = pgTable('propauto_bookings', {
+  id: text('id').primaryKey(),
+  kind: text('kind').notNull(),
+  startsAt: timestamp('starts_at', { withTimezone: true }).notNull(),
+  listingRef: text('listing_ref').notNull(),
+  customerName: text('customer_name').notNull(),
+  customerPhone: text('customer_phone').notNull(),
+  customerEmail: text('customer_email'),
+  language: text('language'),
+  status: text('status').notNull().default('pending'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  confirmedAt: timestamp('confirmed_at', { withTimezone: true }),
+})
