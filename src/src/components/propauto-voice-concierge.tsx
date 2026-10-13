@@ -13,6 +13,7 @@ export function PropAutoVoiceConcierge() {
   const [sending, setSending] = useState(false)
   const [error, setError] = useState('')
   const [micReady, setMicReady] = useState(false)
+  const assistantIdRef = useRef<string | null>(null)
 
   useEffect(() => {
     let active = true
@@ -21,7 +22,8 @@ export function PropAutoVoiceConcierge() {
       .then((config) => {
         if (!active) return
         setAvailable(Boolean(config.enabled))
-        if (config.enabled) {
+        assistantIdRef.current = typeof config.assistantId === 'string' ? config.assistantId : null
+        if (config.enabled && assistantIdRef.current) {
           const vapi = new Vapi(config.publicKey)
           vapi.on('call-start', () => setCalling(true))
           vapi.on('call-end', () => setCalling(false))
@@ -39,7 +41,7 @@ export function PropAutoVoiceConcierge() {
 
   async function startCall() {
     setError('')
-    if (!vapiRef.current || available !== true) {
+    if (!vapiRef.current || available !== true || !assistantIdRef.current) {
       setError('Voice is not connected in this deployment. Please request a callback below.')
       return
     }
@@ -48,7 +50,7 @@ export function PropAutoVoiceConcierge() {
       const microphone = await navigator.mediaDevices.getUserMedia({ audio: true })
       microphone.getTracks().forEach((track) => track.stop())
       setMicReady(true)
-      await vapiRef.current.start('161586da-d430-4469-bfd9-eb0d9c4f5a0e')
+      await vapiRef.current.start(assistantIdRef.current)
     } catch {
       setMicReady(false)
       setCalling(false)
