@@ -98,6 +98,10 @@ export async function POST(request: Request) {
       tools: sarahTools,
       stopWhen: stepCountIs(4),
     })
+    // One line per answered turn so a healthy chat is visible in the logs: which
+    // provider answered and which tools ran. Never the customer's text.
+    const toolsUsed = (result.steps ?? []).flatMap((step) => (step.toolCalls ?? []).map((call) => call.toolName))
+    console.info('[sarah] ok', { provider: process.env.GOOGLE_GENERATIVE_AI_API_KEY ? 'google' : 'gateway', tools: toolsUsed })
     return Response.json({ reply: result.text })
   } catch (error) {
     // Only the error class and message: never the customer's text or any key.
