@@ -50,7 +50,15 @@ test('bookingRequestSchema rejects unknown kinds and short phones', () => {
 
 test('owner email is plain text and carries the confirmation link', () => {
   const mail = bookingNotificationEmail({ id: 'bk_1', kind: 'test_drive', startsAt: '2026-10-12T10:00:00.000Z', listingRef: 'Car 9', name: 'Ada <b>', phone: '+15550100' }, 'https://x/confirm')
-  assert.equal(mail.subject, 'Confirm test drive: Car 9')
+  assert.equal(mail.subject, '🔥 New test drive request via Sarah - Ada <b> (language not given)')
   assert.equal(mail.text.includes('Ada <b>'), true)
   assert.equal(mail.text.endsWith('Confirm this booking: https://x/confirm'), true)
+})
+
+test('owner email subject names the customer and language, and cannot carry extra headers', () => {
+  const base = { id: 'bk_2', kind: 'viewing', startsAt: '2026-10-12T10:00:00.000Z', listingRef: 'Villa 4', phone: '+15550100' }
+  const mail = bookingNotificationEmail({ ...base, name: 'Lina\r\nBcc: x@y.z', language: 'Arabic', notes: 'Wants a sea view' }, 'https://x/confirm')
+  assert.equal(mail.subject.includes('\n'), false)
+  assert.equal(mail.subject.endsWith('(Arabic)'), true)
+  assert.equal(mail.text.includes('Notes: Wants a sea view'), true)
 })

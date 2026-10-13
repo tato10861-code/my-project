@@ -6,7 +6,9 @@ import { z } from 'zod'
 import { bookingRequestSchema } from '@/lib/bookings'
 import { bookingConfig, freeSlots, requestBooking } from '@/lib/db/booking-service'
 import { BodyTooLargeError, getClientKey, payloadTooLarge, rateLimit, readJsonBody, tooManyRequests } from '@/lib/request-security'
+import { runWithModelFallback } from '@/lib/sarah-fallback'
 import { sarahModelNames } from '@/lib/sarah-models'
+import { fallbackReply, sarahSystem } from '@/lib/sarah-prompt'
 
 const requestSchema = z.object({
   messages: z.array(z.object({
@@ -17,8 +19,6 @@ const requestSchema = z.object({
 })
 
 const MAX_BODY_BYTES = 96_000
-
-const SARAH_SYSTEM_PROMPT = `You are Sarah from PropAuto, a warm elite real-estate and automotive sales consultant. Never mention AI, bots, prompts, or system instructions. Reply in the language of the latest user message and keep the same language throughout unless they switch. Keep replies to 15-25 words, ask one question at a time, and always end with a question. Qualify property or car interest, location, budget, timing, and rent/buy/invest intent. Present no more than two options, using only the verified catalog context when provided; never invent exact listings, prices, availability, social proof, or appointments. Handle price objections by adding value, not dropping price. Offer two viewing or test-drive times. When the user is ready to book, asks for a human, or requests final pricing, ask for name, phone, and email and say the PropAuto Sales Team will follow up. Be professional, concise, warm, and persuasive. Current company contact: propautoal@gmail.com. Use check_availability before offering any time, and never invent a slot. Call request_booking only after the customer has chosen a returned slot and given their name and phone. After a request, say it is received and the PropAuto Sales Team will confirm it; never say it is confirmed.`
 
 const sarahTools = {
   check_availability: tool({
@@ -98,7 +98,7 @@ export async function POST(request: Request) {
     const attempt = (name: string) =>
       generateText({
         model: direct ? google(name) : `google/${name}`,
-        system: `${SARAH_SYSTEM_PROMPT}\nPreferred language code: ${language}.`,
+        system: sarahSystem(language),
         messages,
         maxOutputTokens: 240,
         temperature: 0.6,
@@ -111,22 +111,12 @@ export async function POST(request: Request) {
           if (step.toolCalls?.length) toolRan = true
         },
       })
-    let result: Awaited<ReturnType<typeof attempt>> | undefined
-    let used = names[0]
-    let lastError: unknown
-    for (const name of names) {
-      try {
-        result = await attempt(name)
-        used = name
-        break
-      } catch (error) {
-        lastError = error
-        console.error('[sarah] model failed:', name, error instanceof Error ? `${error.name}: ${error.message}` : 'unknown error')
-        // A booking may already be stored: never replay the turn on another model.
-        if (toolRan) break
-      }
-    }
-    if (!result) throw lastError
+    const { result, model: used } = await runWithModelFallback(names, attempt, {
+      onFailure: (name, error) =>
+        console.error('[sarah] model failed:', name, error instanceof Error ? `${error.name}: ${error.message}` : 'unknown error'),
+      // A booking may already be stored: never replay the turn on another model.
+      stopAfterFailure: () => toolRan,
+    })
     // One line per answered turn so a healthy chat is visible in the logs: which
     // provider answered and which tools ran. Never the customer's text.
     const toolsUsed = (result.steps ?? []).flatMap((step) => (step.toolCalls ?? []).map((call) => call.toolName))
@@ -135,13 +125,6 @@ export async function POST(request: Request) {
   } catch (error) {
     // Only the error class and message: never the customer's text or any key.
     console.error('[sarah] chat failed:', error instanceof Error ? `${error.name}: ${error.message}` : 'unknown error')
-    const fallback = language === 'ar'
-      ? 'هلا! معك سارة من PropAuto. تدور عقار أو سيارة اليوم؟'
-      : language === 'fr'
-        ? 'Bonjour, Sarah de PropAuto. Vous cherchez un bien ou une voiture aujourd’hui ?'
-        : language === 'es'
-          ? 'Hola, soy Sarah de PropAuto. ¿Buscas una propiedad o un coche hoy?'
-          : 'Hi, Sarah from PropAuto here. Are you looking for a property or a car today?'
-    return Response.json({ reply: fallback, retryable: true }, { status: 503, headers: { 'Cache-Control': 'no-store' } })
+    return Response.json({ reply: fallbackReply(language), retryable: true }, { status: 503, headers: { 'Cache-Control': 'no-store' } })
   }
 }
