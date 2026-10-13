@@ -15,6 +15,7 @@
     "test:coverage": "jest --coverage"
   },
   "dependencies": {
+    "@ai-sdk/google": "^4.0.95",
     "@ai-sdk/react": "^4.0.140",
     "@base-ui/react": "^1.9.0",
     "@vapi-ai/web": "^2.7.1",

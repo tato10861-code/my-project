@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto'
+import { google } from '@ai-sdk/google'
 import { generateText, stepCountIs, tool } from 'ai'
 import { Resend } from 'resend'
 import { z } from 'zod'
@@ -87,7 +88,9 @@ export async function POST(request: Request) {
       }
     }
     const result = await generateText({
-      model: 'google/gemini-2.5-flash',
+      // A Gemini key from Google AI Studio calls Google directly and needs no
+      // card on file. Without it the request goes through Vercel AI Gateway.
+      model: process.env.GOOGLE_GENERATIVE_AI_API_KEY ? google('gemini-2.5-flash') : 'google/gemini-2.5-flash',
       system: `${SARAH_SYSTEM_PROMPT}\nPreferred language code: ${language}.`,
       messages,
       maxOutputTokens: 240,
