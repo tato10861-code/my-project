@@ -174,7 +174,7 @@ describe('numbers and bookings at the edges', () => {
 
   test('the owner email for a viewing without an email says so', () => {
     const mail = bookingNotificationEmail({ id: 'bk_2', kind: 'viewing', startsAt: '2026-10-12T10:00:00.000Z', listingRef: 'Villa 3', name: 'Omar', phone: '+15550111' }, 'https://x/c')
-    assert.equal(mail.subject, 'Confirm viewing: Villa 3')
+    assert.equal(mail.subject, '🔥 New viewing request via Sarah - Omar (language not given)')
     assert.equal(mail.text.includes('Email: not given'), true)
   })
 })

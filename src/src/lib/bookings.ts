@@ -17,7 +17,10 @@ export const bookingRequestSchema = z.object({
   name: z.string().trim().min(2).max(100),
   phone: z.string().trim().min(7).max(30),
   email: z.string().trim().email().max(160).optional(),
-  language: z.string().trim().max(20).optional(),
+  /** Language the customer is writing in, in plain English (for example "Arabic"). */
+  language: z.string().trim().max(40).optional(),
+  /** One short line on what the customer wants, for the team's email. Not stored. */
+  notes: z.string().trim().max(500).optional(),
 })
 
 export type BookingRequest = z.infer<typeof bookingRequestSchema>
@@ -67,13 +70,16 @@ export function confirmationUrl(baseUrl: string, bookingId: string, secret: stri
 /** Plain-text owner notification. Names and phones are plain text, never HTML. */
 export function bookingNotificationEmail(booking: BookingRequest & { id: string }, link: string) {
   const when = new Date(booking.startsAt).toUTCString()
+  // Customer-supplied text in a header: collapse line breaks so it cannot add headers.
+  const header = (value: string) => value.replace(/[\r\n]+/g, ' ').trim()
   return {
-    subject: `Confirm ${booking.kind === 'viewing' ? 'viewing' : 'test drive'}: ${booking.listingRef}`,
+    subject: `🔥 New ${booking.kind === 'viewing' ? 'viewing' : 'test drive'} request via Sarah - ${header(booking.name)} (${header(booking.language ?? 'language not given')})`,
     text: [
       `Customer: ${booking.name}`,
       `Phone: ${booking.phone}`,
       `Email: ${booking.email ?? 'not given'}`,
       `Language: ${booking.language ?? 'not given'}`,
+      `Notes: ${booking.notes ?? 'none'}`,
       `Requested: ${booking.kind} for ${booking.listingRef} at ${when}`,
       '',
       `Confirm this booking: ${link}`,
