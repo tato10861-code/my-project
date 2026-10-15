@@ -41,6 +41,13 @@ Chat contents are not copied here.
 |---|---|---|
 | Production deployment `dpl_A6LJWK6f7fhJdYhGKdqJbtSBe799` | created 2026-09-16 14:25 UTC, state READY | Vercel deployment record |
 | Project created | 2026-08-14 20:24 UTC | Vercel project record |
+| Source of that 16 Sep deployment | `cli`: uploaded with the Vercel CLI, so it has no git commit | Vercel deployment record |
+
+### How a reviewer can check these facts
+
+- Vercel project and deployments: https://vercel.com/ta-to/propauto-ai-al-closer-saas (project settings show the creation date; the deployment `A6LJWK6f7` shows Created Sep 16, Production, Ready).
+- v0 chats of the same project show their own creation dates in v0.
+- Both belong to the same account, `tato10861-2666`.
 
 ## Real usage
 
