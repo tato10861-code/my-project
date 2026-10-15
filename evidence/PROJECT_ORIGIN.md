@@ -35,10 +35,20 @@ Chat contents are not copied here.
 - `v0-project-request-log-2026-10-10.json`: request log exported from the v0 project.
 - `src-pnpm-lock.yaml`: dependency lockfile from the v0 project.
 
-## Real usage (Vercel Web Analytics, production)
+## Deployment history (read from Vercel)
 
-Window: 15 September to 14 October 2026. The free plan exposes only the latest
-31 days, so earlier traffic cannot be shown.
+| Fact | Value | Source |
+|---|---|---|
+| Production deployment `dpl_A6LJWK6f7fhJdYhGKdqJbtSBe799` | created 2026-09-16 14:25 UTC, state READY | Vercel deployment record |
+| Project created | 2026-08-14 20:24 UTC | Vercel project record |
+
+## Real usage
+
+The Hobby plan keeps only the latest 31 days of analytics, so traffic before
+mid-September cannot be read back from Vercel today. Two kinds of evidence follow,
+kept apart on purpose.
+
+### Verified directly from Vercel Web Analytics (production, 15 Sep to 14 Oct 2026)
 
 | Measure | Value |
 |---|---|
@@ -46,6 +56,25 @@ Window: 15 September to 14 October 2026. The free plan exposes only the latest
 | Page views | 158 |
 | Countries | 13 |
 | Top countries by visitors | Yemen 69, United States 18, Italy 4 |
+
+### Screenshots of the owner's Vercel Analytics dashboard
+
+Taken by the owner at the time. The dates below are read from each chart's axis.
+They are supporting evidence, not independently verified.
+
+| Window (from the chart axis) | Environment | Visitors | Page views |
+|---|---|---|---|
+| 17 to 23 Aug 2026 (7 days) | Production | 12 | 17 |
+| 31 Aug to 6 Sep 2026 (7 days) | Production | 25 | 30 |
+| about 24 Aug to 23 Sep 2026 (30 days) | Production | 97 | 144 |
+| 29 Sep to 5 Oct 2026 (7 days) | Production | 41 | 50 |
+| 15 Sep to 15 Oct 2026 (30 days) | All environments | 116 | 177 |
+
+Windows overlap or repeat visitors, so these figures are not added together.
+Audience mix in the 15 Sep to 15 Oct screenshots: Yemen 65%, United States 18%,
+Italy 4%, India 2%, Jamaica 2%; mobile 69% and desktop 31%; Android 67%, Windows 23%,
+Mac 5%, Linux 4%, iOS 3%. Bounce rate was 71% to 77% depending on the window.
+No custom events were being tracked.
 
 These are site visits. They are not customers, leads, or revenue.
 
