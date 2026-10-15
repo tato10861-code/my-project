@@ -43,6 +43,27 @@ Chat contents are not copied here.
 | Project created | 2026-08-14 20:24 UTC | Vercel project record |
 | Source of that 16 Sep deployment | `cli`: uploaded with the Vercel CLI, so it has no git commit | Vercel deployment record |
 
+### Vercel account activity log (August 2026)
+
+Read directly from the Vercel account activity log on 15 Oct 2026. Times are UTC.
+Account identifiers, environment values and tokens are left out on purpose.
+
+| Date and time | Event |
+|---|---|
+| 2026-08-02 | Two database stores created on the account |
+| 2026-08-14 20:24 | Project `propauto-ai-al-closer-saas` created; Web Analytics enabled the same minute |
+| 2026-08-14 20:39 | Neon Postgres database created and connected to the project |
+| 2026-08-14 20:44 | Blob storage created and connected |
+| 2026-08-14 21:22 | AI Gateway keys created |
+| 2026-08-15 16:29 | Second project `v0-project` created and deployed to production by v0 |
+| 2026-08-16 13:55 to 14:06 | Four production deployments in 11 minutes, three requested by v0 |
+| 2026-08-16 14:03 | Slack connector created and attached to the project |
+| 2026-08-18 21:59 | Production deployment requested by v0 (after a new database was connected) |
+
+The owner's own screenshot of the same activity log also shows, for the Vercel team,
+a GitLab account link on 15 Aug 2026 and the team creation on 10 Jul 2026. I could
+not read those two entries back through the API, so they stay owner-supplied.
+
 ### How a reviewer can check these facts
 
 - Vercel project and deployments: https://vercel.com/ta-to/propauto-ai-al-closer-saas (project settings show the creation date; the deployment `A6LJWK6f7` shows Created Sep 16, Production, Ready).
