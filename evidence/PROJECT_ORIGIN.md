@@ -23,7 +23,7 @@ that date. Earlier work is documented below, not backdated into git.
 | 2026-08-14 | PropAuto AI & Al Closer SaaS |
 | 2026-08-18 | Conversation continuation |
 | 2026-08-23 | PropAuto landing page |
-| 2026-08-24 | v0 project chat |
+| 2026-08-24 | v0/tato10861-2666-ffae6261 |
 | 2026-08-25 | Conversation summary |
 | 2026-09-03 onward | Further build chats |
 
