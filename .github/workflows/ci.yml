@@ -46,6 +46,51 @@ jobs:
         env:
           NEXT_PUBLIC_ENV: production
 
+  migrations:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/src
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: propauto
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL_UNPOOLED: postgresql://postgres:postgres@localhost:5432/propauto
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10
+      - name: Setup Node 24
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: src/src/.nvmrc
+          cache: pnpm
+          cache-dependency-path: src/src/pnpm-lock.yaml
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Apply every migration to an empty database
+        run: pnpm db:migrate
+      - name: Applying again is a no-op
+        run: |
+          pnpm db:migrate | tee /tmp/second-run.log
+          grep -q "up to date" /tmp/second-run.log
+      - name: Nothing is left pending
+        run: pnpm db:migrate --status | tee /tmp/status.log && grep -q "pending: 0" /tmp/status.log
+
   secrets:
     runs-on: ubuntu-latest
     steps:
