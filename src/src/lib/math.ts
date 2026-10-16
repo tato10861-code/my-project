@@ -116,12 +116,28 @@ function localeSeparators(locale: string): { group: string; decimal: string } {
 }
 
 /**
+ * Integer division that rounds to the nearest whole number, with exact halves
+ * rounded away from zero. BigInt `/` truncates toward zero, which understates a
+ * gain or loss by up to one basis point.
+ *
+ * @param numerator - The dividend.
+ * @param denominator - The divisor, which must be positive.
+ */
+function roundedQuotient(numerator: bigint, denominator: bigint): bigint {
+  const negative = numerator < 0n
+  const magnitude = negative ? -numerator : numerator
+  const rounded = (2n * magnitude + denominator) / (2n * denominator)
+  return negative ? -rounded : rounded
+}
+
+/**
  * Computes the return on investment between two precise cent values.
  *
  * @param initialCents - The starting value in cents (may be zero).
  * @param currentCents - The current value in cents.
- * @returns An {@link RoiResult} with basis points, a formatted percent string,
- *   and a positivity flag. The change is measured against the absolute
+ * @returns An {@link RoiResult} with basis points (rounded to the nearest, exact
+ *   halves away from zero), a formatted percent string that is built from that
+ *   same rounded value, and a positivity flag. The change is measured against the absolute
  *   value of the initial amount, so a move from -100 to -50 is a gain. A zero
  *   initial value, or no change, yields a neutral "0.00%" result.
  * @throws {RangeError} When either value exceeds {@link MAX_CENTS}.
@@ -135,7 +151,7 @@ export function computeRoi(initialCents: bigint, currentCents: bigint): RoiResul
   }
   const delta = current - initial
   const base = initial < 0n ? -initial : initial
-  const basisPoints = Number((delta * 10000n) / base)
+  const basisPoints = Number(roundedQuotient(delta * 10000n, base))
   const sign = basisPoints < 0 ? '-' : basisPoints > 0 ? '+' : ''
   const absoluteBp = Math.abs(basisPoints)
   const whole = Math.floor(absoluteBp / 100)

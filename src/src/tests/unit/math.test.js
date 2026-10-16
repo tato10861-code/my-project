@@ -128,6 +128,26 @@ test('computeRoi reports gains as gains when the base is negative', () => {
   assert.equal(deeper.positive, false)
 })
 
+test('computeRoi rounds basis points to the nearest instead of truncating', () => {
+  // 1/3 = 33.33...% -> 3333 bp; 2/3 = 66.66...% -> 6667 bp (truncation gave 6666).
+  assert.equal(computeRoi(30000n, 40000n).basisPoints, 3333)
+  assert.equal(computeRoi(30000n, 50000n).basisPoints, 6667)
+  assert.equal(computeRoi(30000n, 50000n).percent, '+66.67%')
+  // The percent string and the number always agree.
+  assert.equal(computeRoi(30000n, 10000n).basisPoints, -6667)
+  assert.equal(computeRoi(30000n, 10000n).percent, '-66.67%')
+})
+
+test('computeRoi rounds an exact half away from zero, for gains and losses', () => {
+  // 1/20000 * 10000 = 0.5 bp
+  assert.equal(computeRoi(20000n, 20001n).basisPoints, 1)
+  assert.equal(computeRoi(20000n, 19999n).basisPoints, -1)
+  assert.equal(computeRoi(20000n, 20001n).positive, true)
+  // Below half a basis point is no change at all.
+  assert.equal(computeRoi(30000n, 30001n).basisPoints, 0)
+  assert.equal(computeRoi(30000n, 30001n).percent, '0.00%')
+})
+
 test('addCents and subCents are exact', () => {
   assert.equal(addCents(10n, 20n), 30n)
   assert.equal(subCents(20n, 10n), 10n)
