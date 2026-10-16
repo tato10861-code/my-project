@@ -24,7 +24,6 @@ repository root. Node 24 and pnpm 10 (`.nvmrc`, `package.json#engines`).
 - `components/`: UI. `db/migrations/`: ordered SQL, applied by `scripts/migrate.mjs` with a checksum ledger.
 - `tests/unit/`: 29 Jest suites (logic and route handlers). `.github/workflows/ci.yml`: the CI pipeline.
 - `docs/`: `INVESTOR_OVERVIEW.md` (what is built and verified), `ARCHITECTURE.md`, `DEVELOPMENT.md`, `HANDOVER.md`.
-- `agents/sara-closer/`: a superseded eve agent kept as a record; excluded from the root type check and lint.
 
 Tests, lint, types and build all pass without any external service. Only the live site needs Postgres, Stripe, Resend
 and model keys (see `.env.example`).

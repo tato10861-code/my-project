@@ -3,7 +3,6 @@ node_modules
 coverage
 pnpm-lock.yaml
 public
-agents
 evidence
 docs
 *.md

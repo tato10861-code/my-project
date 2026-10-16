@@ -91,4 +91,3 @@ Be aware of these before you rely on or value the project:
 - There are no browser (end-to-end) tests and no load tests; the API routes are covered by unit-level route tests with the database mocked.
 - No error-tracking service is wired in; failures are visible only in the hosting provider's logs.
 - The page and chat widget are Arabic and English; the chat widget also has French and Spanish. The rest of the page is not translated into other languages.
-- `agents/sara-closer` is a separate app inside this repository with its own copy of the booking-confirmation route; it has not had the same hardening as the main app.

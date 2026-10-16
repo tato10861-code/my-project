@@ -12,7 +12,6 @@ const config = [
       '.agents/**',
       '.claude/**',
       'agent/skills/**',
-      'agents/**',
       'coverage/**',
     ],
   },
