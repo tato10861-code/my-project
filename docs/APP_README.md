@@ -82,4 +82,4 @@ Vercel builds the app from `main`. CI (`.github/workflows/ci.yml`) runs the chec
 
 ## Security
 
-Read [SECURITY.md](../../SECURITY.md) before handling credentials or customer information.
+Read [SECURITY.md](../SECURITY.md) before handling credentials or customer information.
