@@ -3,7 +3,8 @@ import { db } from '@/lib/db'
 import { propautoEvents } from '@/lib/db/schema'
 import { isAutomatedTraffic } from '@/lib/analytics'
 import { EVENT_MAX_BODY_BYTES, eventSchema, type VisitorEvent } from '@/lib/events'
-import { BodyTooLargeError, getClientKey, payloadTooLarge, rateLimit, readJsonBody, tooManyRequests, crossOriginForbidden, isSameOriginRequest } from '@/lib/request-security'
+import { BodyTooLargeError, getClientKey, payloadTooLarge, readJsonBody, tooManyRequests, crossOriginForbidden, isSameOriginRequest } from '@/lib/request-security'
+import { checkRateLimit } from '@/lib/db/rate-limit'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -12,7 +13,7 @@ const noStore = { 'Cache-Control': 'no-store' }
 
 export async function POST(request: Request) {
   if (!isSameOriginRequest(request)) return crossOriginForbidden()
-  const limit = rateLimit(getClientKey(request, 'events'), 30)
+  const limit = await checkRateLimit(getClientKey(request, 'events'), 30)
   if (!limit.allowed) return tooManyRequests(limit.retryAfter)
 
   let payload: VisitorEvent

@@ -18,6 +18,8 @@ const requiredFiles = [
   'db/migrations/0001_lead_details.sql',
   'scripts/migrate.mjs',
   'lib/migrations.ts',
+  'lib/db/rate-limit.ts',
+  'lib/rate-limit-shared.ts',
   'app/api/health/route.ts',
   'lib/billing.ts',
   'lib/plans.ts',
