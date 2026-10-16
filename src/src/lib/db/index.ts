@@ -1,5 +1,6 @@
 import { drizzle } from 'drizzle-orm/node-postgres'
 import { Pool } from 'pg'
+import { withExplicitSslMode } from '@/lib/connection-string'
 import * as schema from './schema'
 
 const globalForDb = globalThis as unknown as { propautoPool?: Pool }
@@ -13,7 +14,7 @@ const connectionCandidates = [
 ].filter((value): value is string => typeof value === 'string' && value.trim() !== '')
 const connectionString = connectionCandidates[0]
 
-const safeConnectionString = connectionString ?? 'postgresql://not-configured.invalid/propauto'
+const safeConnectionString = connectionString ? withExplicitSslMode(connectionString) : 'postgresql://not-configured.invalid/propauto'
 
 /**
  * Shared Postgres connection pool (cached on globalThis to survive HMR).
