@@ -19,6 +19,7 @@ const requiredFiles = [
   'scripts/migrate.mjs',
   'db/migrations/0000_base_schema.sql',
   'lib/migrations.ts',
+  'lib/connection-string.ts',
   'lib/db/rate-limit.ts',
   'lib/rate-limit-shared.ts',
   'app/api/health/route.ts',

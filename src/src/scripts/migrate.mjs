@@ -13,6 +13,7 @@
 import { readdir, readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import pg from 'pg'
+import { withExplicitSslMode } from '../lib/connection-string.ts'
 import { migrationChecksum, planMigrations } from '../lib/migrations.ts'
 
 const directoryUrl = new URL('../db/migrations/', import.meta.url)
@@ -34,7 +35,7 @@ if (!connectionString) {
 const names = (await readdir(fileURLToPath(directoryUrl))).filter((name) => name.endsWith('.sql'))
 const files = await Promise.all(names.map(async (name) => ({ name, sql: await readFile(new URL(name, directoryUrl), 'utf8') })))
 
-const client = new pg.Client({ connectionString })
+const client = new pg.Client({ connectionString: withExplicitSslMode(connectionString) })
 await client.connect()
 let exitCode = 0
 try {
