@@ -8,6 +8,8 @@ module.exports = {
   testEnvironment: 'node',
   roots: ['<rootDir>/tests/unit'],
   testMatch: ['**/*.test.js'],
+  // The app imports with the '@/' alias (tsconfig paths); route tests need it too.
+  moduleNameMapper: { '^@/(.*)$': '<rootDir>/$1' },
   transform: {
     '^.+\\.[jt]s$': ['babel-jest', {
       configFile: false,
