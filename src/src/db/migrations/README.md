@@ -24,8 +24,7 @@ can break advisory locks and DDL.
 `0000_base_schema.sql` creates the base tables (`propauto_events`, `propauto_leads`,
 `propauto_operator_logs`), so the runner can build a brand-new database from
 nothing. On a database that already has them it changes nothing. The
-better-auth tables (`user`, `session`, ...) are not part of these files; create
-them with the better-auth CLI.
+better-auth tables (`user`, `session`, `account`, `verification`) are created by `0006_auth_tables.sql`.
 
 The first run on a database you migrated by hand re-applies the existing files.
 They are idempotent, so that is harmless, and it records them in the ledger.
