@@ -89,7 +89,9 @@ jobs:
           pnpm db:migrate | tee /tmp/second-run.log
           grep -q "up to date" /tmp/second-run.log
       - name: Nothing is left pending
-        run: pnpm db:migrate --status | tee /tmp/status.log && grep -q "pending: 0" /tmp/status.log
+        run: |
+          pnpm db:migrate --status | tee /tmp/status.log
+          grep -q "pending: 0" /tmp/status.log
 
   secrets:
     runs-on: ubuntu-latest
