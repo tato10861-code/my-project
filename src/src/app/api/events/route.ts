@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { propautoEvents } from '@/lib/db/schema'
+import { isAutomatedTraffic } from '@/lib/analytics'
 import { EVENT_MAX_BODY_BYTES, eventSchema, type VisitorEvent } from '@/lib/events'
-import { BodyTooLargeError, getClientKey, payloadTooLarge, rateLimit, readJsonBody, tooManyRequests } from '@/lib/request-security'
+import { BodyTooLargeError, getClientKey, payloadTooLarge, rateLimit, readJsonBody, tooManyRequests, crossOriginForbidden, isSameOriginRequest } from '@/lib/request-security'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -10,6 +11,7 @@ export const revalidate = 0
 const noStore = { 'Cache-Control': 'no-store' }
 
 export async function POST(request: Request) {
+  if (!isSameOriginRequest(request)) return crossOriginForbidden()
   const limit = rateLimit(getClientKey(request, 'events'), 30)
   if (!limit.allowed) return tooManyRequests(limit.retryAfter)
 
@@ -20,6 +22,9 @@ export async function POST(request: Request) {
     if (error instanceof BodyTooLargeError) return payloadTooLarge()
     return NextResponse.json({ error: 'Invalid event details' }, { status: 400, headers: noStore })
   }
+
+  // Crawlers and scripts are acknowledged but not counted, so they cannot inflate the audience figures.
+  if (isAutomatedTraffic(request.headers.get('user-agent'))) return NextResponse.json({ ok: true, counted: false }, { status: 202, headers: noStore })
 
   try {
     await db.insert(propautoEvents).values(payload)

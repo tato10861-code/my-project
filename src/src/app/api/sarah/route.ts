@@ -5,7 +5,7 @@ import { Resend } from 'resend'
 import { z } from 'zod'
 import { bookingRequestSchema } from '@/lib/bookings'
 import { bookingConfig, freeSlots, requestBooking } from '@/lib/db/booking-service'
-import { BodyTooLargeError, getClientKey, payloadTooLarge, rateLimit, readJsonBody, tooManyRequests } from '@/lib/request-security'
+import { BodyTooLargeError, getClientKey, payloadTooLarge, rateLimit, readJsonBody, tooManyRequests, crossOriginForbidden, isSameOriginRequest } from '@/lib/request-security'
 import { runWithModelFallback } from '@/lib/sarah-fallback'
 import { sarahModelNames } from '@/lib/sarah-models'
 import { fallbackReply, sarahSystem } from '@/lib/sarah-prompt'
@@ -49,6 +49,7 @@ const sarahTools = {
 }
 
 export async function POST(request: Request) {
+  if (!isSameOriginRequest(request)) return crossOriginForbidden()
   const clientKey = getClientKey(request, 'sarah')
   const limit = rateLimit(clientKey, 10)
   if (!limit.allowed) return tooManyRequests(limit.retryAfter)

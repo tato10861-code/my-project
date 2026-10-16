@@ -70,6 +70,19 @@ test('subscriptionRecord keeps the state of a subscription, with its period end 
   })
 })
 
+test('subscriptionRecord reads the period end from every item and keeps the soonest renewal', () => {
+  const items = {
+    data: [
+      { current_period_end: 1_805_000_000, price: { id: 'price_growth', metadata: { plan: 'growth' } } },
+      { current_period_end: 1_802_592_000, price: { id: 'price_addon', metadata: {} } },
+      { price: { id: 'price_no_period', metadata: {} } },
+    ],
+  }
+  const record = subscriptionRecord(event('customer.subscription.updated', subscription({ items })))
+  assert.deepEqual(record.currentPeriodEnd, new Date(1_802_592_000_000))
+  assert.equal(record.priceId, 'price_growth')
+})
+
 test('subscriptionRecord handles expanded customers, missing plan metadata, no trial and deletion', () => {
   const record = subscriptionRecord(event('customer.subscription.deleted', subscription({ customer: { id: 'cus_2' }, status: 'canceled', trial_end: null, metadata: {} })))
   assert.equal(record.customerId, 'cus_2')
