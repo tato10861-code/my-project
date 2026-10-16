@@ -1,6 +1,6 @@
 import { convertToModelMessages, streamText, type UIMessage } from 'ai'
 import { z } from 'zod'
-import { BodyTooLargeError, getClientKey, payloadTooLarge, rateLimit, readJsonBody, tooManyRequests } from '@/lib/request-security'
+import { BodyTooLargeError, getClientKey, payloadTooLarge, rateLimit, readJsonBody, tooManyRequests, crossOriginForbidden, isSameOriginRequest } from '@/lib/request-security'
 
 const MAX_BODY_BYTES = 96_000
 
@@ -10,6 +10,7 @@ const requestSchema = z.object({
 })
 
 export async function POST(request: Request) {
+  if (!isSameOriginRequest(request)) return crossOriginForbidden()
   const limit = rateLimit(getClientKey(request, 'concierge'), 10)
   if (!limit.allowed) return tooManyRequests(limit.retryAfter)
 

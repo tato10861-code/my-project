@@ -3,7 +3,7 @@ import Stripe from 'stripe'
 import { subscriptionCheckoutParams } from '@/lib/billing'
 import { getPlan } from '@/lib/plans'
 import { getProduct } from '@/lib/products'
-import { getClientKey, hasOversizedBody, rateLimit, tooManyRequests, getConfiguredOrigin } from '@/lib/request-security'
+import { getClientKey, hasOversizedBody, rateLimit, tooManyRequests, getConfiguredOrigin, crossOriginForbidden, isSameOriginRequest } from '@/lib/request-security'
 
 const noStore = { 'Cache-Control': 'no-store' }
 
@@ -13,6 +13,7 @@ const noStore = { 'Cache-Control': 'no-store' }
  * "true"); a `product` field keeps the one-time premium access purchase.
  */
 export async function POST(request: Request) {
+  if (!isSameOriginRequest(request)) return crossOriginForbidden()
   const limit = rateLimit(getClientKey(request, 'checkout'), 10)
   if (!limit.allowed) return tooManyRequests(limit.retryAfter)
   if (hasOversizedBody(request, 8_192)) return NextResponse.json({ error: 'Request too large' }, { status: 413, headers: noStore })

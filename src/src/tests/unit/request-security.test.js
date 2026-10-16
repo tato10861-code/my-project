@@ -9,6 +9,8 @@
 import assert from 'node:assert/strict'
 import {
   getClientKey,
+  isSameOriginRequest,
+  crossOriginForbidden,
   rateLimit,
   tooManyRequests,
   getConfiguredOrigin,
@@ -198,4 +200,44 @@ test('getConfiguredOrigin rejects plain http outside development', () => {
   else delete process.env.NODE_ENV
   if (previousUrl !== undefined) process.env.NEXT_PUBLIC_SITE_URL = previousUrl
   else delete process.env.NEXT_PUBLIC_SITE_URL
+})
+
+describe('isSameOriginRequest', () => {
+  const post = (headers = {}, url = 'https://propauto.example/api/leads') => new Request(url, { method: 'POST', headers })
+  const saved = { site: process.env.NEXT_PUBLIC_SITE_URL, auth: process.env.BETTER_AUTH_URL }
+  beforeEach(() => {
+    process.env.NEXT_PUBLIC_SITE_URL = 'https://www.propauto.example'
+    delete process.env.BETTER_AUTH_URL
+  })
+  afterAll(() => {
+    for (const [key, value] of [['NEXT_PUBLIC_SITE_URL', saved.site], ['BETTER_AUTH_URL', saved.auth]]) {
+      if (value === undefined) delete process.env[key]
+      else process.env[key] = value
+    }
+  })
+
+  test('accepts the configured origin and the origin the request arrived on', () => {
+    assert.equal(isSameOriginRequest(post({ origin: 'https://www.propauto.example' })), true)
+    assert.equal(isSameOriginRequest(post({ origin: 'https://propauto.example' })), true)
+  })
+
+  test('rejects another site, a lookalike host and the null origin', () => {
+    assert.equal(isSameOriginRequest(post({ origin: 'https://evil.example' })), false)
+    assert.equal(isSameOriginRequest(post({ origin: 'https://propauto.example.evil.example' })), false)
+    assert.equal(isSameOriginRequest(post({ origin: 'http://propauto.example' })), false)
+    assert.equal(isSameOriginRequest(post({ origin: 'null' })), false)
+  })
+
+  test('without Origin it relies on Sec-Fetch-Site', () => {
+    assert.equal(isSameOriginRequest(post({ 'sec-fetch-site': 'cross-site' })), false)
+    assert.equal(isSameOriginRequest(post({ 'sec-fetch-site': 'same-origin' })), true)
+    assert.equal(isSameOriginRequest(post()), true)
+  })
+
+  test('crossOriginForbidden answers 403 with no-store', async () => {
+    const response = crossOriginForbidden()
+    assert.equal(response.status, 403)
+    assert.equal(response.headers.get('cache-control'), 'no-store')
+    assert.equal((await response.json()).error, 'Cross-origin request rejected')
+  })
 })

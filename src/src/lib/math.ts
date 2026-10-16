@@ -44,8 +44,12 @@ export function toCents(amount: number | string): bigint {
     if (!Number.isFinite(amount)) {
       throw new RangeError('toCents: amount must be a finite number')
     }
-    const cents = BigInt(Math.round(amount * Number(CENTS_PER_UNIT)))
-    return assertWithinBounds(cents)
+    // At 1e21 and above every double is an integer, and toFixed would switch to
+    // exponent notation, so scale those exactly in BigInt instead.
+    if (Math.abs(amount) >= 1e21) return assertWithinBounds(BigInt(amount) * CENTS_PER_UNIT)
+    // toFixed rounds the double's exact binary value (ties away from zero), so
+    // there is no floating-point multiply to lose precision or misplace a half.
+    return toCents(amount.toFixed(MONEY_DECIMALS))
   }
 
   const normalized = amount.trim()
@@ -212,15 +216,21 @@ export function safeDivide(numerator: number, denominator: number): number | nul
  * Clamps an integer to the inclusive [min, max] range.
  *
  * @param value - The value to clamp. NaN clamps to `min`; infinities clamp
- *   to the nearest bound.
- * @param min - Lower bound (inclusive).
- * @param max - Upper bound (inclusive).
- * @returns The clamped value.
+ *   to the nearest bound; fractions round to the nearest integer.
+ * @param min - Lower bound (inclusive), an integer.
+ * @param max - Upper bound (inclusive), an integer.
+ * @returns The clamped integer.
+ * @throws {RangeError} When a bound is not an integer or `min` exceeds `max`.
  * @complexity O(1) time, O(1) space.
  */
 export function clampInt(value: number, min: number, max: number): number {
+  if (!Number.isInteger(min) || !Number.isInteger(max)) {
+    throw new RangeError('clampInt: bounds must be integers')
+  }
+  if (min > max) throw new RangeError('clampInt: min must not exceed max')
   if (Number.isNaN(value)) return min
-  return Math.min(Math.max(value, min), max)
+  // `+ 0` turns a rounded -0 into 0.
+  return Math.round(Math.min(Math.max(value, min), max)) + 0
 }
 
 function assertWithinBounds(cents: bigint): bigint {

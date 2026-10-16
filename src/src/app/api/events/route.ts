@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { propautoEvents } from '@/lib/db/schema'
 import { EVENT_MAX_BODY_BYTES, eventSchema, type VisitorEvent } from '@/lib/events'
-import { BodyTooLargeError, getClientKey, payloadTooLarge, rateLimit, readJsonBody, tooManyRequests } from '@/lib/request-security'
+import { BodyTooLargeError, getClientKey, payloadTooLarge, rateLimit, readJsonBody, tooManyRequests, crossOriginForbidden, isSameOriginRequest } from '@/lib/request-security'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -10,6 +10,7 @@ export const revalidate = 0
 const noStore = { 'Cache-Control': 'no-store' }
 
 export async function POST(request: Request) {
+  if (!isSameOriginRequest(request)) return crossOriginForbidden()
   const limit = rateLimit(getClientKey(request, 'events'), 30)
   if (!limit.allowed) return tooManyRequests(limit.retryAfter)
 

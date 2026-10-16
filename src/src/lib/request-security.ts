@@ -136,6 +136,38 @@ export function getConfiguredOrigin() {
 }
 
 /**
+ * Decides whether a state-changing request was made by this site's own pages.
+ *
+ * Browsers attach `Origin` to every cross-site POST, so a form hosted on
+ * another site is rejected here before it can start a purchase or write a
+ * record. The allowed origins are the configured public origin and the origin
+ * the request itself arrived on. When `Origin` is absent (older browsers,
+ * non-browser clients) `Sec-Fetch-Site` is consulted; a request with neither
+ * header cannot be a cross-site browser submission and is allowed.
+ *
+ * @param request - The incoming request.
+ * @returns True when the request may proceed.
+ * @complexity O(1) time, O(1) space.
+ */
+export function isSameOriginRequest(request: Request) {
+  const origin = request.headers.get('origin')
+  if (origin === null) return request.headers.get('sec-fetch-site') !== 'cross-site'
+  let requestOrigin: string | null = null
+  try {
+    requestOrigin = new URL(request.url).origin
+  } catch {
+    requestOrigin = null
+  }
+  const allowed = [getConfiguredOrigin(), requestOrigin]
+  return allowed.some((candidate) => candidate !== null && candidate === origin)
+}
+
+/** Standard 403 response for a request from another origin. */
+export function crossOriginForbidden() {
+  return Response.json({ error: 'Cross-origin request rejected' }, { status: 403, headers: { 'Cache-Control': 'no-store' } })
+}
+
+/**
  * Detects whether a request declares a body above the byte limit using the
  * Content-Length header, without reading the body. A missing header is not a
  * verdict: use {@link readJsonBody} to enforce the limit on the actual bytes.

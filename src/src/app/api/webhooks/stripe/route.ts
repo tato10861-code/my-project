@@ -72,16 +72,32 @@ async function saveSubscription(record: SubscriptionRecord) {
     })
 }
 
-/** Inserts an operator-log row for the event unless one exists; true when inserted. */
+/**
+ * Inserts an operator-log row for the event unless one exists; true when this
+ * call inserted it. The lookup is a fast path only: two concurrent deliveries
+ * can both miss it, so the insert itself is conflict-safe against the unique
+ * index from db/migrations/0004_stripe_event_dedupe.sql, and only the delivery
+ * whose insert lands goes on to notify the owner.
+ */
 async function recordOnce(action: string, eventId: string, details: Record<string, unknown>) {
   const existing = await db
     .select({ id: propautoOperatorLogs.id })
     .from(propautoOperatorLogs)
-    .where(and(eq(propautoOperatorLogs.botName, 'stripe'), sql`${propautoOperatorLogs.details}->>'eventId' = ${eventId}`))
+    .where(
+      and(
+        eq(propautoOperatorLogs.botName, 'stripe'),
+        eq(propautoOperatorLogs.action, action),
+        sql`${propautoOperatorLogs.details}->>'eventId' = ${eventId}`,
+      ),
+    )
     .limit(1)
   if (existing.length > 0) return false
-  await db.insert(propautoOperatorLogs).values({ botName: 'stripe', action, status: 'completed', details })
-  return true
+  const inserted = await db
+    .insert(propautoOperatorLogs)
+    .values({ botName: 'stripe', action, status: 'completed', details })
+    .onConflictDoNothing()
+    .returning({ id: propautoOperatorLogs.id })
+  return inserted.length > 0
 }
 
 interface OwnerEmail {

@@ -42,6 +42,17 @@ test('toCents rounds to the nearest cent for numbers', () => {
   assert.equal(toCents(0.004), 0n)
 })
 
+test('toCents keeps precision for large numbers and exact halves', () => {
+  // 9007199254740.99 * 100 does not land on an integer in floating point.
+  assert.equal(toCents(9007199254740.99), 900719925474099n)
+  assert.equal(toCents(4503599627370.5), 450359962737050n)
+  // Exact binary halves round away from zero instead of toward +infinity.
+  assert.equal(toCents(0.125), 13n)
+  assert.equal(toCents(-0.125), -13n)
+  assert.equal(toCents(-2.675), -267n)
+  assert.equal(toCents(-0.004), 0n)
+})
+
 test('toCents parses decimal strings without drift', () => {
   assert.equal(toCents('0'), 0n)
   assert.equal(toCents('12.3'), 1230n)
@@ -155,6 +166,20 @@ test('clampInt bounds values defensively', () => {
   assert.equal(clampInt(Number.NaN, 0, 10), 0)
   assert.equal(clampInt(Number.POSITIVE_INFINITY, 0, 10), 10)
   assert.equal(clampInt(Number.NEGATIVE_INFINITY, 0, 10), 0)
+})
+
+test('clampInt always returns an integer', () => {
+  assert.equal(clampInt(2.4, 0, 10), 2)
+  assert.equal(clampInt(2.5, 0, 10), 3)
+  assert.equal(clampInt(-0.2, -5, 5), 0)
+  assert.equal(Object.is(clampInt(-0.2, -5, 5), 0), true)
+  assert.equal(clampInt(10.4, 0, 10), 10)
+})
+
+test('clampInt rejects inverted or fractional bounds', () => {
+  assert.throws(() => clampInt(5, 10, 0), RangeError)
+  assert.throws(() => clampInt(5, 0.5, 10), RangeError)
+  assert.throws(() => clampInt(5, 0, Number.POSITIVE_INFINITY), RangeError)
 })
 
 test('constants are stable', () => {

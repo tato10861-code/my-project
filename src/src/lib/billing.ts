@@ -55,6 +55,18 @@ const SUBSCRIPTION_EVENTS = new Set(['customer.subscription.created', 'customer.
 const fromUnix = (seconds: number | null | undefined) => (typeof seconds === 'number' ? new Date(seconds * 1000) : null)
 
 /**
+ * The soonest period end across every item of a subscription, which is when
+ * the next renewal charge happens. A multi-item subscription can carry items on
+ * different periods, so reading only the first item can name the wrong date.
+ */
+function nextRenewal(subscription: Stripe.Subscription): number | null {
+  const ends = (subscription.items?.data ?? [])
+    .map((item) => item.current_period_end)
+    .filter((end): end is number => typeof end === 'number')
+  return ends.length > 0 ? Math.min(...ends) : null
+}
+
+/**
  * Extracts the subscription state from a customer.subscription.* event, or
  * null for every other event. The billing period lives on the subscription
  * item in current API versions.
@@ -71,7 +83,7 @@ export function subscriptionRecord(event: Stripe.Event): SubscriptionRecord | nu
     status: subscription.status,
     cancelAtPeriodEnd: subscription.cancel_at_period_end,
     trialEnd: fromUnix(subscription.trial_end),
-    currentPeriodEnd: fromUnix(item?.current_period_end),
+    currentPeriodEnd: fromUnix(nextRenewal(subscription)),
     livemode: event.livemode,
     eventCreated: event.created,
   }
