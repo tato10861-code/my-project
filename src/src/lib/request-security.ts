@@ -255,6 +255,19 @@ export async function readJsonBody(request: Request, maxBytes: number): Promise<
   }
 }
 
+/**
+ * Reads a form-encoded body (`application/x-www-form-urlencoded`) under the
+ * same byte cap as {@link readTextBody}, so a chunked submission with no
+ * Content-Length cannot slip past the limit the way `request.formData()` would
+ * allow.
+ *
+ * @throws {BodyTooLargeError} When the declared or actual size exceeds the cap.
+ * @returns The decoded fields (empty when there is no body).
+ */
+export async function readFormBody(request: Request, maxBytes: number): Promise<URLSearchParams> {
+  return new URLSearchParams(await readTextBody(request, maxBytes))
+}
+
 /** Standard 413 response for oversized bodies. */
 export function payloadTooLarge() {
   return Response.json({ error: 'Request too large' }, { status: 413, headers: { 'Cache-Control': 'no-store' } })

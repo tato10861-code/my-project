@@ -16,6 +16,7 @@ import {
   getConfiguredOrigin,
   hasOversizedBody,
   readJsonBody,
+  readFormBody,
   BodyTooLargeError,
   InvalidJsonError,
   bucketCount,
@@ -239,5 +240,32 @@ describe('isSameOriginRequest', () => {
     assert.equal(response.status, 403)
     assert.equal(response.headers.get('cache-control'), 'no-store')
     assert.equal((await response.json()).error, 'Cross-origin request rejected')
+  })
+})
+
+describe('readFormBody', () => {
+  const form = (body, headers = {}) => new Request('https://example.com/api/checkout', { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded', ...headers }, body })
+
+  test('decodes the fields of a form submission', async () => {
+    const fields = await readFormBody(form('plan=growth&product=a%20b'), 1024)
+    assert.equal(fields.get('plan'), 'growth')
+    assert.equal(fields.get('product'), 'a b')
+    assert.equal(fields.get('missing'), null)
+  })
+
+  test('an empty body yields no fields', async () => {
+    const fields = await readFormBody(new Request('https://example.com', { method: 'POST' }), 1024)
+    assert.equal([...fields].length, 0)
+  })
+
+  test('caps the bytes actually received, not just the declared length', async () => {
+    const chunks = [new TextEncoder().encode('plan='), new TextEncoder().encode('x'.repeat(64))]
+    const stream = new ReadableStream({ start(controller) { for (const chunk of chunks) controller.enqueue(chunk); controller.close() } })
+    const chunked = new Request('https://example.com/api/checkout', { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body: stream, duplex: 'half' })
+    await assert.rejects(readFormBody(chunked, 32), BodyTooLargeError)
+  })
+
+  test('rejects a declared length over the cap without reading', async () => {
+    await assert.rejects(readFormBody(form('plan=growth', { 'content-length': '999999' }), 1024), BodyTooLargeError)
   })
 })

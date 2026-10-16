@@ -22,12 +22,20 @@ export async function POST(request: Request) {
     return Response.json({ error: 'Invalid concierge request' }, { status: 400, headers: { 'Cache-Control': 'no-store' } })
   }
 
+  let messages: Awaited<ReturnType<typeof convertToModelMessages>>
+  try {
+    messages = await convertToModelMessages(parsed.messages)
+  } catch {
+    // The schema only checks that each entry is an object; malformed message parts are the caller's error, not ours.
+    return Response.json({ error: 'Invalid concierge request' }, { status: 400, headers: { 'Cache-Control': 'no-store' } })
+  }
+
   const result = streamText({
     model: 'google/gemini-3.1-flash-lite',
     system: parsed.locale === 'ar'
       ? 'أنت مستشار PropAuto AI للعقارات الفاخرة والسيارات النادرة والاستثمار. كن واضحاً ومختصراً. لا تعد بعوائد مضمونة. اجمع هدف العميل وميزانيته ومدينته ثم اقترح خطوة تواصل.'
       : 'You are PropAuto AI concierge for luxury real estate, rare cars, and investing. Be concise and practical. Never promise guaranteed returns. Ask for intent, budget, and city, then recommend a next contact step.',
-    messages: await convertToModelMessages(parsed.messages),
+    messages,
     abortSignal: request.signal,
   })
   return result.toUIMessageStreamResponse()

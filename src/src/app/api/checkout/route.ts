@@ -3,9 +3,12 @@ import Stripe from 'stripe'
 import { subscriptionCheckoutParams } from '@/lib/billing'
 import { getPlan } from '@/lib/plans'
 import { getProduct } from '@/lib/products'
-import { getClientKey, hasOversizedBody, rateLimit, tooManyRequests, getConfiguredOrigin, crossOriginForbidden, isSameOriginRequest } from '@/lib/request-security'
+import { BodyTooLargeError, getClientKey, payloadTooLarge, rateLimit, readFormBody, tooManyRequests, getConfiguredOrigin, crossOriginForbidden, isSameOriginRequest } from '@/lib/request-security'
 
 const noStore = { 'Cache-Control': 'no-store' }
+
+/** A checkout form carries one short field; anything larger is not ours. */
+const CHECKOUT_MAX_BODY_BYTES = 8_192
 
 /**
  * Starts a Stripe-hosted Checkout. A `plan` field starts a monthly
@@ -16,12 +19,17 @@ export async function POST(request: Request) {
   if (!isSameOriginRequest(request)) return crossOriginForbidden()
   const limit = rateLimit(getClientKey(request, 'checkout'), 10)
   if (!limit.allowed) return tooManyRequests(limit.retryAfter)
-  if (hasOversizedBody(request, 8_192)) return NextResponse.json({ error: 'Request too large' }, { status: 413, headers: noStore })
 
   try {
-    const formData = await request.formData()
-    const plan = getPlan(String(formData.get('plan') ?? ''))
-    const product = plan ? undefined : getProduct(String(formData.get('product') ?? ''))
+    let formData: URLSearchParams
+    try {
+      formData = await readFormBody(request, CHECKOUT_MAX_BODY_BYTES)
+    } catch (error) {
+      if (error instanceof BodyTooLargeError) return payloadTooLarge()
+      throw error
+    }
+    const plan = getPlan(formData.get('plan') ?? '')
+    const product = plan ? undefined : getProduct(formData.get('product') ?? '')
     if (!plan && !product) return NextResponse.json({ error: 'Product not found' }, { status: 404, headers: noStore })
 
     const secretKey = process.env.STRIPE_SECRET_KEY
