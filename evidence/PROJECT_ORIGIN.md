@@ -98,6 +98,9 @@ They are supporting evidence, not independently verified.
 | 29 Sep to 5 Oct 2026 (7 days) | Production | 41 | 50 |
 | 15 Sep to 15 Oct 2026 (30 days) | All environments | 116 | 177 |
 
+Four of these screenshots are stored in [`screenshots/`](screenshots/) (all environments from 15 Sep,
+production 30 days, the 16 Sep page-views peak, and the operating-system split).
+
 Windows overlap or repeat visitors, so these figures are not added together.
 Audience mix in the 15 Sep to 15 Oct screenshots: Yemen 65%, United States 18%,
 Italy 4%, India 2%, Jamaica 2%; mobile 69% and desktop 31%; Android 67%, Windows 23%,
@@ -111,4 +114,4 @@ These are site visits. They are not customers, leads, or revenue.
 - No paying customers yet.
 - Latency and concurrent-load figures have not been measured.
 - Voice is the Vapi service and the model is a Gemini free tier; see
-  `src/src/docs/ARCHITECTURE.md` for what is external and what is not built.
+  `docs/ARCHITECTURE.md` for what is external and what is not built.
