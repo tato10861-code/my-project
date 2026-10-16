@@ -178,7 +178,7 @@ export function crossOriginForbidden() {
  *   the limit; false when it is absent or within the limit.
  * @complexity O(1) time, O(1) space.
  */
-export function hasOversizedBody(request: Request, maxBytes: number) {
+export function hasOversizedBody(request: Request | Response, maxBytes: number) {
   const value = request.headers.get('content-length')
   if (value === null) return false
   const length = Number(value)
@@ -202,8 +202,8 @@ export class InvalidJsonError extends Error {
 }
 
 /**
- * Reads the raw body as text while enforcing a byte cap on the bytes actually
- * received, so a chunked request with no Content-Length cannot bypass the
+ * Reads the raw body of a request (or of an upstream response) as text while
+ * enforcing a byte cap on the bytes actually received, so a chunked request with no Content-Length cannot bypass the
  * limit. Reading stops as soon as the cap is crossed.
  *
  * @param request - The incoming request.
@@ -212,7 +212,7 @@ export class InvalidJsonError extends Error {
  * @throws {BodyTooLargeError} When the declared or actual size exceeds the cap.
  * @complexity O(n) time and space in the body size, bounded by maxBytes.
  */
-export async function readTextBody(request: Request, maxBytes: number): Promise<string> {
+export async function readTextBody(request: Request | Response, maxBytes: number): Promise<string> {
   if (hasOversizedBody(request, maxBytes)) throw new BodyTooLargeError()
   if (!request.body) return ''
 
