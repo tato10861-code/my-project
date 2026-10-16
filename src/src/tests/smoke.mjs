@@ -17,6 +17,7 @@ const requiredFiles = [
   'app/api/webhooks/stripe/route.ts',
   'db/migrations/0001_lead_details.sql',
   'scripts/migrate.mjs',
+  'db/migrations/0000_base_schema.sql',
   'lib/migrations.ts',
   'lib/db/rate-limit.ts',
   'lib/rate-limit-shared.ts',
