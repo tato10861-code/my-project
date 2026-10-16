@@ -4,9 +4,9 @@ import { db } from '@/lib/db'
 import { propautoLeads } from '@/lib/db/schema'
 import { buildLeadEmail, isMissingColumnError, LEAD_MAX_BODY_BYTES, leadIdempotencyKey, leadRow, leadSchema, type Lead } from '@/lib/leads'
 import { BodyTooLargeError, getClientKey, payloadTooLarge, readJsonBody, tooManyRequests, crossOriginForbidden, isSameOriginRequest } from '@/lib/request-security'
+import { notifyEmail } from '@/lib/site-config'
 import { checkRateLimit } from '@/lib/db/rate-limit'
 
-const COMPANY_EMAIL = 'propautoal@gmail.com'
 const noStore = { 'Cache-Control': 'no-store' }
 
 export async function POST(request: Request) {
@@ -40,7 +40,7 @@ export async function POST(request: Request) {
   try {
     const { subject, html } = buildLeadEmail(payload)
     const { error } = await new Resend(apiKey).emails.send(
-      { from: process.env.RESEND_FROM_EMAIL ?? 'PropAuto Sales Team <onboarding@resend.dev>', to: [COMPANY_EMAIL], replyTo: payload.email, subject, html },
+      { from: process.env.RESEND_FROM_EMAIL ?? 'PropAuto Sales Team <onboarding@resend.dev>', to: [notifyEmail()], replyTo: payload.email, subject, html },
       { idempotencyKey: leadIdempotencyKey(payload) },
     )
     if (error) throw new Error(error.message)

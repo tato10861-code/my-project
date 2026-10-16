@@ -6,6 +6,7 @@ import { db } from '@/lib/db'
 import { propautoOperatorLogs, propautoSubscriptions } from '@/lib/db/schema'
 import { billingNotice, subscriptionRecord, type BillingNotice, type SubscriptionRecord } from '@/lib/billing'
 import { paymentRecord, STRIPE_WEBHOOK_MAX_BYTES, verifyStripeEvent, type PaymentRecord } from '@/lib/payments'
+import { notifyEmail } from '@/lib/site-config'
 import { BodyTooLargeError, payloadTooLarge, readTextBody } from '@/lib/request-security'
 
 const noStore = { 'Cache-Control': 'no-store' }
@@ -134,7 +135,7 @@ async function notifyOwner(email: OwnerEmail) {
   const { error } = await new Resend(apiKey).emails.send(
     {
       from: process.env.RESEND_FROM_EMAIL ?? 'PropAuto Payments <onboarding@resend.dev>',
-      to: ['propautoal@gmail.com'],
+      to: [notifyEmail()],
       subject: email.subject,
       text: email.text,
     },

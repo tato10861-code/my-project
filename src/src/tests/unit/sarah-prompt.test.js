@@ -15,6 +15,18 @@ test('system instruction carries the widget language code', () => {
   assert.equal(sarahSystem('fr').endsWith('Preferred language code: fr.'), true)
 })
 
+test('system instruction carries the configured contact email, not a hard-coded one', () => {
+  assert.equal(SARAH_SYSTEM_PROMPT.includes('@'), false)
+  const saved = process.env.NEXT_PUBLIC_CONTACT_EMAIL
+  process.env.NEXT_PUBLIC_CONTACT_EMAIL = 'hello@buyer.example'
+  try {
+    assert.equal(sarahSystem('en').includes('Current company contact: hello@buyer.example.'), true)
+  } finally {
+    if (saved === undefined) delete process.env.NEXT_PUBLIC_CONTACT_EMAIL
+    else process.env.NEXT_PUBLIC_CONTACT_EMAIL = saved
+  }
+})
+
 test('fallback reply is localized and defaults to English', () => {
   assert.equal(fallbackReply('ar').includes('سارة'), true)
   assert.equal(fallbackReply('fr').startsWith('Bonjour'), true)

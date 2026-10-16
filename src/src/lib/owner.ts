@@ -1,7 +1,13 @@
-/** Email address of the platform owner; the only account allowed into /admin. */
-export const OWNER_EMAIL = 'tato10861@gmail.com'
+import { DEFAULT_OWNER_EMAIL, ownerEmail } from '@/lib/site-config'
 
-/** Case- and whitespace-insensitive comparison against {@link OWNER_EMAIL}. */
+/**
+ * The built-in owner email, the platform owner's login when OWNER_EMAIL is not
+ * set. The only account allowed into /admin is the configured owner (see
+ * lib/site-config.ts).
+ */
+export const OWNER_EMAIL = DEFAULT_OWNER_EMAIL
+
+/** Case- and whitespace-insensitive comparison against the configured owner email. */
 export function isOwnerEmail(email: string | null | undefined) {
-  return typeof email === 'string' && email.trim().toLowerCase() === OWNER_EMAIL
+  return typeof email === 'string' && email.trim().toLowerCase() === ownerEmail()
 }
