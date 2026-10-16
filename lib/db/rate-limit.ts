@@ -12,6 +12,7 @@
 import { pool } from '@/lib/db'
 import { rateLimit } from '@/lib/request-security'
 import { sharedRateLimit, type LimitResult } from '@/lib/rate-limit-shared'
+import { errorMessage, log } from '@/lib/log'
 
 /** Longest the shared check may delay a request before the per-instance answer is used. */
 const SHARED_TIMEOUT_MS = 750
@@ -43,10 +44,10 @@ export async function checkRateLimit(key: string, limit: number, now: number = D
   } catch (error) {
     if (!warned) {
       warned = true
-      console.error(
-        '[rate-limit] shared store unavailable, using per-instance limits:',
-        error instanceof Error ? error.message : 'unknown error',
-      )
+      log('error', 'rate-limit.shared_store_unavailable', {
+        fallback: 'per-instance limits',
+        error: errorMessage(error),
+      })
     }
     return local
   }

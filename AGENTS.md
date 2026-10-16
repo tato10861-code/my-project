@@ -7,7 +7,7 @@ repository root. Node 24 and pnpm 10 (`.nvmrc`, `package.json#engines`).
 |---|---|
 | Install | `pnpm install --frozen-lockfile` |
 | Run locally | `cp .env.example .env.local` then `pnpm dev` |
-| Unit tests (Jest) | `pnpm test` (221 tests, no database needed) |
+| Unit tests (Jest) | `pnpm test` (224 tests, no database needed) |
 | Coverage (enforced floors) | `pnpm test:coverage` |
 | Lint / format / types | `pnpm lint`, `pnpm format:check`, `pnpm typecheck` |
 | Production build | `pnpm build` (needs `BETTER_AUTH_SECRET`; any value works for a build) |
@@ -22,7 +22,7 @@ repository root. Node 24 and pnpm 10 (`.nvmrc`, `package.json#engines`).
 - `lib/`: business logic with no framework imports where possible: money math (`math.ts`), request defences
   (`request-security.ts`), billing and revenue (`billing.ts`, `revenue.ts`), bookings, the concierge prompt.
 - `components/`: UI. `db/migrations/`: ordered SQL, applied by `scripts/migrate.mjs` with a checksum ledger.
-- `tests/unit/`: 28 Jest suites (logic and route handlers). `.github/workflows/ci.yml`: the CI pipeline.
+- `tests/unit/`: 29 Jest suites (logic and route handlers). `.github/workflows/ci.yml`: the CI pipeline.
 - `docs/`: `INVESTOR_OVERVIEW.md` (what is built and verified), `ARCHITECTURE.md`, `DEVELOPMENT.md`, `HANDOVER.md`.
 - `agents/sara-closer/`: a superseded eve agent kept as a record; excluded from the root type check and lint.
 

@@ -3,6 +3,7 @@ import { requireOwner } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { propautoSubscriptions } from '@/lib/db/schema'
 import { summarizeRevenue } from '@/lib/revenue'
+import { errorMessage, log } from '@/lib/log'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -17,7 +18,7 @@ export async function GET(request: Request) {
     const rows = await db.select().from(propautoSubscriptions)
     return NextResponse.json({ ...summarizeRevenue(rows), source: 'neon' }, { headers: noStore })
   } catch (error) {
-    console.error('[admin-revenue] query failed:', error instanceof Error ? error.message : 'unknown error')
+    log('error', 'admin-revenue.query_failed', { error: errorMessage(error) })
     return NextResponse.json({ error: 'Revenue unavailable' }, { status: 503, headers: noStore })
   }
 }

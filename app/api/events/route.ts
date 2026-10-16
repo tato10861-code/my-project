@@ -13,6 +13,7 @@ import {
   isSameOriginRequest,
 } from '@/lib/request-security'
 import { checkRateLimit } from '@/lib/db/rate-limit'
+import { errorMessage, log } from '@/lib/log'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -40,7 +41,7 @@ export async function POST(request: Request) {
     await db.insert(propautoEvents).values(payload)
     return NextResponse.json({ ok: true }, { status: 201, headers: noStore })
   } catch (error) {
-    console.error('[events] tracking failed:', error instanceof Error ? error.message : 'unknown error')
+    log('error', 'events.tracking_failed', { error: errorMessage(error) })
     return NextResponse.json(
       { error: 'Event tracking temporarily unavailable', retryable: true },
       { status: 503, headers: noStore },

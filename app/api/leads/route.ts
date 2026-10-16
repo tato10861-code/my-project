@@ -22,6 +22,7 @@ import {
 } from '@/lib/request-security'
 import { notifyEmail } from '@/lib/site-config'
 import { checkRateLimit } from '@/lib/db/rate-limit'
+import { errorMessage, log } from '@/lib/log'
 
 const noStore = { 'Cache-Control': 'no-store' }
 
@@ -41,7 +42,7 @@ export async function POST(request: Request) {
   try {
     await saveLead(payload)
   } catch (error) {
-    console.error('[leads] storage failed:', error instanceof Error ? error.message : 'unknown error')
+    log('error', 'leads.storage_failed', { error: errorMessage(error) })
     return NextResponse.json(
       { ok: false, saved: false, retryable: true, error: 'Lead storage is temporarily unavailable.' },
       { status: 503, headers: noStore },
@@ -52,7 +53,7 @@ export async function POST(request: Request) {
   // visitor to submit again, so it is reported as accepted-but-not-delivered.
   const apiKey = process.env.RESEND_API_KEY_2 ?? process.env.RESEND_API_KEY
   if (!apiKey) {
-    console.error('[leads] owner notification skipped: email delivery is not configured')
+    log('warn', 'leads.owner_notification_skipped', { reason: 'email delivery is not configured' })
     return NextResponse.json({ ok: true, saved: true, delivered: false }, { status: 202, headers: noStore })
   }
 
@@ -70,7 +71,7 @@ export async function POST(request: Request) {
     )
     if (error) throw new Error(error.message)
   } catch (error) {
-    console.error('[leads] owner notification failed:', error instanceof Error ? error.message : 'unknown error')
+    log('error', 'leads.owner_notification_failed', { error: errorMessage(error) })
     return NextResponse.json({ ok: true, saved: true, delivered: false }, { status: 202, headers: noStore })
   }
 
@@ -87,7 +88,7 @@ async function saveLead(lead: Lead) {
     await db.insert(propautoLeads).values(row)
   } catch (error) {
     if (!isMissingColumnError(error)) throw error
-    console.error('[leads] detail columns missing; apply db/migrations/0001_lead_details.sql')
+    log('error', 'leads.detail_columns_missing', { fix: 'apply db/migrations/0001_lead_details.sql' })
     await db.insert(propautoLeads).values({ name: row.name, email: row.email, intent: row.intent, source: row.source })
   }
 }

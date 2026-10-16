@@ -3,6 +3,7 @@ import { count, desc, sql } from 'drizzle-orm'
 import { requireOwner } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { propautoEvents, propautoLeads, propautoOperatorLogs } from '@/lib/db/schema'
+import { errorMessage, log } from '@/lib/log'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -35,7 +36,7 @@ export async function GET(request: Request) {
       source: 'neon',
     })
   } catch (error) {
-    console.error('[admin-analytics] query failed:', error instanceof Error ? error.message : 'unknown error')
+    log('error', 'admin-analytics.query_failed', { error: errorMessage(error) })
     return NextResponse.json({ error: 'Analytics unavailable' }, { status: 503 })
   }
 }
