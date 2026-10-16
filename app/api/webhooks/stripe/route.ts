@@ -47,7 +47,8 @@ export async function POST(request: Request) {
     if (subscription) await saveSubscription(subscription)
 
     const payment = paymentRecord(event)
-    if (payment && (await recordOnce('payment_received', payment.eventId, { ...payment }))) await notifyOwner(paymentEmail(payment))
+    if (payment && (await recordOnce('payment_received', payment.eventId, { ...payment })))
+      await notifyOwner(paymentEmail(payment))
 
     const notice = billingNotice(event)
     if (notice && (await recordOnce(notice.kind, notice.eventId, { ...notice }))) await notifyOwner(noticeEmail(notice))
@@ -121,7 +122,8 @@ function paymentEmail(record: PaymentRecord): OwnerEmail {
 
 function noticeEmail(notice: BillingNotice): OwnerEmail {
   const plan = notice.plan ?? 'unknown plan'
-  const subject = notice.kind === 'subscription_started' ? `PropAuto new subscription: ${plan}` : `PropAuto payment failed: ${plan}`
+  const subject =
+    notice.kind === 'subscription_started' ? `PropAuto new subscription: ${plan}` : `PropAuto payment failed: ${plan}`
   return {
     idempotencyKey: `stripe-${notice.kind}/${notice.eventId}`,
     subject,

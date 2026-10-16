@@ -36,17 +36,23 @@ test('fallback reply is localized and defaults to English', () => {
 
 test('fallback runner returns the first model that answers', async () => {
   const failed = []
-  const out = await runWithModelFallback(['a', 'b', 'c'], async (name) => {
-    if (name === 'a') throw new Error('quota')
-    return `reply from ${name}`
-  }, { onFailure: (name) => failed.push(name) })
+  const out = await runWithModelFallback(
+    ['a', 'b', 'c'],
+    async (name) => {
+      if (name === 'a') throw new Error('quota')
+      return `reply from ${name}`
+    },
+    { onFailure: (name) => failed.push(name) },
+  )
   assert.deepEqual(out, { result: 'reply from b', model: 'b' })
   assert.deepEqual(failed, ['a'])
 })
 
 test('fallback runner throws the last error when every model fails', async () => {
   await assert.rejects(
-    runWithModelFallback(['a', 'b'], async (name) => { throw new Error(`down ${name}`) }),
+    runWithModelFallback(['a', 'b'], async (name) => {
+      throw new Error(`down ${name}`)
+    }),
     /down b/,
   )
 })
@@ -54,12 +60,22 @@ test('fallback runner throws the last error when every model fails', async () =>
 test('fallback runner stops when told a side effect already happened', async () => {
   let tried = 0
   await assert.rejects(
-    runWithModelFallback(['a', 'b'], async () => { tried += 1; throw new Error('late failure') }, { stopAfterFailure: () => true }),
+    runWithModelFallback(
+      ['a', 'b'],
+      async () => {
+        tried += 1
+        throw new Error('late failure')
+      },
+      { stopAfterFailure: () => true },
+    ),
     /late failure/,
   )
   assert.equal(tried, 1)
 })
 
 test('fallback runner reports an empty model list', async () => {
-  await assert.rejects(runWithModelFallback([], async () => 'x'), /No model configured/)
+  await assert.rejects(
+    runWithModelFallback([], async () => 'x'),
+    /No model configured/,
+  )
 })

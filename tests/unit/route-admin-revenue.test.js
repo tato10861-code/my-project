@@ -7,7 +7,11 @@ const mockRequireOwner = jest.fn()
 const mockRows = { value: [] }
 jest.mock('@/lib/auth', () => ({ requireOwner: (...args) => mockRequireOwner(...args) }))
 jest.mock('@/lib/db', () => ({
-  db: { select: () => ({ from: () => (mockRows.value instanceof Error ? Promise.reject(mockRows.value) : Promise.resolve(mockRows.value)) }) },
+  db: {
+    select: () => ({
+      from: () => (mockRows.value instanceof Error ? Promise.reject(mockRows.value) : Promise.resolve(mockRows.value)),
+    }),
+  },
 }))
 
 import { GET } from '../../app/api/admin/revenue/route'
@@ -28,7 +32,17 @@ test('answers 401 to a caller who is not the owner', async () => {
 })
 
 test('returns the recurring-revenue summary for the owner', async () => {
-  mockRows.value = [{ id: 'sub_1', plan: 'growth', status: 'active', cancelAtPeriodEnd: false, trialEnd: null, currentPeriodEnd: null, livemode: true }]
+  mockRows.value = [
+    {
+      id: 'sub_1',
+      plan: 'growth',
+      status: 'active',
+      cancelAtPeriodEnd: false,
+      trialEnd: null,
+      currentPeriodEnd: null,
+      livemode: true,
+    },
+  ]
   const response = await GET(request())
   assert.equal(response.status, 200)
   const data = await body(response)

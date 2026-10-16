@@ -32,6 +32,8 @@ jobs:
         run: pnpm test:smoke
       - name: Unit tests with coverage
         run: pnpm test:coverage
+      - name: Format check
+        run: pnpm format:check
       - name: Lint
         run: pnpm lint
       - name: Typecheck

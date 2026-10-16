@@ -19,7 +19,8 @@ function providerConfig() {
 }
 
 function parseFiniteNumber(value: unknown) {
-  const number = typeof value === 'number' ? value : typeof value === 'string' && value.trim() !== '' ? Number(value) : NaN
+  const number =
+    typeof value === 'number' ? value : typeof value === 'string' && value.trim() !== '' ? Number(value) : NaN
   return Number.isFinite(number) ? number : null
 }
 
@@ -35,10 +36,16 @@ function extractMarkets(payload: unknown) {
   return candidate
     .filter(isMarketRecord)
     .map((market) => ({
-      city: typeof market.city === 'string' && market.city.trim() ? market.city.trim() : typeof market.name === 'string' && market.name.trim() ? market.name.trim() : null,
+      city:
+        typeof market.city === 'string' && market.city.trim()
+          ? market.city.trim()
+          : typeof market.name === 'string' && market.name.trim()
+            ? market.name.trim()
+            : null,
       property: parseFiniteNumber(market.property),
       supercar: parseFiniteNumber(market.supercar),
-      currency: typeof market.currency === 'string' && market.currency.trim() ? market.currency.trim().toUpperCase() : 'USD',
+      currency:
+        typeof market.currency === 'string' && market.currency.trim() ? market.currency.trim().toUpperCase() : 'USD',
       signal: market.signal === 'up' || market.signal === 'down' ? market.signal : 'steady',
     }))
     .filter((market) => market.city !== null && (market.property !== null || market.supercar !== null))
@@ -94,8 +101,12 @@ export async function GET(request: Request) {
         { status: 502, headers: { 'Cache-Control': 'no-store' } },
       )
     }
-    const code = error instanceof DOMException && error.name === 'AbortError' ? 'MARKET_DATA_TIMEOUT' : 'MARKET_DATA_UNAVAILABLE'
-    return NextResponse.json({ error: 'Market data is temporarily unavailable.', code }, { status: 503, headers: { 'Cache-Control': 'no-store' } })
+    const code =
+      error instanceof DOMException && error.name === 'AbortError' ? 'MARKET_DATA_TIMEOUT' : 'MARKET_DATA_UNAVAILABLE'
+    return NextResponse.json(
+      { error: 'Market data is temporarily unavailable.', code },
+      { status: 503, headers: { 'Cache-Control': 'no-store' } },
+    )
   } finally {
     clearTimeout(timeout)
   }

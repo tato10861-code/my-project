@@ -36,5 +36,8 @@ export async function GET() {
     { name: 'auth', ok: authConfigured() },
   ]
   const report = readinessReport(checks)
-  return NextResponse.json(report, { status: report.status === 'ready' ? 200 : 503, headers: { 'Cache-Control': 'no-store' } })
+  return NextResponse.json(report, {
+    status: report.status === 'ready' ? 200 : 503,
+    headers: { 'Cache-Control': 'no-store' },
+  })
 }

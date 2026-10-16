@@ -25,7 +25,10 @@ test('is ready when the database answers and auth is configured', async () => {
   assert.equal(response.status, 200)
   const data = await body(response)
   assert.equal(data.status, 'ready')
-  assert.deepEqual(data.checks, [{ name: 'database', ok: true }, { name: 'auth', ok: true }])
+  assert.deepEqual(data.checks, [
+    { name: 'database', ok: true },
+    { name: 'auth', ok: true },
+  ])
 })
 
 test('answers 503 when the database query fails', async () => {
@@ -52,7 +55,13 @@ test('never leaks the secret or the error text', async () => {
 })
 
 test('readinessReport is degraded when any check fails; authConfigured ignores blanks', () => {
-  assert.equal(readinessReport([{ name: 'a', ok: true }, { name: 'b', ok: false }]).status, 'degraded')
+  assert.equal(
+    readinessReport([
+      { name: 'a', ok: true },
+      { name: 'b', ok: false },
+    ]).status,
+    'degraded',
+  )
   assert.equal(readinessReport([]).status, 'ready')
   assert.equal(authConfigured({ BETTER_AUTH_SECRET: '   ' }), false)
   assert.equal(authConfigured({}), false)

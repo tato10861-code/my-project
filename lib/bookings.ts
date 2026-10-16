@@ -48,7 +48,9 @@ export function buildSlots(from: Date, days: number, taken: ReadonlySet<string>)
 export function isBookableSlot(startsAt: string, now: Date): boolean {
   const slot = new Date(startsAt)
   if (Number.isNaN(slot.getTime()) || slot.getTime() <= now.getTime()) return false
-  return slot.getUTCMinutes() === 0 && BOOKING_SLOT_HOURS.includes(slot.getUTCHours() as (typeof BOOKING_SLOT_HOURS)[number])
+  return (
+    slot.getUTCMinutes() === 0 && BOOKING_SLOT_HOURS.includes(slot.getUTCHours() as (typeof BOOKING_SLOT_HOURS)[number])
+  )
 }
 
 /** How long a confirmation link stays valid after it is issued. */
@@ -68,7 +70,13 @@ export function signBookingToken(bookingId: string, secret: string, expiresAt?: 
  * is still in the future. A link without a valid expiry never verifies, so an
  * old or leaked link stops working once its window has passed.
  */
-export function verifyBookingToken(bookingId: string, token: string, secret: string, expiresAt: number, now: number = Date.now()): boolean {
+export function verifyBookingToken(
+  bookingId: string,
+  token: string,
+  secret: string,
+  expiresAt: number,
+  now: number = Date.now(),
+): boolean {
   if (!Number.isSafeInteger(expiresAt) || expiresAt <= now) return false
   const expected = Buffer.from(signBookingToken(bookingId, secret, expiresAt))
   const given = Buffer.from(token)

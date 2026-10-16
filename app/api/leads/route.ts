@@ -2,8 +2,24 @@ import { NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { db } from '@/lib/db'
 import { propautoLeads } from '@/lib/db/schema'
-import { buildLeadEmail, isMissingColumnError, LEAD_MAX_BODY_BYTES, leadIdempotencyKey, leadRow, leadSchema, type Lead } from '@/lib/leads'
-import { BodyTooLargeError, getClientKey, payloadTooLarge, readJsonBody, tooManyRequests, crossOriginForbidden, isSameOriginRequest } from '@/lib/request-security'
+import {
+  buildLeadEmail,
+  isMissingColumnError,
+  LEAD_MAX_BODY_BYTES,
+  leadIdempotencyKey,
+  leadRow,
+  leadSchema,
+  type Lead,
+} from '@/lib/leads'
+import {
+  BodyTooLargeError,
+  getClientKey,
+  payloadTooLarge,
+  readJsonBody,
+  tooManyRequests,
+  crossOriginForbidden,
+  isSameOriginRequest,
+} from '@/lib/request-security'
 import { notifyEmail } from '@/lib/site-config'
 import { checkRateLimit } from '@/lib/db/rate-limit'
 
@@ -26,7 +42,10 @@ export async function POST(request: Request) {
     await saveLead(payload)
   } catch (error) {
     console.error('[leads] storage failed:', error instanceof Error ? error.message : 'unknown error')
-    return NextResponse.json({ ok: false, saved: false, retryable: true, error: 'Lead storage is temporarily unavailable.' }, { status: 503, headers: noStore })
+    return NextResponse.json(
+      { ok: false, saved: false, retryable: true, error: 'Lead storage is temporarily unavailable.' },
+      { status: 503, headers: noStore },
+    )
   }
 
   // The lead is stored from here on. A notification failure must not invite the
@@ -40,7 +59,13 @@ export async function POST(request: Request) {
   try {
     const { subject, html } = buildLeadEmail(payload)
     const { error } = await new Resend(apiKey).emails.send(
-      { from: process.env.RESEND_FROM_EMAIL ?? 'PropAuto Sales Team <onboarding@resend.dev>', to: [notifyEmail()], replyTo: payload.email, subject, html },
+      {
+        from: process.env.RESEND_FROM_EMAIL ?? 'PropAuto Sales Team <onboarding@resend.dev>',
+        to: [notifyEmail()],
+        replyTo: payload.email,
+        subject,
+        html,
+      },
       { idempotencyKey: leadIdempotencyKey(payload) },
     )
     if (error) throw new Error(error.message)

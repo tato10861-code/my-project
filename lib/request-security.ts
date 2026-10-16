@@ -164,7 +164,10 @@ export function isSameOriginRequest(request: Request) {
 
 /** Standard 403 response for a request from another origin. */
 export function crossOriginForbidden() {
-  return Response.json({ error: 'Cross-origin request rejected' }, { status: 403, headers: { 'Cache-Control': 'no-store' } })
+  return Response.json(
+    { error: 'Cross-origin request rejected' },
+    { status: 403, headers: { 'Cache-Control': 'no-store' } },
+  )
 }
 
 /**

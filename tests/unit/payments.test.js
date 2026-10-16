@@ -8,7 +8,25 @@ import { paymentRecord, verifyStripeEvent } from '../../lib/payments'
 const secret = 'whsec_test_secret'
 
 function event(type, session, extra = {}) {
-  return { id: 'evt_1', object: 'event', type, livemode: false, data: { object: { id: 'cs_1', object: 'checkout.session', payment_status: 'paid', amount_total: 4900, currency: 'usd', metadata: { product_id: 'propauto-premium-access' }, customer_details: { email: 'buyer@example.com' }, ...session } }, ...extra }
+  return {
+    id: 'evt_1',
+    object: 'event',
+    type,
+    livemode: false,
+    data: {
+      object: {
+        id: 'cs_1',
+        object: 'checkout.session',
+        payment_status: 'paid',
+        amount_total: 4900,
+        currency: 'usd',
+        metadata: { product_id: 'propauto-premium-access' },
+        customer_details: { email: 'buyer@example.com' },
+        ...session,
+      },
+    },
+    ...extra,
+  }
 }
 
 function signed(payload, timestamp) {
@@ -32,7 +50,13 @@ test('verifyStripeEvent rejects a tampered body, a wrong secret, a missing heade
 
 test('paymentRecord keeps the fields of a paid checkout', () => {
   assert.deepEqual(paymentRecord(event('checkout.session.completed', {})), {
-    eventId: 'evt_1', sessionId: 'cs_1', productId: 'propauto-premium-access', amountTotal: 4900, currency: 'usd', customerEmail: 'buyer@example.com', livemode: false,
+    eventId: 'evt_1',
+    sessionId: 'cs_1',
+    productId: 'propauto-premium-access',
+    amountTotal: 4900,
+    currency: 'usd',
+    customerEmail: 'buyer@example.com',
+    livemode: false,
   })
   assert.equal(paymentRecord(event('checkout.session.async_payment_succeeded', {})).sessionId, 'cs_1')
 })

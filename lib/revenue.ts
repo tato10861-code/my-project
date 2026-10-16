@@ -43,13 +43,15 @@ export interface Entitlement {
 export function entitlementFor(subscription: StoredSubscription, now: Date = new Date()): Entitlement {
   const { status, currentPeriodEnd } = subscription
   if (status === 'active') return { granted: true, reason: 'active', accessUntil: currentPeriodEnd }
-  if (status === 'trialing') return { granted: true, reason: 'trialing', accessUntil: subscription.trialEnd ?? currentPeriodEnd }
+  if (status === 'trialing')
+    return { granted: true, reason: 'trialing', accessUntil: subscription.trialEnd ?? currentPeriodEnd }
   if (status === 'past_due') {
     const graceEnd = currentPeriodEnd ? new Date(currentPeriodEnd.getTime() + PAST_DUE_GRACE_DAYS * DAY_MS) : null
     return { granted: graceEnd !== null && now < graceEnd, reason: 'grace_period', accessUntil: graceEnd }
   }
   if (status === 'unpaid') return { granted: false, reason: 'unpaid', accessUntil: null }
-  if (status === 'incomplete' || status === 'incomplete_expired') return { granted: false, reason: 'incomplete', accessUntil: null }
+  if (status === 'incomplete' || status === 'incomplete_expired')
+    return { granted: false, reason: 'incomplete', accessUntil: null }
   return { granted: false, reason: 'ended', accessUntil: null }
 }
 

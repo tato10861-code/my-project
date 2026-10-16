@@ -3,7 +3,17 @@ import type { ReactNode } from 'react'
 export type LegalSection = { heading: string; body: ReactNode }
 
 /** Shared layout for the legal pages. */
-export function LegalPage({ title, updated, intro, sections }: { title: string; updated: string; intro: ReactNode; sections: LegalSection[] }) {
+export function LegalPage({
+  title,
+  updated,
+  intro,
+  sections,
+}: {
+  title: string
+  updated: string
+  intro: ReactNode
+  sections: LegalSection[]
+}) {
   return (
     <main className="min-h-screen bg-[#071014] px-6 py-20 text-[#f5f1e8]">
       <article className="mx-auto max-w-3xl space-y-6">

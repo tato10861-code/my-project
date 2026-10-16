@@ -24,7 +24,10 @@ export type Lead = z.infer<typeof leadSchema>
 
 /** Escapes text for safe interpolation into an HTML email body. */
 export function escapeHtml(value: string) {
-  return value.replace(/[&<>"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character] ?? character)
+  return value.replace(
+    /[&<>"']/g,
+    (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character] ?? character,
+  )
 }
 
 /**
@@ -34,7 +37,15 @@ export function escapeHtml(value: string) {
  * deliberately re-submit on a later day.
  */
 export function leadIdempotencyKey(lead: Lead, now = new Date()) {
-  const fingerprint = [lead.email.toLowerCase(), lead.name, lead.intent, lead.phone ?? '', lead.budget ?? '', lead.message ?? '', now.toISOString().slice(0, 10)].join('\u0000')
+  const fingerprint = [
+    lead.email.toLowerCase(),
+    lead.name,
+    lead.intent,
+    lead.phone ?? '',
+    lead.budget ?? '',
+    lead.message ?? '',
+    now.toISOString().slice(0, 10),
+  ].join('\u0000')
   return `propauto-lead/${createHash('sha256').update(fingerprint).digest('hex').slice(0, 40)}`
 }
 
@@ -65,7 +76,8 @@ const UNDEFINED_COLUMN = '42703'
  */
 export function isMissingColumnError(error: unknown): boolean {
   for (let current = error, depth = 0; current && depth < 5; depth++) {
-    if (typeof current === 'object' && 'code' in current && (current as { code?: unknown }).code === UNDEFINED_COLUMN) return true
+    if (typeof current === 'object' && 'code' in current && (current as { code?: unknown }).code === UNDEFINED_COLUMN)
+      return true
     current = typeof current === 'object' && 'cause' in current ? (current as { cause?: unknown }).cause : undefined
   }
   return false

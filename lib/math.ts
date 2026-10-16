@@ -203,7 +203,7 @@ export function scaleCents(cents: bigint, numerator: bigint, denominator: bigint
     throw new RangeError('scaleCents: denominator must not be zero')
   }
   const product = cents * numerator
-  const negative = (product < 0n) !== (denominator < 0n)
+  const negative = product < 0n !== denominator < 0n
   const absProduct = product < 0n ? -product : product
   const absDenominator = denominator < 0n ? -denominator : denominator
   const quotient = absProduct / absDenominator

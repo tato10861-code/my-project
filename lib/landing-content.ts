@@ -1,0 +1,122 @@
+/**
+ * @fileoverview Landing-page content: the translated copy and the featured listings.
+ * Kept apart from the page component so the page stays about layout and behaviour.
+ */
+
+export const copy = {
+  ar: {
+    nav: ['اكتشف العقارات', 'السيارات النادرة', 'للمستثمرين', 'حلول الأعمال'],
+    login: 'تسجيل الدخول',
+    cta: 'ابدأ مجاناً',
+    eyebrow: 'سوق الأصول الفاخرة المدعوم بالذكاء الاصطناعي',
+    title: 'امتلك ما يسبق المستقبل.',
+    subtitle: 'منصة واحدة لاكتشاف العقارات النادرة والسيارات الفاخرة والفرص الاستثمارية التي تستحق وقتك.',
+    search: 'ابحث عن مدينة، نوع أصل، أو فرصة استثمارية',
+    explore: 'استكشف السوق',
+    concierge: 'تحدث مع المستشار الذكي',
+    verified: 'أصل موثق',
+    featured: 'مختارات هذا الأسبوع',
+    viewAll: 'عرض الكل',
+    roi: 'احسب العائد المحتمل',
+    roiSub: 'اتخذ قراراتك بثقة، قبل أن تتحرك الأسعار.',
+    budget: 'ميزانيتك الاستثمارية',
+    horizon: 'الأفق الزمني',
+    result: 'العائد السنوي المتوقع',
+    investors: 'للمستثمرين العصريين',
+    investorsSub: 'بيانات أعمق. قرارات أسرع. نتائج أكبر.',
+    conciergeTitle: 'ذكاء يعمل لصالحك.',
+    conciergeSub: 'يقرأ السوق، يقارن الفرص، ويصنع لك قائمة قصيرة تناسب أهدافك.',
+    ask: 'اسأل PropAuto AI',
+    footer: 'PropAuto AI — حيث تبدأ الملكية الذكية.',
+    companyVideo: 'فيلم PropAuto AI التعريفي',
+    videoKicker: 'قصة شركة تُبنى حول الثقة',
+    videoDescription:
+      'من أصل نادر إلى قرار استثماري واضح: PropAuto AI يربط المشترين والملاك والمستثمرين في تجربة واحدة ذكية.',
+    transcript: 'نص الفيلم التعريفي',
+    play: 'تشغيل الفيلم',
+    pause: 'إيقاف الفيلم',
+    mute: 'كتم الصوت',
+    unmute: 'تشغيل الصوت',
+    botTitle: 'بوتات PropAuto AI تعمل بلا توقف',
+    botSub: 'أتمتة تأهيل العملاء، متابعة المستثمرين، واستقبال طلبات الإدراج على مدار الساعة.',
+    investorLead: 'احصل على موجز المستثمرين',
+    sellerLead: 'أرسل أصلك للإدراج',
+    buyerLead: 'تحدث مع مستشار المشتري',
+  },
+  en: {
+    nav: ['Explore properties', 'Rare cars', 'For investors', 'Business solutions'],
+    login: 'Sign in',
+    cta: 'Start free',
+    eyebrow: 'The AI-powered luxury asset marketplace',
+    title: 'Own what comes next.',
+    subtitle:
+      'One intelligent platform for rare properties, exceptional cars, and investment opportunities worth your time.',
+    search: 'Search a city, asset type, or investment opportunity',
+    explore: 'Explore the market',
+    concierge: 'Talk to AI concierge',
+    verified: 'Verified asset',
+    featured: 'Curated this week',
+    viewAll: 'View all',
+    roi: 'Estimate your upside',
+    roiSub: 'Make confident decisions before the market moves.',
+    budget: 'Investment budget',
+    horizon: 'Time horizon',
+    result: 'Estimated annual return',
+    investors: 'For modern investors',
+    investorsSub: 'Deeper data. Faster decisions. Bigger outcomes.',
+    conciergeTitle: 'Intelligence on your side.',
+    conciergeSub: 'It reads the market, compares opportunities, and creates a shortlist built around your goals.',
+    ask: 'Ask PropAuto AI',
+    footer: 'PropAuto AI — where smart ownership begins.',
+    companyVideo: 'The PropAuto AI company film',
+    videoKicker: 'A company built around trust',
+    videoDescription:
+      'From rare assets to clear investment decisions: PropAuto AI connects buyers, owners, and investors in one intelligent experience.',
+    transcript: 'Company film transcript',
+    play: 'Play film',
+    pause: 'Pause film',
+    mute: 'Mute audio',
+    unmute: 'Unmute audio',
+    botTitle: 'PropAuto AI bots that never stop',
+    botSub: 'Automate lead qualification, investor follow-up, and listing intake around the clock.',
+    investorLead: 'Get investor brief',
+    sellerLead: 'Submit an asset',
+    buyerLead: 'Talk to buyer concierge',
+  },
+}
+
+// Only languages whose page copy is actually translated are offered. (The chat widget has its own,
+// separately translated, French and Spanish.)
+export const localizedCopy = copy
+
+export type SiteLocale = keyof typeof localizedCopy
+
+export const listings = [
+  {
+    image: 'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1200&q=85',
+    type: 'REAL ESTATE',
+    name: 'Skyline Villa 07',
+    place: 'Palm Jumeirah, Dubai',
+    price: '$4.8M',
+    metric: '+12.4% projected',
+    accent: 'property',
+  },
+  {
+    image: 'https://images.unsplash.com/photo-1544829099-b9a0c07fad1a?auto=format&fit=crop&w=1200&q=85',
+    type: 'REAL ESTATE',
+    name: 'The Mayfair Residence',
+    place: 'London, United Kingdom',
+    price: '$6.2M',
+    metric: '+8.9% projected',
+    accent: 'property',
+  },
+  {
+    image: 'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?auto=format&fit=crop&w=1200&q=85',
+    type: 'AUTOMOTIVE',
+    name: 'Ferrari 812 GTS',
+    place: '2024 · 1,200 miles',
+    price: '$620K',
+    metric: 'Rare allocation',
+    accent: 'car',
+  },
+]

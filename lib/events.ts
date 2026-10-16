@@ -22,10 +22,20 @@ export type EventName = (typeof EVENT_NAMES)[number]
 export const EVENT_MAX_BODY_BYTES = 16_384
 
 export const eventSchema = z.object({
-  sessionId: z.string().trim().regex(/^[A-Za-z0-9._:-]{8,120}$/),
+  sessionId: z
+    .string()
+    .trim()
+    .regex(/^[A-Za-z0-9._:-]{8,120}$/),
   eventName: z.enum(EVENT_NAMES),
-  path: z.string().trim().regex(/^\/[A-Za-z0-9/_?&=.%#-]{0,299}$/).default('/'),
-  metadata: z.record(z.string(), z.string().max(200)).refine((value) => Object.keys(value).length <= 20).default({}),
+  path: z
+    .string()
+    .trim()
+    .regex(/^\/[A-Za-z0-9/_?&=.%#-]{0,299}$/)
+    .default('/'),
+  metadata: z
+    .record(z.string(), z.string().max(200))
+    .refine((value) => Object.keys(value).length <= 20)
+    .default({}),
 })
 
 export type VisitorEvent = z.infer<typeof eventSchema>

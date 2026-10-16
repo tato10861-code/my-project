@@ -11,7 +11,8 @@ const noStore = { 'Cache-Control': 'no-store' }
 
 /** Owner-only recurring-revenue summary built from the Stripe-synced subscriptions. */
 export async function GET(request: Request) {
-  if (!(await requireOwner(request.headers))) return NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers: noStore })
+  if (!(await requireOwner(request.headers)))
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers: noStore })
   try {
     const rows = await db.select().from(propautoSubscriptions)
     return NextResponse.json({ ...summarizeRevenue(rows), source: 'neon' }, { headers: noStore })

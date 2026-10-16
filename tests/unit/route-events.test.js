@@ -12,13 +12,19 @@ jest.mock('@/lib/db/rate-limit', () => ({ checkRateLimit: (...args) => mockCheck
 
 import { POST } from '../../app/api/events/route'
 
-const BROWSER = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36'
+const BROWSER =
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36'
 const valid = { sessionId: 'session-12345', eventName: 'page_view', path: '/', metadata: { language: 'en' } }
 
 const post = (body, headers = {}) =>
   new Request('https://propauto.example/api/events', {
     method: 'POST',
-    headers: { 'content-type': 'application/json', 'user-agent': BROWSER, origin: 'https://propauto.example', ...headers },
+    headers: {
+      'content-type': 'application/json',
+      'user-agent': BROWSER,
+      origin: 'https://propauto.example',
+      ...headers,
+    },
     body: typeof body === 'string' ? body : JSON.stringify(body),
   })
 

@@ -11,7 +11,7 @@ const baseURL =
     ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
     : process.env.VERCEL_URL
       ? `https://${process.env.VERCEL_URL}`
-      : process.env.V0_RUNTIME_URL ?? PRODUCTION_URL)
+      : (process.env.V0_RUNTIME_URL ?? PRODUCTION_URL))
 
 const authSecret = process.env.BETTER_AUTH_SECRET
 const isProductionBuild = process.env.NEXT_PHASE === 'phase-production-build'
@@ -38,9 +38,8 @@ export const auth = betterAuth({
   secret: effectiveAuthSecret,
   baseURL,
   emailAndPassword: { enabled: true, autoSignIn: true },
-  trustedOrigins: process.env.NODE_ENV === 'development'
-    ? ['http://localhost:3000', ...runtimeOrigins]
-    : productionOrigins,
+  trustedOrigins:
+    process.env.NODE_ENV === 'development' ? ['http://localhost:3000', ...runtimeOrigins] : productionOrigins,
   session: { expiresIn: 60 * 60 * 24 * 7, updateAge: 60 * 60 * 24 },
   databaseHooks: {
     user: {
