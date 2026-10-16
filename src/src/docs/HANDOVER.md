@@ -60,6 +60,7 @@ Sign-up is restricted to the email in `OWNER_EMAIL`. Open `/sign-up`, register t
 1. Use your own Stripe account and a live secret key in `STRIPE_SECRET_KEY` when you are ready to take real payments.
 2. Create products/prices whose lookup keys match the plans in `lib/plans.ts`.
 3. Add a webhook endpoint `https://<your-domain>/api/webhooks/stripe` for `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted` and `invoice.payment_failed`, and put its signing secret in `STRIPE_WEBHOOK_SECRET`.
+4. The dashboard shows recurring revenue (MRR, trial pipeline, failed renewals, pending cancellations) from the synced subscriptions; only live-mode subscriptions count, so sandbox checkouts never inflate it. `lib/revenue.ts` also holds `entitlementFor`, which decides access per subscription: active and trialing grant it, `past_due` keeps it for a 7-day grace period, everything else does not.
 
 ## Things that are not environment variables
 
