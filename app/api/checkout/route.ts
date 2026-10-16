@@ -14,6 +14,7 @@ import {
   isSameOriginRequest,
 } from '@/lib/request-security'
 import { checkRateLimit } from '@/lib/db/rate-limit'
+import { errorMessage, log } from '@/lib/log'
 
 const noStore = { 'Cache-Control': 'no-store' }
 
@@ -53,7 +54,7 @@ export async function POST(request: Request) {
       const prices = await stripe.prices.list({ lookup_keys: [plan.lookupKey], active: true, limit: 1 })
       const price = prices.data[0]
       if (!price) {
-        console.error(`[checkout] no active Stripe price with lookup key ${plan.lookupKey}`)
+        log('error', 'checkout.price_not_found', { lookupKey: plan.lookupKey })
         return NextResponse.json({ error: 'This plan is not available yet.' }, { status: 503, headers: noStore })
       }
       session = await stripe.checkout.sessions.create(
@@ -81,7 +82,7 @@ export async function POST(request: Request) {
 
     return NextResponse.redirect(session?.url ?? origin, 303)
   } catch (error) {
-    console.error('[checkout] session creation failed:', error instanceof Error ? error.message : 'unknown error')
+    log('error', 'checkout.session_failed', { error: errorMessage(error) })
     return NextResponse.json({ error: 'Unable to start checkout' }, { status: 502, headers: noStore })
   }
 }

@@ -19,6 +19,7 @@ import { checkRateLimit } from '@/lib/db/rate-limit'
 import { runWithModelFallback } from '@/lib/sarah-fallback'
 import { sarahModelNames } from '@/lib/sarah-models'
 import { fallbackReply, sarahSystem } from '@/lib/sarah-prompt'
+import { errorMessage, log } from '@/lib/log'
 
 const requestSchema = z.object({
   messages: z
@@ -50,7 +51,7 @@ const sarahTools = {
       try {
         return { slots: await freeSlots(new Date(), days) }
       } catch (error) {
-        console.error('[sarah] availability lookup failed:', error instanceof Error ? error.message : error)
+        log('error', 'sarah.availability_failed', { error: errorMessage(error) })
         return { slots: [], note: 'Availability is unavailable right now; offer an advisor call instead.' }
       }
     },
@@ -63,7 +64,7 @@ const sarahTools = {
       try {
         return await requestBooking(input)
       } catch (error) {
-        console.error('[sarah] booking request failed:', error instanceof Error ? error.message : error)
+        log('error', 'sarah.booking_failed', { error: errorMessage(error) })
         return {
           ok: false,
           error: 'Booking is unavailable right now. Tell the customer an advisor will call them to confirm.',
@@ -112,9 +113,9 @@ export async function POST(request: Request) {
           },
           { idempotencyKey: `sarah-alert/${alertKey}` },
         )
-        if (error) console.error('[sarah] owner alert failed:', error.message)
+        if (error) log('error', 'sarah.owner_alert_failed', { error: error.message })
       } catch (error) {
-        console.error('[sarah] owner alert failed:', error instanceof Error ? error.message : 'unknown error')
+        log('error', 'sarah.owner_alert_failed', { error: errorMessage(error) })
       }
     }
     // A Gemini key from Google AI Studio calls Google directly and needs no card
@@ -142,22 +143,27 @@ export async function POST(request: Request) {
       })
     const { result, model: used } = await runWithModelFallback(names, attempt, {
       onFailure: (name, error) =>
-        console.error(
-          '[sarah] model failed:',
-          name,
-          error instanceof Error ? `${error.name}: ${error.message}` : 'unknown error',
-        ),
+        log('error', 'sarah.model_failed', {
+          model: name,
+          error: error instanceof Error ? `${error.name}: ${error.message}` : 'unknown error',
+        }),
       // A booking may already be stored: never replay the turn on another model.
       stopAfterFailure: () => toolRan,
     })
     // One line per answered turn so a healthy chat is visible in the logs: which
     // provider answered and which tools ran. Never the customer's text.
     const toolsUsed = (result.steps ?? []).flatMap((step) => (step.toolCalls ?? []).map((call) => call.toolName))
-    console.info('[sarah] ok', { provider: direct ? 'google' : 'gateway', model: used, tools: toolsUsed })
+    log('info', 'sarah.turn_ok', {
+      provider: direct ? 'google' : 'gateway',
+      model: used,
+      tools: toolsUsed.join(',') || 'none',
+    })
     return Response.json({ reply: result.text })
   } catch (error) {
     // Only the error class and message: never the customer's text or any key.
-    console.error('[sarah] chat failed:', error instanceof Error ? `${error.name}: ${error.message}` : 'unknown error')
+    log('error', 'sarah.chat_failed', {
+      error: error instanceof Error ? `${error.name}: ${error.message}` : 'unknown error',
+    })
     return Response.json(
       { reply: fallbackReply(language), retryable: true },
       { status: 503, headers: { 'Cache-Control': 'no-store' } },

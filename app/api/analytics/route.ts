@@ -4,6 +4,7 @@ import { percentChange } from '@/lib/analytics'
 import { requireOwner } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { propautoEvents, propautoLeads } from '@/lib/db/schema'
+import { errorMessage, log } from '@/lib/log'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -93,7 +94,7 @@ export async function GET(request: Request) {
       { headers: noStoreHeaders },
     )
   } catch (error) {
-    console.error('[analytics] query failed:', error instanceof Error ? error.message : 'unknown error')
+    log('error', 'analytics.query_failed', { error: errorMessage(error) })
     return NextResponse.json({ error: 'Analytics unavailable' }, { status: 503, headers: noStoreHeaders })
   }
 }

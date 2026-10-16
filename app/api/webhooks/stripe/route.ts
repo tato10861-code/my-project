@@ -8,6 +8,7 @@ import { billingNotice, subscriptionRecord, type BillingNotice, type Subscriptio
 import { paymentRecord, STRIPE_WEBHOOK_MAX_BYTES, verifyStripeEvent, type PaymentRecord } from '@/lib/payments'
 import { notifyEmail } from '@/lib/site-config'
 import { BodyTooLargeError, payloadTooLarge, readTextBody } from '@/lib/request-security'
+import { errorMessage, log } from '@/lib/log'
 
 const noStore = { 'Cache-Control': 'no-store' }
 
@@ -54,7 +55,7 @@ export async function POST(request: Request) {
     if (notice && (await recordOnce(notice.kind, notice.eventId, { ...notice }))) await notifyOwner(noticeEmail(notice))
   } catch (error) {
     // A non-2xx answer makes Stripe retry, which is what we want on a storage outage.
-    console.error('[stripe-webhook] recording failed:', error instanceof Error ? error.message : 'unknown error')
+    log('error', 'stripe-webhook.recording_failed', { error: errorMessage(error) })
     return NextResponse.json({ error: 'Temporarily unavailable' }, { status: 503, headers: noStore })
   }
 
@@ -143,5 +144,5 @@ async function notifyOwner(email: OwnerEmail) {
     },
     { idempotencyKey: email.idempotencyKey },
   )
-  if (error) console.error('[stripe-webhook] owner email failed:', error.message)
+  if (error) log('error', 'stripe-webhook.owner_email_failed', { error: error.message })
 }

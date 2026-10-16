@@ -4,6 +4,9 @@ PropAuto AI is a multilingual sales platform for luxury real estate and collecto
 
 [![CI](https://github.com/tato10861-code/my-project/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/tato10861-code/my-project/actions/workflows/ci.yml)
 
+> **For investors and reviewers:** start with [docs/INVESTOR_OVERVIEW.md](docs/INVESTOR_OVERVIEW.md), a factual summary
+> of what is built, how it is verified and what is not built yet.
+
 ## Repository layout
 
 | Path | What it is |

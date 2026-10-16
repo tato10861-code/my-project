@@ -13,6 +13,7 @@ import {
   type BookingRequest,
 } from '@/lib/bookings'
 import { cancelBooking, createPendingBooking, takenStarts } from '@/lib/db/bookings'
+import { errorMessage, log } from '@/lib/log'
 
 const DAY_MS = 24 * 60 * 60 * 1000
 
@@ -95,7 +96,7 @@ export async function requestBooking(input: BookingRequest, now: Date = new Date
   const mail = bookingNotificationEmail({ ...input, id: created.id }, link)
   const error = await config.send(mail)
   if (error) {
-    console.error('[sarah] owner email failed:', error)
+    log('error', 'sarah.owner_email_failed', { error: errorMessage(error) })
     // Nothing is held without the team seeing it: release the slot and keep the reason.
     await cancelBooking(created.id, `email: ${error}`)
     return {
