@@ -6,8 +6,8 @@ on the branch [`archive/static-site-and-snapshots`](https://github.com/tato10861
 
 | Path | What it is |
 |---|---|
-| `static-site/` | Static-HTML rebuild of the site with its dev server (`server.js`). Incomplete in this repository: `assets/` and `lib/storage.js` were never committed. Production runs the Next.js app in `src/src`. |
-| `PropAuto-AI-complete.zip`, `propauto-complete-project.zip`, `propauto-project-ready.zip` | Earlier snapshots of the Next.js app (September–October 2026). Everything in them is present in `src/src` or its history. |
+| `static-site/` | Static-HTML rebuild of the site with its dev server (`server.js`). Incomplete in this repository: `assets/` and `lib/storage.js` were never committed. Production runs the Next.js app at the repository root. |
+| `PropAuto-AI-complete.zip`, `propauto-complete-project.zip`, `propauto-project-ready.zip` | Earlier snapshots of the Next.js app (September–October 2026). Everything in them is present in the root app or its history. |
 
 Restore any of them with:
 

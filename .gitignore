@@ -12,3 +12,17 @@ node_modules
 .DS_Store
 # Local measurement output
 out/
+.next
+.vercel
+.agents
+.env.local
+.env.*.local
+*.log
+.agents/
+.claude/
+agent/skills/
+skills-lock.json
+# Build artifacts
+tsconfig.tsbuildinfo
+# Test coverage reports
+coverage/

@@ -12,9 +12,6 @@ permissions:
 jobs:
   audit:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: src/src
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -26,9 +23,9 @@ jobs:
       - name: Setup Node 24
         uses: actions/setup-node@v7
         with:
-          node-version-file: src/src/.nvmrc
+          node-version-file: .nvmrc
           cache: pnpm
-          cache-dependency-path: src/src/pnpm-lock.yaml
+          cache-dependency-path: pnpm-lock.yaml
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Smoke test
@@ -48,9 +45,6 @@ jobs:
 
   migrations:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: src/src
     services:
       postgres:
         image: postgres:16
@@ -77,9 +71,9 @@ jobs:
       - name: Setup Node 24
         uses: actions/setup-node@v7
         with:
-          node-version-file: src/src/.nvmrc
+          node-version-file: .nvmrc
           cache: pnpm
-          cache-dependency-path: src/src/pnpm-lock.yaml
+          cache-dependency-path: pnpm-lock.yaml
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Apply every migration to an empty database

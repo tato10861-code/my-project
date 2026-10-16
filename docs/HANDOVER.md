@@ -43,7 +43,6 @@ Variables starting with `NEXT_PUBLIC_` are baked into the build: redeploy after 
 ## Database
 
 ```bash
-cd src/src
 export DATABASE_URL_UNPOOLED="<direct, unpooled Neon connection string>"
 pnpm db:migrate --status   # what is applied / pending
 pnpm db:migrate            # apply pending migrations
@@ -92,5 +91,4 @@ Be aware of these before you rely on or value the project:
 - There are no browser (end-to-end) tests and no load tests; the API routes are covered by unit-level route tests with the database mocked.
 - No error-tracking service is wired in; failures are visible only in the hosting provider's logs.
 - The page and chat widget are Arabic and English; the chat widget also has French and Spanish. The rest of the page is not translated into other languages.
-- `agents/sara-closer` is a separate app inside this repository with its own copy of the booking-confirmation route; it has not had the same hardening as `src/src`.
-- The project layout is nested (`src/src`) and the root build copies `.next` into place; it works, but it is more complicated than it needs to be.
+- `agents/sara-closer` is a separate app inside this repository with its own copy of the booking-confirmation route; it has not had the same hardening as the main app.
