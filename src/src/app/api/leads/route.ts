@@ -3,14 +3,15 @@ import { Resend } from 'resend'
 import { db } from '@/lib/db'
 import { propautoLeads } from '@/lib/db/schema'
 import { buildLeadEmail, isMissingColumnError, LEAD_MAX_BODY_BYTES, leadIdempotencyKey, leadRow, leadSchema, type Lead } from '@/lib/leads'
-import { BodyTooLargeError, getClientKey, payloadTooLarge, rateLimit, readJsonBody, tooManyRequests, crossOriginForbidden, isSameOriginRequest } from '@/lib/request-security'
+import { BodyTooLargeError, getClientKey, payloadTooLarge, readJsonBody, tooManyRequests, crossOriginForbidden, isSameOriginRequest } from '@/lib/request-security'
+import { checkRateLimit } from '@/lib/db/rate-limit'
 
 const COMPANY_EMAIL = 'propautoal@gmail.com'
 const noStore = { 'Cache-Control': 'no-store' }
 
 export async function POST(request: Request) {
   if (!isSameOriginRequest(request)) return crossOriginForbidden()
-  const limit = rateLimit(getClientKey(request, 'leads'), 5)
+  const limit = await checkRateLimit(getClientKey(request, 'leads'), 5)
   if (!limit.allowed) return tooManyRequests(limit.retryAfter)
 
   let payload: Lead

@@ -3,7 +3,8 @@ import Stripe from 'stripe'
 import { subscriptionCheckoutParams } from '@/lib/billing'
 import { getPlan } from '@/lib/plans'
 import { getProduct } from '@/lib/products'
-import { BodyTooLargeError, getClientKey, payloadTooLarge, rateLimit, readFormBody, tooManyRequests, getConfiguredOrigin, crossOriginForbidden, isSameOriginRequest } from '@/lib/request-security'
+import { BodyTooLargeError, getClientKey, payloadTooLarge, readFormBody, tooManyRequests, getConfiguredOrigin, crossOriginForbidden, isSameOriginRequest } from '@/lib/request-security'
+import { checkRateLimit } from '@/lib/db/rate-limit'
 
 const noStore = { 'Cache-Control': 'no-store' }
 
@@ -17,7 +18,7 @@ const CHECKOUT_MAX_BODY_BYTES = 8_192
  */
 export async function POST(request: Request) {
   if (!isSameOriginRequest(request)) return crossOriginForbidden()
-  const limit = rateLimit(getClientKey(request, 'checkout'), 10)
+  const limit = await checkRateLimit(getClientKey(request, 'checkout'), 10)
   if (!limit.allowed) return tooManyRequests(limit.retryAfter)
 
   try {

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
-import { getClientKey, rateLimit, tooManyRequests } from '@/lib/request-security'
+import { getClientKey, tooManyRequests } from '@/lib/request-security'
+import { checkRateLimit } from '@/lib/db/rate-limit'
 
 export const dynamic = 'force-dynamic'
 
@@ -36,7 +37,7 @@ function extractMarkets(payload: unknown) {
 }
 
 export async function GET(request: Request) {
-  const limit = rateLimit(getClientKey(request, 'market-prices'), 30)
+  const limit = await checkRateLimit(getClientKey(request, 'market-prices'), 30)
   if (!limit.allowed) return tooManyRequests(limit.retryAfter)
   if (!providerUrl) {
     return NextResponse.json(
