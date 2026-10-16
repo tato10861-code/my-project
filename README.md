@@ -12,7 +12,6 @@ PropAuto AI is a multilingual sales platform for luxury real estate and collecto
 | Path | What it is |
 |---|---|
 | [`app`](app), [`lib`](lib), [`components`](components), [`db`](db), [`tests`](tests) | The production web app (Next.js 16, React 19, TypeScript) at the repository root, deployed on Vercel. See the [app README](docs/APP_README.md). |
-| [`agents/sara-closer`](agents/sara-closer) | Sara, the closing agent, built on the eve agent framework. |
 | [`.github`](.github) | CI (tests, coverage, lint, typecheck, dependency audit, build, secret scan), Dependabot and templates. |
 | [`ARCHIVE.md`](ARCHIVE.md) | Where retired material lives and how to restore it. |
 

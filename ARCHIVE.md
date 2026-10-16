@@ -14,3 +14,7 @@ Restore any of them with:
 ```bash
 git checkout archive/static-site-and-snapshots -- static-site
 ```
+
+## Removed from `main`: the early Sara agent (`agents/sara-closer`)
+
+A separate, never-deployed eve agent app that Sara's live implementation (`app/api/sarah`) superseded. It was removed from `main` so the repository holds one application. It is not lost: it is in the git history as of commit `3fa6f77`. To restore it, run `git checkout 3fa6f77 -- agents/sara-closer`. An early scaffold of the same agent is also in the archived `sara-propauto-closer-agent` repository.
