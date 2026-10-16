@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getClientKey, tooManyRequests } from '@/lib/request-security'
+import { BodyTooLargeError, getClientKey, readTextBody, tooManyRequests } from '@/lib/request-security'
 import { checkRateLimit } from '@/lib/db/rate-limit'
 
 export const dynamic = 'force-dynamic'
@@ -7,8 +7,16 @@ export const dynamic = 'force-dynamic'
 /** Prices change slowly; let the CDN serve one answer per minute instead of calling the provider per visit. */
 const CACHED = { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300' }
 
-const providerUrl = process.env.MARKET_DATA_API_URL ?? process.env.api
-const providerKey = process.env.MARKET_DATA_API_KEY ?? process.env.apiKey_2
+/** A price list is small; a larger answer is a broken or hostile upstream, not data. */
+const MAX_PROVIDER_BYTES = 256 * 1024
+
+/** Read per request, so a changed setting needs no redeploy and tests can set it. */
+function providerConfig() {
+  return {
+    url: process.env.MARKET_DATA_API_URL ?? process.env.api,
+    key: process.env.MARKET_DATA_API_KEY ?? process.env.apiKey_2,
+  }
+}
 
 function parseFiniteNumber(value: unknown) {
   const number = typeof value === 'number' ? value : typeof value === 'string' && value.trim() !== '' ? Number(value) : NaN
@@ -39,6 +47,7 @@ function extractMarkets(payload: unknown) {
 export async function GET(request: Request) {
   const limit = await checkRateLimit(getClientKey(request, 'market-prices'), 30)
   if (!limit.allowed) return tooManyRequests(limit.retryAfter)
+  const { url: providerUrl, key: providerKey } = providerConfig()
   if (!providerUrl) {
     return NextResponse.json(
       { error: 'Market data provider is not configured.', code: 'MARKET_DATA_NOT_CONFIGURED' },
@@ -66,7 +75,7 @@ export async function GET(request: Request) {
       )
     }
 
-    const markets = extractMarkets(await response.json())
+    const markets = extractMarkets(JSON.parse(await readTextBody(response, MAX_PROVIDER_BYTES)))
     if (!markets) {
       return NextResponse.json(
         { error: 'Market data provider returned an unsupported response.', code: 'MARKET_DATA_INVALID_RESPONSE' },
@@ -79,6 +88,12 @@ export async function GET(request: Request) {
       { headers: CACHED },
     )
   } catch (error) {
+    if (error instanceof BodyTooLargeError || error instanceof SyntaxError) {
+      return NextResponse.json(
+        { error: 'Market data provider returned an unsupported response.', code: 'MARKET_DATA_INVALID_RESPONSE' },
+        { status: 502, headers: { 'Cache-Control': 'no-store' } },
+      )
+    }
     const code = error instanceof DOMException && error.name === 'AbortError' ? 'MARKET_DATA_TIMEOUT' : 'MARKET_DATA_UNAVAILABLE'
     return NextResponse.json({ error: 'Market data is temporarily unavailable.', code }, { status: 503, headers: { 'Cache-Control': 'no-store' } })
   } finally {
