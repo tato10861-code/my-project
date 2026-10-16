@@ -13,6 +13,7 @@ All notable changes to PropAuto are documented here.
 - The app now lives at the repository root instead of `src/src`.
 - Source is formatted with Prettier (`pnpm format`, checked in CI): several files had single lines of thousands of characters. The landing page's content and its tracking, chat and lead-form logic moved out of `app/page.tsx` into `lib/`.
 - `package.json` now carries the product description, author, homepage and repository.
+- Server logs are structured JSON lines (`lib/log.ts`: level, event, time, scalar fields; errors reduced to their message) instead of free-text `console.error` calls.
 
 ## [1.1.0] - 2026-10-09
 
