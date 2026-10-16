@@ -1,9 +1,10 @@
 import type { Metadata } from 'next'
 import { LegalPage } from '@/components/legal-page'
+import { contactEmail } from '@/lib/site-config'
 
 export const metadata: Metadata = { title: 'Terms of Use', description: 'Terms governing use of the PropAuto AI platform.' }
 
-const CONTACT = 'propautoal@gmail.com'
+const CONTACT = contactEmail()
 
 export default function TermsPage() {
   return (

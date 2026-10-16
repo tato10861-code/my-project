@@ -108,6 +108,12 @@ test('records a paid checkout once and emails the owner', async () => {
   assert.equal(mockSend.mock.calls[0][1].idempotencyKey, 'stripe-payment/evt_pay_1')
 })
 
+test('the owner email goes to the configured mailbox', async () => {
+  process.env.NOTIFY_EMAIL = 'ops@buyer.example'
+  await POST(signed(checkoutCompleted()))
+  assert.deepEqual(mockSend.mock.calls[0][0].to, ['ops@buyer.example'])
+})
+
 test('a delivery already recorded is acknowledged without a second email', async () => {
   mockState.existing = [{ id: 7 }]
   const response = await POST(signed(checkoutCompleted()))

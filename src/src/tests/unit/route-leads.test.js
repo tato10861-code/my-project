@@ -49,6 +49,13 @@ test('stores the lead and reports the owner email as delivered', async () => {
   assert.equal(mockSend.mock.calls[0][0].replyTo, 'ada@example.com')
 })
 
+test('the owner notification goes to the configured mailbox', async () => {
+  assert.deepEqual(mockSend.mock.calls.length, 0)
+  process.env.NOTIFY_EMAIL = 'ops@buyer.example'
+  await POST(post(lead))
+  assert.deepEqual(mockSend.mock.calls[0][0].to, ['ops@buyer.example'])
+})
+
 test('rejects another origin, an exhausted rate limit and invalid details', async () => {
   assert.equal((await POST(post(lead, { origin: 'https://evil.example' }))).status, 403)
   mockCheckRateLimit.mockResolvedValue({ allowed: false, retryAfter: 9 })

@@ -6,6 +6,7 @@ import { z } from 'zod'
 import { bookingRequestSchema } from '@/lib/bookings'
 import { bookingConfig, freeSlots, requestBooking } from '@/lib/db/booking-service'
 import { BodyTooLargeError, getClientKey, payloadTooLarge, readJsonBody, tooManyRequests, crossOriginForbidden, isSameOriginRequest } from '@/lib/request-security'
+import { notifyEmail } from '@/lib/site-config'
 import { checkRateLimit } from '@/lib/db/rate-limit'
 import { runWithModelFallback } from '@/lib/sarah-fallback'
 import { sarahModelNames } from '@/lib/sarah-models'
@@ -79,7 +80,7 @@ export async function POST(request: Request) {
         const { error } = await resend.emails.send(
           {
             from: process.env.RESEND_FROM_EMAIL ?? 'PropAuto Sales <onboarding@resend.dev>',
-            to: 'propautoal@gmail.com',
+            to: notifyEmail(),
             subject: 'PropAuto hot lead from Sarah',
             text: `A visitor may be ready to buy or book. Latest message: ${latestMessage}`,
           },

@@ -68,6 +68,10 @@ Each payment is recorded once (a unique index makes concurrent duplicate deliver
 
 Use `.env.example` as the variable checklist. Keep production secrets in the deployment provider, never in Git. `RESEND_FROM_EMAIL` must be a verified sender for reliable production delivery. `NEXT_PUBLIC_VAPI_PUBLIC_KEY` must be a Vapi public key; private keys must remain server-side.
 
+### Contact details
+
+The public contact email, the WhatsApp number, the mailbox that receives lead, chat and payment notifications, and the owner login are environment variables, so a new operator sets them in the hosting dashboard without editing code: `NEXT_PUBLIC_CONTACT_EMAIL`, `NOTIFY_EMAIL`, `OWNER_EMAIL`, `NEXT_PUBLIC_WHATSAPP_NUMBER` and optionally `NEXT_PUBLIC_WHATSAPP_DISPLAY` (see `.env.example`). Unset values keep the built-in defaults, so an existing deployment is unchanged. The `NEXT_PUBLIC_` ones are baked into the build, so redeploy after changing them. The separate `agent/` configuration (`agent/instructions.md`) still names the owner's email and phone in plain text and must be edited by hand.
+
 ## Access
 
 Only the owner account (`lib/owner.ts`) can be created or reach `/admin` and the analytics endpoints. Public endpoints are rate limited per client, with counters shared across server instances through Postgres (`propauto_rate_limits`), validate every input with Zod, and cap request bodies on the bytes actually received. State-changing `POST` routes reject requests from other origins. Booking confirmation links are signed, expire after 72 hours and confirm only through a same-origin `POST`, so mail scanners that open the link cannot confirm a booking.
