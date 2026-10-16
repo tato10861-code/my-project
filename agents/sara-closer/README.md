@@ -1,5 +1,5 @@
 > **Superseded.** This eve agent is not deployed. Sara's live implementation, with
-> the same booking tools, is `src/src/app/api/sarah` in the PropAuto app. Keep this
+> the same booking tools, is `app/api/sarah` in the PropAuto app. Keep this
 > folder only as the development record; do not add features here.
 
 # sara-propauto-closer

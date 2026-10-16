@@ -8,7 +8,7 @@ PropAuto AI is a multilingual sales platform for luxury real estate and collecto
 
 | Path | What it is |
 |---|---|
-| [`src/src`](src/src) | The production web app (Next.js 16, React 19, TypeScript), deployed on Vercel. Start with its [README](src/src/README.md). |
+| [`app`](app), [`lib`](lib), [`components`](components), [`db`](db), [`tests`](tests) | The production web app (Next.js 16, React 19, TypeScript) at the repository root, deployed on Vercel. See the [app README](docs/APP_README.md). |
 | [`agents/sara-closer`](agents/sara-closer) | Sara, the closing agent, built on the eve agent framework. |
 | [`.github`](.github) | CI (tests, coverage, lint, typecheck, dependency audit, build, secret scan), Dependabot and templates. |
 | [`ARCHIVE.md`](ARCHIVE.md) | Where retired material lives and how to restore it. |
@@ -29,14 +29,13 @@ Browser ──► Next.js app (Vercel)
                     └─► Stripe, Vapi (voice)
 ```
 
-Shared request defences live in [`src/src/lib/request-security.ts`](src/src/lib/request-security.ts). They provide sliding-window rate limiting keyed on platform-set client IPs, body caps enforced on received bytes and origin validation. Money is handled as integer cents in [`src/src/lib/math.ts`](src/src/lib/math.ts).
+Shared request defences live in [`lib/request-security.ts`](lib/request-security.ts). They provide sliding-window rate limiting keyed on platform-set client IPs, body caps enforced on received bytes and origin validation. Money is handled as integer cents in [`lib/math.ts`](lib/math.ts).
 
 ## Quick start
 
 Requires Node 24 and pnpm 10.
 
 ```bash
-cd src/src
 pnpm install --frozen-lockfile
 cp .env.example .env.local   # fill in the values you need
 pnpm dev
@@ -49,7 +48,7 @@ pnpm dev
 - Unit tests run on Jest, with coverage thresholds enforced in CI.
 - `pnpm audit` is clean at every package root. Dependabot keeps dependencies current.
 - Every push is scanned for credential patterns.
-- Security headers (HSTS, CSP `frame-ancestors`, `X-Frame-Options`) are set in [`next.config.mjs`](src/src/next.config.mjs).
+- Security headers (HSTS, CSP `frame-ancestors`, `X-Frame-Options`) are set in [`next.config.mjs`](next.config.mjs).
 
 ## Project history
 
@@ -66,7 +65,7 @@ Early iterations lived in v0 and Vercel before the code moved to Git, so the Git
 - [CHANGELOG.md](CHANGELOG.md): release history
 - [SECURITY.md](SECURITY.md): security policy and reporting
 - [CONTRIBUTING.md](CONTRIBUTING.md): workflow and conventions
-- [src/src/docs/DEVELOPMENT.md](src/src/docs/DEVELOPMENT.md): development guide
+- [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md): development guide
 
 ## License
 

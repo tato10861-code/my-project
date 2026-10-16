@@ -2,6 +2,6 @@
   "name": "PropAuto AI",
   "image": "mcr.microsoft.com/devcontainers/javascript-node:24",
   "features": {},
-  "postCreateCommand": "corepack enable && cd src/src && pnpm install --frozen-lockfile",
+  "postCreateCommand": "corepack enable && pnpm install --frozen-lockfile",
   "forwardPorts": [3000]
 }
