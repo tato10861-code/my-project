@@ -77,7 +77,7 @@ Sign-up is restricted to the email in `OWNER_EMAIL`. Open `/sign-up`, register t
 ## Verifying a fresh deployment
 
 1. `pnpm check` passes locally (smoke test, unit tests, lint, typecheck, audit, build).
-2. `/api/health` answers `{"status":"ok"}`.
+2. `/api/health` answers `{"status":"ok"}` and `/api/ready` answers `{"status":"ready"}` (it returns 503 when the database or the sign-in secret is missing).
 3. Submit the contact form: a row appears in `propauto_leads` and the email arrives at `NOTIFY_EMAIL`.
 4. Load the home page twice: rows appear in `propauto_events` and `propauto_rate_limits`.
 5. In Stripe, send a test webhook: one row in `propauto_operator_logs`, one email; sending the same event again adds nothing.

@@ -2,6 +2,16 @@
 
 All notable changes to PropAuto are documented here.
 
+## [Unreleased]
+
+### Added
+- `GET /api/ready` readiness probe: 200 when the database answers and sign-in is configured, 503 otherwise, with generic check names only.
+- Owner dashboard shows monthly recurring revenue, trial pipeline, failed renewals and pending cancellations (`GET /api/admin/revenue`, `lib/revenue.ts`).
+- Migration `0006_auth_tables.sql` creates the sign-in tables.
+
+### Changed
+- The app now lives at the repository root instead of `src/src`.
+
 ## [1.1.0] - 2026-10-09
 
 ### Added
