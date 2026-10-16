@@ -11,6 +11,7 @@
     "test": "jest --runInBand",
     "test:unit": "jest --runInBand",
     "check": "pnpm test:smoke && pnpm test && pnpm lint && pnpm typecheck && pnpm audit --prod --audit-level high && pnpm build",
+    "db:migrate": "node scripts/migrate.mjs",
     "test:smoke": "node tests/smoke.mjs",
     "test:coverage": "jest --coverage"
   },
