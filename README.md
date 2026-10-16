@@ -22,7 +22,8 @@ Browser ──► Next.js app (Vercel)
               ├─ /api/checkout                  Stripe Checkout: monthly plans with a 14-day trial
               ├─ /api/webhooks/stripe           signed webhook: payments recorded once, subscriptions synced
               ├─ /api/admin/*, /api/analytics   owner-only reporting (Better Auth session)
-              └─ /api/health                    liveness probe
+              ├─ /api/health                    liveness probe (never touches the database)
+              └─ /api/ready                     readiness probe (database + sign-in configured; 503 if not)
                     │
                     ├─► Neon Postgres (Drizzle ORM)
                     ├─► Resend (owner notifications)
