@@ -36,11 +36,17 @@ export async function checkRateLimit(key: string, limit: number, now: number = D
   const local = rateLimit(key, limit, now)
   if (!local.allowed) return local
   try {
-    return await withTimeout(sharedRateLimit((text, values) => pool.query(text, values), key, limit, now), SHARED_TIMEOUT_MS)
+    return await withTimeout(
+      sharedRateLimit((text, values) => pool.query(text, values), key, limit, now),
+      SHARED_TIMEOUT_MS,
+    )
   } catch (error) {
     if (!warned) {
       warned = true
-      console.error('[rate-limit] shared store unavailable, using per-instance limits:', error instanceof Error ? error.message : 'unknown error')
+      console.error(
+        '[rate-limit] shared store unavailable, using per-instance limits:',
+        error instanceof Error ? error.message : 'unknown error',
+      )
     }
     return local
   }

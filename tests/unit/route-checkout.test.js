@@ -9,7 +9,12 @@ const mockPricesList = jest.fn()
 const mockSessionsCreate = jest.fn()
 const mockCheckRateLimit = jest.fn()
 jest.mock('@/lib/db/rate-limit', () => ({ checkRateLimit: (...args) => mockCheckRateLimit(...args) }))
-jest.mock('stripe', () => jest.fn(() => ({ prices: { list: (...args) => mockPricesList(...args) }, checkout: { sessions: { create: (...args) => mockSessionsCreate(...args) } } })))
+jest.mock('stripe', () =>
+  jest.fn(() => ({
+    prices: { list: (...args) => mockPricesList(...args) },
+    checkout: { sessions: { create: (...args) => mockSessionsCreate(...args) } },
+  })),
+)
 
 import { POST } from '../../app/api/checkout/route'
 import { PLANS } from '../../lib/plans'
@@ -68,8 +73,18 @@ test('answers 413 when the form body is over the cap, declared or chunked', asyn
   assert.equal((await POST(form({ plan: planId, pad: 'x'.repeat(9_000) }))).status, 413)
 
   const chunks = [new TextEncoder().encode('plan='), new TextEncoder().encode('x'.repeat(9_000))]
-  const stream = new ReadableStream({ start(controller) { for (const chunk of chunks) controller.enqueue(chunk); controller.close() } })
-  const chunked = new Request(`${ORIGIN}/api/checkout`, { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded', origin: ORIGIN }, body: stream, duplex: 'half' })
+  const stream = new ReadableStream({
+    start(controller) {
+      for (const chunk of chunks) controller.enqueue(chunk)
+      controller.close()
+    },
+  })
+  const chunked = new Request(`${ORIGIN}/api/checkout`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/x-www-form-urlencoded', origin: ORIGIN },
+    body: stream,
+    duplex: 'half',
+  })
   assert.equal((await POST(chunked)).status, 413)
   assert.equal(mockSessionsCreate.mock.calls.length, 0)
 })

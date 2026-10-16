@@ -9,7 +9,10 @@ const ledger = (...files) => new Map(files.map((entry) => [entry.name, migration
 
 test('every file is pending on an empty ledger, in numeric order', () => {
   const plan = planMigrations([file('0003_c.sql'), file('0001_a.sql'), file('0002_b.sql')], new Map())
-  assert.deepEqual(plan.pending.map((entry) => entry.name), ['0001_a.sql', '0002_b.sql', '0003_c.sql'])
+  assert.deepEqual(
+    plan.pending.map((entry) => entry.name),
+    ['0001_a.sql', '0002_b.sql', '0003_c.sql'],
+  )
   assert.deepEqual(plan.drifted, [])
   assert.deepEqual(plan.missing, [])
 })
@@ -18,7 +21,10 @@ test('applied files are not run again, new ones are', () => {
   const a = file('0001_a.sql')
   const b = file('0002_b.sql')
   const plan = planMigrations([a, b], ledger(a))
-  assert.deepEqual(plan.pending.map((entry) => entry.name), ['0002_b.sql'])
+  assert.deepEqual(
+    plan.pending.map((entry) => entry.name),
+    ['0002_b.sql'],
+  )
 })
 
 test('an applied file whose content changed is reported as drifted', () => {

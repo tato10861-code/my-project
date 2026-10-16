@@ -11,11 +11,14 @@ module.exports = {
   // The app imports with the '@/' alias (tsconfig paths); route tests need it too.
   moduleNameMapper: { '^@/(.*)$': '<rootDir>/$1' },
   transform: {
-    '^.+\\.[jt]s$': ['babel-jest', {
-      configFile: false,
-      babelrc: false,
-      presets: [['@babel/preset-env', { targets: { node: 'current' } }], '@babel/preset-typescript'],
-    }],
+    '^.+\\.[jt]s$': [
+      'babel-jest',
+      {
+        configFile: false,
+        babelrc: false,
+        presets: [['@babel/preset-env', { targets: { node: 'current' } }], '@babel/preset-typescript'],
+      },
+    ],
   },
   collectCoverageFrom: ['lib/**/*.ts', '!lib/db/**', '!lib/auth.ts', '!lib/auth-client.ts'],
   coverageReporters: ['text', 'json-summary'],

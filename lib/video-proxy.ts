@@ -3,7 +3,8 @@
  * storage. Shared by the public and owner-only video endpoints.
  */
 
-export const VIDEO_SOURCE = 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/d1f2fb50-a0ab-11f1-881d-6515b107900b%20%281%29-k9MtgLxwIC9J0FfT2EjdxeNpddGKsu.mp4'
+export const VIDEO_SOURCE =
+  'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/d1f2fb50-a0ab-11f1-881d-6515b107900b%20%281%29-k9MtgLxwIC9J0FfT2EjdxeNpddGKsu.mp4'
 
 /** Upper bound on waiting for the origin to start responding. */
 export const UPSTREAM_TIMEOUT_MS = 10_000
@@ -46,7 +47,13 @@ export async function proxyVideo(request: Request, visibility: Visibility, fetch
     return Response.json({ error: 'Video unavailable' }, { status: 504, headers: { 'Cache-Control': 'no-store' } })
   }
   if (!response.ok) {
-    return Response.json({ error: 'Video unavailable' }, { status: response.status === 416 ? 416 : 502, headers: { 'Cache-Control': 'no-store' } })
+    return Response.json(
+      { error: 'Video unavailable' },
+      { status: response.status === 416 ? 416 : 502, headers: { 'Cache-Control': 'no-store' } },
+    )
   }
-  return new Response(response.body, { status: response.status, headers: videoResponseHeaders(response.headers, response.status, visibility) })
+  return new Response(response.body, {
+    status: response.status,
+    headers: videoResponseHeaders(response.headers, response.status, visibility),
+  })
 }

@@ -18,7 +18,8 @@ export function percentChange(current: number, previous: number): number | null 
   return Math.round(((current - previous) / previous) * 100)
 }
 
-const AUTOMATED_AGENT = /bot|crawl|spider|slurp|headless|lighthouse|preview|monitor|uptime|curl\/|wget|python-requests|node-fetch|axios|go-http-client|okhttp|java\//i
+const AUTOMATED_AGENT =
+  /bot|crawl|spider|slurp|headless|lighthouse|preview|monitor|uptime|curl\/|wget|python-requests|node-fetch|axios|go-http-client|okhttp|java\//i
 
 /**
  * Whether a User-Agent looks like automated traffic. A missing agent counts as

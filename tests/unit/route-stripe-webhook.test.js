@@ -48,7 +48,19 @@ const checkoutCompleted = (overrides = {}) => ({
   type: 'checkout.session.completed',
   livemode: false,
   created: 1_800_000_000,
-  data: { object: { id: 'cs_1', object: 'checkout.session', mode: 'payment', payment_status: 'paid', amount_total: 490000, currency: 'usd', metadata: { product_id: 'premium' }, customer_details: { email: 'buyer@example.com' }, ...overrides } },
+  data: {
+    object: {
+      id: 'cs_1',
+      object: 'checkout.session',
+      mode: 'payment',
+      payment_status: 'paid',
+      amount_total: 490000,
+      currency: 'usd',
+      metadata: { product_id: 'premium' },
+      customer_details: { email: 'buyer@example.com' },
+      ...overrides,
+    },
+  },
 })
 
 const subscriptionUpdated = () => ({
@@ -57,18 +69,39 @@ const subscriptionUpdated = () => ({
   type: 'customer.subscription.updated',
   livemode: false,
   created: 1_800_000_100,
-  data: { object: { id: 'sub_1', object: 'subscription', customer: 'cus_1', status: 'active', cancel_at_period_end: false, trial_end: null, metadata: { plan: 'growth' }, items: { data: [{ current_period_end: 1_802_592_000, price: { id: 'price_growth', metadata: {} } }] } } },
+  data: {
+    object: {
+      id: 'sub_1',
+      object: 'subscription',
+      customer: 'cus_1',
+      status: 'active',
+      cancel_at_period_end: false,
+      trial_end: null,
+      metadata: { plan: 'growth' },
+      items: { data: [{ current_period_end: 1_802_592_000, price: { id: 'price_growth', metadata: {} } }] },
+    },
+  },
 })
 
 const signed = (event, { secret = SECRET, headers = {} } = {}) => {
   const payload = JSON.stringify(event)
   const signature = Stripe.webhooks.generateTestHeaderString({ payload, secret })
-  return new Request('https://propauto.example/api/webhooks/stripe', { method: 'POST', headers: { 'stripe-signature': signature, ...headers }, body: payload })
+  return new Request('https://propauto.example/api/webhooks/stripe', {
+    method: 'POST',
+    headers: { 'stripe-signature': signature, ...headers },
+    body: payload,
+  })
 }
 
 const saved = { ...process.env }
 beforeEach(() => {
-  Object.assign(mockState, { existing: [], inserted: [{ id: 1 }], insertCalls: [], subscriptionCalls: [], insertError: null })
+  Object.assign(mockState, {
+    existing: [],
+    inserted: [{ id: 1 }],
+    insertCalls: [],
+    subscriptionCalls: [],
+    insertError: null,
+  })
   mockSend.mockReset().mockResolvedValue({ error: null })
   process.env.STRIPE_WEBHOOK_SECRET = SECRET
   process.env.RESEND_API_KEY = 're_test_key'
@@ -86,7 +119,10 @@ test('answers 503 when the webhook secret is not configured', async () => {
 })
 
 test('rejects a missing, forged or wrong-secret signature with 400', async () => {
-  const noHeader = new Request('https://propauto.example/api/webhooks/stripe', { method: 'POST', body: JSON.stringify(checkoutCompleted()) })
+  const noHeader = new Request('https://propauto.example/api/webhooks/stripe', {
+    method: 'POST',
+    body: JSON.stringify(checkoutCompleted()),
+  })
   assert.equal((await POST(noHeader)).status, 400)
   assert.equal((await POST(signed(checkoutCompleted(), { secret: 'whsec_other' }))).status, 400)
   assert.equal(mockState.insertCalls.length, 0)
@@ -94,7 +130,11 @@ test('rejects a missing, forged or wrong-secret signature with 400', async () =>
 })
 
 test('rejects a body over the size cap with 413 before verifying it', async () => {
-  const huge = new Request('https://propauto.example/api/webhooks/stripe', { method: 'POST', headers: { 'stripe-signature': 't=1,v1=x' }, body: 'x'.repeat(300 * 1024) })
+  const huge = new Request('https://propauto.example/api/webhooks/stripe', {
+    method: 'POST',
+    headers: { 'stripe-signature': 't=1,v1=x' },
+    body: 'x'.repeat(300 * 1024),
+  })
   assert.equal((await POST(huge)).status, 413)
 })
 
@@ -143,7 +183,16 @@ test('upserts subscription state, guarded by the event timestamp', async () => {
 })
 
 test('acknowledges events it does not handle without storing anything', async () => {
-  const response = await POST(signed({ id: 'evt_other', object: 'event', type: 'customer.created', livemode: false, created: 1, data: { object: {} } }))
+  const response = await POST(
+    signed({
+      id: 'evt_other',
+      object: 'event',
+      type: 'customer.created',
+      livemode: false,
+      created: 1,
+      data: { object: {} },
+    }),
+  )
   assert.equal(response.status, 200)
   assert.equal(mockState.insertCalls.length, 0)
   assert.equal(mockState.subscriptionCalls.length, 0)

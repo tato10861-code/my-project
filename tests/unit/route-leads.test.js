@@ -14,7 +14,13 @@ jest.mock('resend', () => ({ Resend: jest.fn(() => ({ emails: { send: (...args) 
 
 import { POST } from '../../app/api/leads/route'
 
-const lead = { name: 'Ada Lovelace', email: 'ada@example.com', intent: 'buyer', phone: '+15550100', message: 'Interested in the villa' }
+const lead = {
+  name: 'Ada Lovelace',
+  email: 'ada@example.com',
+  intent: 'buyer',
+  phone: '+15550100',
+  message: 'Interested in the villa',
+}
 
 const post = (body, headers = {}) =>
   new Request('https://propauto.example/api/leads', {

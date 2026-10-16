@@ -30,7 +30,8 @@ const T0 = 10 * WINDOW_MS
 test('allows requests up to the limit and rejects the next one', async () => {
   const store = fakeStore()
   const results = []
-  for (let i = 0; i < 6; i++) results.push((await sharedRateLimit(store.query, 'leads:1.2.3.4', 5, T0 + 1000, NEVER_PRUNE)).allowed)
+  for (let i = 0; i < 6; i++)
+    results.push((await sharedRateLimit(store.query, 'leads:1.2.3.4', 5, T0 + 1000, NEVER_PRUNE)).allowed)
   assert.deepEqual(results, [true, true, true, true, true, false])
 })
 
@@ -40,7 +41,10 @@ test('counters are shared by every caller of the same store, so instances cannot
   const instanceA = () => sharedRateLimit(store.query, 'leads:ip', 5, T0 + 1000, NEVER_PRUNE)
   const instanceB = () => sharedRateLimit(store.query, 'leads:ip', 5, T0 + 2000, NEVER_PRUNE)
   const allowed = []
-  for (let i = 0; i < 3; i++) { allowed.push((await instanceA()).allowed); allowed.push((await instanceB()).allowed) }
+  for (let i = 0; i < 3; i++) {
+    allowed.push((await instanceA()).allowed)
+    allowed.push((await instanceB()).allowed)
+  }
   assert.equal(allowed.filter(Boolean).length, 5)
 })
 
@@ -73,7 +77,10 @@ test('occasionally prunes old windows, and a failing prune does not change the a
   const result = await sharedRateLimit(store.query, 'new', 5, later, () => 0)
   assert.equal(result.allowed, true)
   assert.equal(store.calls.includes('DELETE'), true)
-  assert.equal([...store.rows.keys()].some((id) => id.startsWith('old|')), false)
+  assert.equal(
+    [...store.rows.keys()].some((id) => id.startsWith('old|')),
+    false,
+  )
 
   const failingPrune = async (text, values) => {
     if (text.includes('DELETE')) throw new Error('boom')
@@ -83,6 +90,8 @@ test('occasionally prunes old windows, and a failing prune does not change the a
 })
 
 test('a store error propagates so the caller can fail open', async () => {
-  const broken = async () => { throw new Error('connection refused') }
+  const broken = async () => {
+    throw new Error('connection refused')
+  }
   await assert.rejects(sharedRateLimit(broken, 'k', 5, T0, NEVER_PRUNE), /connection refused/)
 })

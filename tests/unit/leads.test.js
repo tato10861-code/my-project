@@ -2,9 +2,23 @@
  * @fileoverview Unit tests for lead validation and owner notification helpers.
  */
 import assert from 'node:assert/strict'
-import { buildLeadEmail, escapeHtml, isMissingColumnError, leadIdempotencyKey, leadRow, leadSchema } from '../../lib/leads'
+import {
+  buildLeadEmail,
+  escapeHtml,
+  isMissingColumnError,
+  leadIdempotencyKey,
+  leadRow,
+  leadSchema,
+} from '../../lib/leads'
 
-const lead = leadSchema.parse({ name: 'Ada Lovelace', email: 'ada@example.com', intent: 'investor', phone: '+15550100', budget: '2M', message: 'Hello' })
+const lead = leadSchema.parse({
+  name: 'Ada Lovelace',
+  email: 'ada@example.com',
+  intent: 'investor',
+  phone: '+15550100',
+  budget: '2M',
+  message: 'Hello',
+})
 
 test('leadSchema accepts every field the forms send', () => {
   assert.equal(lead.phone, '+15550100')
@@ -19,7 +33,10 @@ test('leadSchema rejects malformed leads', () => {
 })
 
 test('leadSchema accepts a chatbot transcript longer than 1000 characters', () => {
-  assert.equal(leadSchema.safeParse({ name: 'Ada', email: 'ada@example.com', intent: 'buyer', message: 'x'.repeat(3000) }).success, true)
+  assert.equal(
+    leadSchema.safeParse({ name: 'Ada', email: 'ada@example.com', intent: 'buyer', message: 'x'.repeat(3000) }).success,
+    true,
+  )
 })
 
 test('escapeHtml neutralizes markup', () => {
@@ -43,7 +60,16 @@ test('leadIdempotencyKey is stable for a retry and differs for a different lead'
 })
 
 test('leadRow keeps every optional detail the forms collect', () => {
-  assert.deepEqual(leadRow(lead), { name: 'Ada Lovelace', email: 'ada@example.com', intent: 'investor', source: 'web', phone: '+15550100', budget: '2M', message: 'Hello', language: null })
+  assert.deepEqual(leadRow(lead), {
+    name: 'Ada Lovelace',
+    email: 'ada@example.com',
+    intent: 'investor',
+    source: 'web',
+    phone: '+15550100',
+    budget: '2M',
+    message: 'Hello',
+    language: null,
+  })
 })
 
 test('isMissingColumnError finds the SQLSTATE through ORM wrapping', () => {

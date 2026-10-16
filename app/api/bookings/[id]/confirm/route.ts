@@ -56,7 +56,10 @@ export async function POST(request: Request, context: Params) {
 }
 
 const escapeHtml = (value: string) =>
-  value.replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char] as string)
+  value.replace(
+    /[&<>"']/g,
+    (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char] as string,
+  )
 
 const headers = (contentType: string) => ({
   'Content-Type': contentType,
@@ -66,10 +69,13 @@ const headers = (contentType: string) => ({
 })
 
 function html(title: string, body: string, status: number) {
-  return new Response(`<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title}</title>${body}`, {
-    status,
-    headers: headers('text/html; charset=utf-8'),
-  })
+  return new Response(
+    `<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title}</title>${body}`,
+    {
+      status,
+      headers: headers('text/html; charset=utf-8'),
+    },
+  )
 }
 
 function text(body: string, status: number) {

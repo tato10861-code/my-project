@@ -53,7 +53,13 @@ const PRUNE_SQL = 'DELETE FROM propauto_rate_limits WHERE window_start < $1'
  * @throws Whatever `query` throws; callers decide whether to fail open.
  * @complexity O(1) statements per call, plus an occasional prune.
  */
-export async function sharedRateLimit(query: Query, key: string, limit: number, now: number, random: () => number = Math.random): Promise<LimitResult> {
+export async function sharedRateLimit(
+  query: Query,
+  key: string,
+  limit: number,
+  now: number,
+  random: () => number = Math.random,
+): Promise<LimitResult> {
   const windowStart = now - (now % WINDOW_MS)
   const { rows } = await query(COUNT_SQL, [key, new Date(windowStart), new Date(windowStart - WINDOW_MS)])
   const current = Number(rows[0]?.current ?? 0)

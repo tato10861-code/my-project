@@ -28,12 +28,16 @@ const connectionString = [
 ].find((value) => typeof value === 'string' && value.trim() !== '')
 
 if (!connectionString) {
-  console.error('[migrate] No database URL set (DATABASE_URL_UNPOOLED, POSTGRES_URL_NON_POOLING, DATABASE_URL or POSTGRES_URL).')
+  console.error(
+    '[migrate] No database URL set (DATABASE_URL_UNPOOLED, POSTGRES_URL_NON_POOLING, DATABASE_URL or POSTGRES_URL).',
+  )
   process.exit(1)
 }
 
 const names = (await readdir(fileURLToPath(directoryUrl))).filter((name) => name.endsWith('.sql'))
-const files = await Promise.all(names.map(async (name) => ({ name, sql: await readFile(new URL(name, directoryUrl), 'utf8') })))
+const files = await Promise.all(
+  names.map(async (name) => ({ name, sql: await readFile(new URL(name, directoryUrl), 'utf8') })),
+)
 
 const client = new pg.Client({ connectionString: withExplicitSslMode(connectionString) })
 await client.connect()
@@ -52,7 +56,9 @@ try {
   for (const name of plan.drifted) console.error(`[migrate] CHANGED after it was applied: ${name}`)
   for (const name of plan.missing) console.error(`[migrate] MISSING from db/migrations: ${name}`)
   if (plan.drifted.length > 0 || plan.missing.length > 0) {
-    console.error('[migrate] Refusing to continue. Restore the file, or add a new migration instead of editing an applied one.')
+    console.error(
+      '[migrate] Refusing to continue. Restore the file, or add a new migration instead of editing an applied one.',
+    )
     exitCode = 1
   } else if (statusOnly) {
     console.log(`[migrate] applied: ${rows.length}, pending: ${plan.pending.length}`)
@@ -62,7 +68,10 @@ try {
       try {
         await client.query('BEGIN')
         await client.query(file.sql)
-        await client.query('INSERT INTO propauto_migrations (name, checksum) VALUES ($1, $2)', [file.name, migrationChecksum(file.sql)])
+        await client.query('INSERT INTO propauto_migrations (name, checksum) VALUES ($1, $2)', [
+          file.name,
+          migrationChecksum(file.sql),
+        ])
         await client.query('COMMIT')
         console.log(`[migrate] applied ${file.name}`)
       } catch (error) {

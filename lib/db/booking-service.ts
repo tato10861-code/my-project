@@ -5,7 +5,13 @@
  */
 import nodemailer from 'nodemailer'
 import { Resend } from 'resend'
-import { bookingNotificationEmail, buildSlots, confirmationUrl, isBookableSlot, type BookingRequest } from '@/lib/bookings'
+import {
+  bookingNotificationEmail,
+  buildSlots,
+  confirmationUrl,
+  isBookableSlot,
+  type BookingRequest,
+} from '@/lib/bookings'
 import { cancelBooking, createPendingBooking, takenStarts } from '@/lib/db/bookings'
 
 const DAY_MS = 24 * 60 * 60 * 1000
@@ -23,7 +29,12 @@ function mailSender(notifyTo: string): ((mail: Mail) => Promise<string | null>) 
   if (process.env.RESEND_FROM_EMAIL && resendKey) {
     const from = process.env.RESEND_FROM_EMAIL
     return async (mail) => {
-      const { error } = await new Resend(resendKey).emails.send({ from, to: notifyTo, subject: mail.subject, text: mail.text })
+      const { error } = await new Resend(resendKey).emails.send({
+        from,
+        to: notifyTo,
+        subject: mail.subject,
+        text: mail.text,
+      })
       return error ? error.message : null
     }
   }
@@ -63,10 +74,16 @@ export type RequestResult = { ok: true; bookingId: string; status: 'pending' } |
 export async function requestBooking(input: BookingRequest, now: Date = new Date()): Promise<RequestResult> {
   const config = bookingConfig()
   if (!config) {
-    return { ok: false, error: 'Booking requests are not configured yet. Tell the customer a PropAuto advisor will call them to confirm.' }
+    return {
+      ok: false,
+      error: 'Booking requests are not configured yet. Tell the customer a PropAuto advisor will call them to confirm.',
+    }
   }
   if (!isBookableSlot(input.startsAt, now)) {
-    return { ok: false, error: 'That time is not a bookable slot. Check availability and offer one of the returned times.' }
+    return {
+      ok: false,
+      error: 'That time is not a bookable slot. Check availability and offer one of the returned times.',
+    }
   }
 
   const created = await createPendingBooking(input)
@@ -81,7 +98,10 @@ export async function requestBooking(input: BookingRequest, now: Date = new Date
     console.error('[sarah] owner email failed:', error)
     // Nothing is held without the team seeing it: release the slot and keep the reason.
     await cancelBooking(created.id, `email: ${error}`)
-    return { ok: false, error: 'Could not send the confirmation request. Offer another time or ask the customer to wait for a call.' }
+    return {
+      ok: false,
+      error: 'Could not send the confirmation request. Offer another time or ask the customer to wait for a call.',
+    }
   }
   return { ok: true, bookingId: created.id, status: 'pending' }
 }

@@ -180,12 +180,19 @@ test('readJsonBody enforces the cap on chunked bodies without content-length', a
 })
 
 test('readJsonBody rejects a declared oversized body before reading', async () => {
-  const request = new Request('https://example.com', { method: 'POST', body: '{}', headers: { 'content-length': '999999' } })
+  const request = new Request('https://example.com', {
+    method: 'POST',
+    body: '{}',
+    headers: { 'content-length': '999999' },
+  })
   await assert.rejects(readJsonBody(request, 1024), BodyTooLargeError)
 })
 
 test('readJsonBody rejects malformed or empty JSON', async () => {
-  await assert.rejects(readJsonBody(new Request('https://example.com', { method: 'POST', body: '{nope' }), 1024), InvalidJsonError)
+  await assert.rejects(
+    readJsonBody(new Request('https://example.com', { method: 'POST', body: '{nope' }), 1024),
+    InvalidJsonError,
+  )
   await assert.rejects(readJsonBody(new Request('https://example.com', { method: 'POST' }), 1024), InvalidJsonError)
 })
 
@@ -204,14 +211,18 @@ test('getConfiguredOrigin rejects plain http outside development', () => {
 })
 
 describe('isSameOriginRequest', () => {
-  const post = (headers = {}, url = 'https://propauto.example/api/leads') => new Request(url, { method: 'POST', headers })
+  const post = (headers = {}, url = 'https://propauto.example/api/leads') =>
+    new Request(url, { method: 'POST', headers })
   const saved = { site: process.env.NEXT_PUBLIC_SITE_URL, auth: process.env.BETTER_AUTH_URL }
   beforeEach(() => {
     process.env.NEXT_PUBLIC_SITE_URL = 'https://www.propauto.example'
     delete process.env.BETTER_AUTH_URL
   })
   afterAll(() => {
-    for (const [key, value] of [['NEXT_PUBLIC_SITE_URL', saved.site], ['BETTER_AUTH_URL', saved.auth]]) {
+    for (const [key, value] of [
+      ['NEXT_PUBLIC_SITE_URL', saved.site],
+      ['BETTER_AUTH_URL', saved.auth],
+    ]) {
       if (value === undefined) delete process.env[key]
       else process.env[key] = value
     }
@@ -244,7 +255,12 @@ describe('isSameOriginRequest', () => {
 })
 
 describe('readFormBody', () => {
-  const form = (body, headers = {}) => new Request('https://example.com/api/checkout', { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded', ...headers }, body })
+  const form = (body, headers = {}) =>
+    new Request('https://example.com/api/checkout', {
+      method: 'POST',
+      headers: { 'content-type': 'application/x-www-form-urlencoded', ...headers },
+      body,
+    })
 
   test('decodes the fields of a form submission', async () => {
     const fields = await readFormBody(form('plan=growth&product=a%20b'), 1024)
@@ -260,8 +276,18 @@ describe('readFormBody', () => {
 
   test('caps the bytes actually received, not just the declared length', async () => {
     const chunks = [new TextEncoder().encode('plan='), new TextEncoder().encode('x'.repeat(64))]
-    const stream = new ReadableStream({ start(controller) { for (const chunk of chunks) controller.enqueue(chunk); controller.close() } })
-    const chunked = new Request('https://example.com/api/checkout', { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body: stream, duplex: 'half' })
+    const stream = new ReadableStream({
+      start(controller) {
+        for (const chunk of chunks) controller.enqueue(chunk)
+        controller.close()
+      },
+    })
+    const chunked = new Request('https://example.com/api/checkout', {
+      method: 'POST',
+      headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      body: stream,
+      duplex: 'half',
+    })
     await assert.rejects(readFormBody(chunked, 32), BodyTooLargeError)
   })
 

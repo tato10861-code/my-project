@@ -35,7 +35,8 @@ export function verifyStripeEvent(rawBody: string, signature: string | null, sec
  * asynchronous payment, and subscription checkouts), which the webhook acknowledges without storing.
  */
 export function paymentRecord(event: Stripe.Event): PaymentRecord | null {
-  if (event.type !== 'checkout.session.completed' && event.type !== 'checkout.session.async_payment_succeeded') return null
+  if (event.type !== 'checkout.session.completed' && event.type !== 'checkout.session.async_payment_succeeded')
+    return null
   const session = event.data.object as Stripe.Checkout.Session
   // Subscription checkouts are reported by lib/billing.ts instead.
   if (session.mode === 'subscription' || session.payment_status !== 'paid') return null

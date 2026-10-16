@@ -20,5 +20,9 @@ test('healthReport reports "dev" when no commit is known', () => {
 })
 
 test('healthReport exposes nothing beyond status, version and time', () => {
-  assert.deepEqual(Object.keys(healthReport({ DATABASE_URL: 'postgres://secret' })).sort(), ['status', 'time', 'version'])
+  assert.deepEqual(Object.keys(healthReport({ DATABASE_URL: 'postgres://secret' })).sort(), [
+    'status',
+    'time',
+    'version',
+  ])
 })

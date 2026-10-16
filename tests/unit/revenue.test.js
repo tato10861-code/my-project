@@ -57,7 +57,10 @@ test('MRR counts only live paying subscriptions and splits trial and at-risk rev
   assert.equal(summary.mrrCents, 4_900 + 14_900)
   assert.equal(summary.trialMrrCents, 39_900)
   assert.equal(summary.atRiskMrrCents, 14_900)
-  assert.deepEqual([summary.activeCount, summary.trialingCount, summary.pastDueCount, summary.cancelingCount], [2, 1, 1, 1])
+  assert.deepEqual(
+    [summary.activeCount, summary.trialingCount, summary.pastDueCount, summary.cancelingCount],
+    [2, 1, 1, 1],
+  )
   assert.deepEqual(summary.byPlan, { starter: 1, growth: 1 })
 })
 

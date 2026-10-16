@@ -5,7 +5,15 @@ import { Resend } from 'resend'
 import { z } from 'zod'
 import { bookingRequestSchema } from '@/lib/bookings'
 import { bookingConfig, freeSlots, requestBooking } from '@/lib/db/booking-service'
-import { BodyTooLargeError, getClientKey, payloadTooLarge, readJsonBody, tooManyRequests, crossOriginForbidden, isSameOriginRequest } from '@/lib/request-security'
+import {
+  BodyTooLargeError,
+  getClientKey,
+  payloadTooLarge,
+  readJsonBody,
+  tooManyRequests,
+  crossOriginForbidden,
+  isSameOriginRequest,
+} from '@/lib/request-security'
 import { notifyEmail } from '@/lib/site-config'
 import { checkRateLimit } from '@/lib/db/rate-limit'
 import { runWithModelFallback } from '@/lib/sarah-fallback'
@@ -13,18 +21,29 @@ import { sarahModelNames } from '@/lib/sarah-models'
 import { fallbackReply, sarahSystem } from '@/lib/sarah-prompt'
 
 const requestSchema = z.object({
-  messages: z.array(z.object({
-    role: z.enum(['user', 'assistant']),
-    content: z.string().trim().min(1).max(2000),
-  })).min(1).max(30).refine((messages) => messages.some((message) => message.role === 'user')),
-  language: z.string().trim().regex(/^[a-z]{2}(?:-[A-Z]{2})?$/).default('en'),
+  messages: z
+    .array(
+      z.object({
+        role: z.enum(['user', 'assistant']),
+        content: z.string().trim().min(1).max(2000),
+      }),
+    )
+    .min(1)
+    .max(30)
+    .refine((messages) => messages.some((message) => message.role === 'user')),
+  language: z
+    .string()
+    .trim()
+    .regex(/^[a-z]{2}(?:-[A-Z]{2})?$/)
+    .default('en'),
 })
 
 const MAX_BODY_BYTES = 96_000
 
 const sarahTools = {
   check_availability: tool({
-    description: 'List the free viewing or test-drive start times (ISO, UTC) for the next few days. Call this before offering any time.',
+    description:
+      'List the free viewing or test-drive start times (ISO, UTC) for the next few days. Call this before offering any time.',
     inputSchema: z.object({ days: z.number().int().min(1).max(7).default(3) }),
     execute: async ({ days }) => {
       if (!bookingConfig()) return { slots: [], note: 'Booking is not configured; offer an advisor call instead.' }
@@ -37,14 +56,18 @@ const sarahTools = {
     },
   }),
   request_booking: tool({
-    description: 'Request a viewing or test drive at a slot from check_availability. Needs the customer name and phone. The booking stays pending until the team confirms it.',
+    description:
+      'Request a viewing or test drive at a slot from check_availability. Needs the customer name and phone. The booking stays pending until the team confirms it.',
     inputSchema: bookingRequestSchema,
     execute: async (input) => {
       try {
         return await requestBooking(input)
       } catch (error) {
         console.error('[sarah] booking request failed:', error instanceof Error ? error.message : error)
-        return { ok: false, error: 'Booking is unavailable right now. Tell the customer an advisor will call them to confirm.' }
+        return {
+          ok: false,
+          error: 'Booking is unavailable right now. Tell the customer an advisor will call them to confirm.',
+        }
       }
     },
   }),
@@ -67,7 +90,10 @@ export async function POST(request: Request) {
   const { messages, language } = parsed
   try {
     const latestMessage = messages[messages.length - 1]?.content ?? ''
-    const hotLead = /\b(book|booking|viewing|test drive|human|price|interested|buy|rent)\b|حجز|معاينة|موظف|السعر|شراء|إيجار/i.test(latestMessage)
+    const hotLead =
+      /\b(book|booking|viewing|test drive|human|price|interested|buy|rent)\b|حجز|معاينة|موظف|السعر|شراء|إيجار/i.test(
+        latestMessage,
+      )
     const resendKey = process.env.RESEND_API_KEY_2 ?? process.env.RESEND_API_KEY
     if (hotLead && resendKey) {
       // The alert is a courtesy to the team: a bad key or a provider outage must
@@ -116,7 +142,11 @@ export async function POST(request: Request) {
       })
     const { result, model: used } = await runWithModelFallback(names, attempt, {
       onFailure: (name, error) =>
-        console.error('[sarah] model failed:', name, error instanceof Error ? `${error.name}: ${error.message}` : 'unknown error'),
+        console.error(
+          '[sarah] model failed:',
+          name,
+          error instanceof Error ? `${error.name}: ${error.message}` : 'unknown error',
+        ),
       // A booking may already be stored: never replay the turn on another model.
       stopAfterFailure: () => toolRan,
     })
@@ -128,6 +158,9 @@ export async function POST(request: Request) {
   } catch (error) {
     // Only the error class and message: never the customer's text or any key.
     console.error('[sarah] chat failed:', error instanceof Error ? `${error.name}: ${error.message}` : 'unknown error')
-    return Response.json({ reply: fallbackReply(language), retryable: true }, { status: 503, headers: { 'Cache-Control': 'no-store' } })
+    return Response.json(
+      { reply: fallbackReply(language), retryable: true },
+      { status: 503, headers: { 'Cache-Control': 'no-store' } },
+    )
   }
 }

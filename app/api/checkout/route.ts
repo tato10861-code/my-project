@@ -3,7 +3,16 @@ import Stripe from 'stripe'
 import { subscriptionCheckoutParams } from '@/lib/billing'
 import { getPlan } from '@/lib/plans'
 import { getProduct } from '@/lib/products'
-import { BodyTooLargeError, getClientKey, payloadTooLarge, readFormBody, tooManyRequests, getConfiguredOrigin, crossOriginForbidden, isSameOriginRequest } from '@/lib/request-security'
+import {
+  BodyTooLargeError,
+  getClientKey,
+  payloadTooLarge,
+  readFormBody,
+  tooManyRequests,
+  getConfiguredOrigin,
+  crossOriginForbidden,
+  isSameOriginRequest,
+} from '@/lib/request-security'
 import { checkRateLimit } from '@/lib/db/rate-limit'
 
 const noStore = { 'Cache-Control': 'no-store' }
@@ -35,7 +44,8 @@ export async function POST(request: Request) {
 
     const secretKey = process.env.STRIPE_SECRET_KEY
     const origin = getConfiguredOrigin()
-    if (!secretKey || !origin) return NextResponse.json({ error: 'Payments are not configured yet.' }, { status: 503, headers: noStore })
+    if (!secretKey || !origin)
+      return NextResponse.json({ error: 'Payments are not configured yet.' }, { status: 503, headers: noStore })
     const stripe = new Stripe(secretKey)
 
     let session: Stripe.Checkout.Session | undefined
@@ -46,11 +56,22 @@ export async function POST(request: Request) {
         console.error(`[checkout] no active Stripe price with lookup key ${plan.lookupKey}`)
         return NextResponse.json({ error: 'This plan is not available yet.' }, { status: 503, headers: noStore })
       }
-      session = await stripe.checkout.sessions.create(subscriptionCheckoutParams(plan, price.id, origin, process.env.STRIPE_AUTOMATIC_TAX === 'true'))
+      session = await stripe.checkout.sessions.create(
+        subscriptionCheckoutParams(plan, price.id, origin, process.env.STRIPE_AUTOMATIC_TAX === 'true'),
+      )
     } else if (product) {
       session = await stripe.checkout.sessions.create({
         mode: 'payment',
-        line_items: [{ price_data: { currency: 'usd', product_data: { name: product.name, description: product.description }, unit_amount: product.priceInCents }, quantity: 1 }],
+        line_items: [
+          {
+            price_data: {
+              currency: 'usd',
+              product_data: { name: product.name, description: product.description },
+              unit_amount: product.priceInCents,
+            },
+            quantity: 1,
+          },
+        ],
         client_reference_id: `propauto_${crypto.randomUUID()}`,
         success_url: `${origin}/?payment=success&session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${origin}/?payment=cancelled`,

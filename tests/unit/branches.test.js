@@ -9,7 +9,13 @@ import { healthReport } from '../../lib/health'
 import { buildLeadEmail, isMissingColumnError, leadIdempotencyKey, leadRow, leadSchema } from '../../lib/leads'
 import { safeDivide, toCents } from '../../lib/math'
 import { paymentRecord } from '../../lib/payments'
-import { BodyTooLargeError, InvalidJsonError, getConfiguredOrigin, payloadTooLarge, readJsonBody } from '../../lib/request-security'
+import {
+  BodyTooLargeError,
+  InvalidJsonError,
+  getConfiguredOrigin,
+  payloadTooLarge,
+  readJsonBody,
+} from '../../lib/request-security'
 import { proxyVideo } from '../../lib/video-proxy'
 
 const minimalLead = leadSchema.parse({ name: 'Ada Lovelace', email: 'ADA@Example.com', intent: 'buyer' })
@@ -32,13 +38,17 @@ describe('leads without optional details', () => {
     const day = new Date('2026-10-12T09:00:00Z')
     const sameLeadUpper = leadSchema.parse({ name: 'Ada Lovelace', email: 'ada@example.com', intent: 'buyer' })
     assert.equal(leadIdempotencyKey(minimalLead, day), leadIdempotencyKey(sameLeadUpper, day))
-    assert.notEqual(leadIdempotencyKey(minimalLead, day), leadIdempotencyKey(minimalLead, new Date('2026-10-13T09:00:00Z')))
+    assert.notEqual(
+      leadIdempotencyKey(minimalLead, day),
+      leadIdempotencyKey(minimalLead, new Date('2026-10-13T09:00:00Z')),
+    )
   })
 })
 
 describe('isMissingColumnError', () => {
   test('is false for values that are not errors or carry another code', () => {
-    for (const value of [undefined, null, 'boom', 42, new Error('x'), { code: '23505' }]) assert.equal(isMissingColumnError(value), false)
+    for (const value of [undefined, null, 'boom', 42, new Error('x'), { code: '23505' }])
+      assert.equal(isMissingColumnError(value), false)
   })
 
   test('finds the code several causes deep but stops on a cyclic or very deep chain', () => {
@@ -57,14 +67,19 @@ describe('paymentRecord', () => {
   const event = (type, object) => ({ id: 'evt_1', type, livemode: false, data: { object } })
 
   test('accepts a payment that succeeded asynchronously after checkout', () => {
-    const record = paymentRecord(event('checkout.session.async_payment_succeeded', session({ amount_total: 500, currency: 'usd' })))
+    const record = paymentRecord(
+      event('checkout.session.async_payment_succeeded', session({ amount_total: 500, currency: 'usd' })),
+    )
     assert.equal(record?.sessionId, 'cs_1')
     assert.equal(record?.amountTotal, 500)
   })
 
   test('leaves unknown details null rather than inventing them', () => {
     const record = paymentRecord(event('checkout.session.completed', session({})))
-    assert.deepEqual([record?.productId, record?.amountTotal, record?.currency, record?.customerEmail], [null, null, null, null])
+    assert.deepEqual(
+      [record?.productId, record?.amountTotal, record?.currency, record?.customerEmail],
+      [null, null, null, null],
+    )
   })
 
   test('does not store a paid subscription checkout as a one-time payment', () => {
@@ -80,12 +95,19 @@ describe('healthReport', () => {
   })
 
   test('trims and shortens a full commit hash to seven characters', () => {
-    assert.equal(healthReport({ VERCEL_GIT_COMMIT_SHA: ' ce19e48f41b9d427d4acbd74f4f4fdf19a8af14f ' }, now).version, 'ce19e48')
+    assert.equal(
+      healthReport({ VERCEL_GIT_COMMIT_SHA: ' ce19e48f41b9d427d4acbd74f4f4fdf19a8af14f ' }, now).version,
+      'ce19e48',
+    )
   })
 })
 
 describe('getConfiguredOrigin', () => {
-  const saved = { site: process.env.NEXT_PUBLIC_SITE_URL, auth: process.env.BETTER_AUTH_URL, node: process.env.NODE_ENV }
+  const saved = {
+    site: process.env.NEXT_PUBLIC_SITE_URL,
+    auth: process.env.BETTER_AUTH_URL,
+    node: process.env.NODE_ENV,
+  }
   const restore = (key, value) => (value === undefined ? delete process.env[key] : (process.env[key] = value))
 
   afterEach(() => {
@@ -173,7 +195,17 @@ describe('numbers and bookings at the edges', () => {
   })
 
   test('the owner email for a viewing without an email says so', () => {
-    const mail = bookingNotificationEmail({ id: 'bk_2', kind: 'viewing', startsAt: '2026-10-12T10:00:00.000Z', listingRef: 'Villa 3', name: 'Omar', phone: '+15550111' }, 'https://x/c')
+    const mail = bookingNotificationEmail(
+      {
+        id: 'bk_2',
+        kind: 'viewing',
+        startsAt: '2026-10-12T10:00:00.000Z',
+        listingRef: 'Villa 3',
+        name: 'Omar',
+        phone: '+15550111',
+      },
+      'https://x/c',
+    )
     assert.equal(mail.subject, '🔥 New viewing request via Sarah - Omar (language not given)')
     assert.equal(mail.text.includes('Email: not given'), true)
   })

@@ -2,12 +2,32 @@
  * @fileoverview Unit tests for the configurable contact details.
  */
 import assert from 'node:assert/strict'
-import { contactEmail, notifyEmail, ownerEmail, whatsappDisplay, whatsappNumber, DEFAULT_OWNER_EMAIL } from '../../lib/site-config'
+import {
+  contactEmail,
+  notifyEmail,
+  ownerEmail,
+  whatsappDisplay,
+  whatsappNumber,
+  DEFAULT_OWNER_EMAIL,
+} from '../../lib/site-config'
 
-const KEYS = ['NEXT_PUBLIC_CONTACT_EMAIL', 'NOTIFY_EMAIL', 'OWNER_EMAIL', 'NEXT_PUBLIC_WHATSAPP_NUMBER', 'NEXT_PUBLIC_WHATSAPP_DISPLAY']
+const KEYS = [
+  'NEXT_PUBLIC_CONTACT_EMAIL',
+  'NOTIFY_EMAIL',
+  'OWNER_EMAIL',
+  'NEXT_PUBLIC_WHATSAPP_NUMBER',
+  'NEXT_PUBLIC_WHATSAPP_DISPLAY',
+]
 const saved = Object.fromEntries(KEYS.map((key) => [key, process.env[key]]))
-beforeEach(() => { for (const key of KEYS) delete process.env[key] })
-afterAll(() => { for (const key of KEYS) { if (saved[key] === undefined) delete process.env[key]; else process.env[key] = saved[key] } })
+beforeEach(() => {
+  for (const key of KEYS) delete process.env[key]
+})
+afterAll(() => {
+  for (const key of KEYS) {
+    if (saved[key] === undefined) delete process.env[key]
+    else process.env[key] = saved[key]
+  }
+})
 
 test('defaults keep an existing deployment working unchanged', () => {
   assert.equal(contactEmail(), 'propautoal@gmail.com')

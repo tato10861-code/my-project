@@ -18,7 +18,12 @@ import { TRIAL_DAYS, type Plan } from './plans'
  *   session until a head office address is set in its tax settings, so this
  *   is switched on by configuration once that is done.
  */
-export function subscriptionCheckoutParams(plan: Plan, priceId: string, origin: string, automaticTax: boolean): Stripe.Checkout.SessionCreateParams {
+export function subscriptionCheckoutParams(
+  plan: Plan,
+  priceId: string,
+  origin: string,
+  automaticTax: boolean,
+): Stripe.Checkout.SessionCreateParams {
   return {
     mode: 'subscription',
     line_items: [{ price: priceId, quantity: 1 }],
@@ -50,7 +55,11 @@ export interface SubscriptionRecord {
   eventCreated: number
 }
 
-const SUBSCRIPTION_EVENTS = new Set(['customer.subscription.created', 'customer.subscription.updated', 'customer.subscription.deleted'])
+const SUBSCRIPTION_EVENTS = new Set([
+  'customer.subscription.created',
+  'customer.subscription.updated',
+  'customer.subscription.deleted',
+])
 
 const fromUnix = (seconds: number | null | undefined) => (typeof seconds === 'number' ? new Date(seconds * 1000) : null)
 

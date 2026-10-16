@@ -22,7 +22,9 @@ function subscription(overrides = {}) {
     cancel_at_period_end: false,
     trial_end: 1_800_000_000,
     metadata: { plan: 'growth' },
-    items: { data: [{ current_period_end: 1_802_592_000, price: { id: 'price_growth', metadata: { plan: 'growth' } } }] },
+    items: {
+      data: [{ current_period_end: 1_802_592_000, price: { id: 'price_growth', metadata: { plan: 'growth' } } }],
+    },
     ...overrides,
   }
 }
@@ -34,7 +36,10 @@ test('plans have unique ids and lookup keys and positive prices', () => {
     assert.ok(Number.isInteger(plan.priceInCents) && plan.priceInCents > 0, plan.id)
     assert.equal(plan.features.en.length, plan.features.ar.length, plan.id)
   }
-  assert.deepEqual(PLANS.map((plan) => plan.priceInCents), [4900, 14900, 39900])
+  assert.deepEqual(
+    PLANS.map((plan) => plan.priceInCents),
+    [4900, 14900, 39900],
+  )
   assert.equal(getPlan('enterprise'), undefined)
   assert.equal(getPlan(''), undefined)
 })
@@ -52,7 +57,10 @@ test('subscription checkout collects a card, starts the trial and enables tax wh
   assert.equal(params.success_url, 'https://propauto.example/?billing=success&session_id={CHECKOUT_SESSION_ID}')
   assert.equal(params.cancel_url, 'https://propauto.example/?billing=cancelled#pricing')
   assert.match(params.client_reference_id, /^propauto_[0-9a-f-]{36}$/)
-  assert.deepEqual(subscriptionCheckoutParams(growth, 'price_growth', 'https://propauto.example', false).automatic_tax, { enabled: false })
+  assert.deepEqual(
+    subscriptionCheckoutParams(growth, 'price_growth', 'https://propauto.example', false).automatic_tax,
+    { enabled: false },
+  )
 })
 
 test('subscriptionRecord keeps the state of a subscription, with its period end from the item', () => {
@@ -84,13 +92,23 @@ test('subscriptionRecord reads the period end from every item and keeps the soon
 })
 
 test('subscriptionRecord handles expanded customers, missing plan metadata, no trial and deletion', () => {
-  const record = subscriptionRecord(event('customer.subscription.deleted', subscription({ customer: { id: 'cus_2' }, status: 'canceled', trial_end: null, metadata: {} })))
+  const record = subscriptionRecord(
+    event(
+      'customer.subscription.deleted',
+      subscription({ customer: { id: 'cus_2' }, status: 'canceled', trial_end: null, metadata: {} }),
+    ),
+  )
   assert.equal(record.customerId, 'cus_2')
   assert.equal(record.plan, 'growth')
   assert.equal(record.status, 'canceled')
   assert.equal(record.trialEnd, null)
 
-  const bare = subscriptionRecord(event('customer.subscription.updated', subscription({ metadata: {}, items: { data: [] }, cancel_at_period_end: true })))
+  const bare = subscriptionRecord(
+    event(
+      'customer.subscription.updated',
+      subscription({ metadata: {}, items: { data: [] }, cancel_at_period_end: true }),
+    ),
+  )
   assert.equal(bare.plan, null)
   assert.equal(bare.priceId, null)
   assert.equal(bare.currentPeriodEnd, null)
@@ -104,13 +122,29 @@ test('subscriptionRecord ignores other events', () => {
 
 test('only trialing and active subscriptions grant access', () => {
   for (const status of ['trialing', 'active']) assert.equal(isActiveStatus(status), true, status)
-  for (const status of ['past_due', 'unpaid', 'canceled', 'incomplete', 'incomplete_expired', 'paused']) assert.equal(isActiveStatus(status), false, status)
+  for (const status of ['past_due', 'unpaid', 'canceled', 'incomplete', 'incomplete_expired', 'paused'])
+    assert.equal(isActiveStatus(status), false, status)
 })
 
 test('billingNotice reports a completed subscription checkout once, not as a one-time payment', () => {
-  const session = { id: 'cs_1', object: 'checkout.session', mode: 'subscription', payment_status: 'no_payment_required', amount_total: 0, currency: 'usd', metadata: { plan: 'growth' }, customer_details: { email: 'agency@example.com' } }
+  const session = {
+    id: 'cs_1',
+    object: 'checkout.session',
+    mode: 'subscription',
+    payment_status: 'no_payment_required',
+    amount_total: 0,
+    currency: 'usd',
+    metadata: { plan: 'growth' },
+    customer_details: { email: 'agency@example.com' },
+  }
   assert.deepEqual(billingNotice(event('checkout.session.completed', session)), {
-    eventId: 'evt_1', kind: 'subscription_started', plan: 'growth', customerEmail: 'agency@example.com', amountDue: 0, currency: 'usd', livemode: false,
+    eventId: 'evt_1',
+    kind: 'subscription_started',
+    plan: 'growth',
+    customerEmail: 'agency@example.com',
+    amountDue: 0,
+    currency: 'usd',
+    livemode: false,
   })
   assert.equal(paymentRecord(event('checkout.session.completed', { ...session, payment_status: 'paid' })), null)
   assert.equal(billingNotice(event('checkout.session.completed', { ...session, mode: 'payment' })), null)
@@ -122,9 +156,22 @@ test('billingNotice reports a completed subscription checkout once, not as a one
 })
 
 test('billingNotice reports a failed renewal with the plan from the subscription', () => {
-  const invoice = { id: 'in_1', object: 'invoice', customer_email: 'agency@example.com', amount_due: 14900, currency: 'usd', parent: { subscription_details: { metadata: { plan: 'growth' } } } }
+  const invoice = {
+    id: 'in_1',
+    object: 'invoice',
+    customer_email: 'agency@example.com',
+    amount_due: 14900,
+    currency: 'usd',
+    parent: { subscription_details: { metadata: { plan: 'growth' } } },
+  }
   assert.deepEqual(billingNotice(event('invoice.payment_failed', invoice)), {
-    eventId: 'evt_1', kind: 'payment_failed', plan: 'growth', customerEmail: 'agency@example.com', amountDue: 14900, currency: 'usd', livemode: false,
+    eventId: 'evt_1',
+    kind: 'payment_failed',
+    plan: 'growth',
+    customerEmail: 'agency@example.com',
+    amountDue: 14900,
+    currency: 'usd',
+    livemode: false,
   })
   const bare = billingNotice(event('invoice.payment_failed', { id: 'in_2' }))
   assert.equal(bare.plan, null)

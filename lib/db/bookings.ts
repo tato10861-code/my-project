@@ -29,7 +29,16 @@ export async function createPendingBooking(input: BookingRequest): Promise<Creat
       `INSERT INTO propauto_bookings
          (id, kind, starts_at, listing_ref, customer_name, customer_phone, customer_email, language, status)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'pending')`,
-      [id, input.kind, input.startsAt, input.listingRef, input.name, input.phone, input.email ?? null, input.language ?? null],
+      [
+        id,
+        input.kind,
+        input.startsAt,
+        input.listingRef,
+        input.name,
+        input.phone,
+        input.email ?? null,
+        input.language ?? null,
+      ],
     )
     return { ok: true, id }
   } catch (error) {
@@ -47,10 +56,10 @@ export async function createPendingBooking(input: BookingRequest): Promise<Creat
  */
 export async function cancelBooking(id: string, reason: string): Promise<void> {
   await ensureBookingSchema()
-  await pool.query(
-    `UPDATE propauto_bookings SET status = 'cancelled', failure_reason = $2 WHERE id = $1`,
-    [id, reason.slice(0, 500)],
-  )
+  await pool.query(`UPDATE propauto_bookings SET status = 'cancelled', failure_reason = $2 WHERE id = $1`, [
+    id,
+    reason.slice(0, 500),
+  ])
 }
 
 export type ConfirmResult = 'confirmed' | 'already_confirmed' | 'cancelled' | 'not_found'

@@ -3,7 +3,15 @@ import { db } from '@/lib/db'
 import { propautoEvents } from '@/lib/db/schema'
 import { isAutomatedTraffic } from '@/lib/analytics'
 import { EVENT_MAX_BODY_BYTES, eventSchema, type VisitorEvent } from '@/lib/events'
-import { BodyTooLargeError, getClientKey, payloadTooLarge, readJsonBody, tooManyRequests, crossOriginForbidden, isSameOriginRequest } from '@/lib/request-security'
+import {
+  BodyTooLargeError,
+  getClientKey,
+  payloadTooLarge,
+  readJsonBody,
+  tooManyRequests,
+  crossOriginForbidden,
+  isSameOriginRequest,
+} from '@/lib/request-security'
 import { checkRateLimit } from '@/lib/db/rate-limit'
 
 export const dynamic = 'force-dynamic'
@@ -25,13 +33,17 @@ export async function POST(request: Request) {
   }
 
   // Crawlers and scripts are acknowledged but not counted, so they cannot inflate the audience figures.
-  if (isAutomatedTraffic(request.headers.get('user-agent'))) return NextResponse.json({ ok: true, counted: false }, { status: 202, headers: noStore })
+  if (isAutomatedTraffic(request.headers.get('user-agent')))
+    return NextResponse.json({ ok: true, counted: false }, { status: 202, headers: noStore })
 
   try {
     await db.insert(propautoEvents).values(payload)
     return NextResponse.json({ ok: true }, { status: 201, headers: noStore })
   } catch (error) {
     console.error('[events] tracking failed:', error instanceof Error ? error.message : 'unknown error')
-    return NextResponse.json({ error: 'Event tracking temporarily unavailable', retryable: true }, { status: 503, headers: noStore })
+    return NextResponse.json(
+      { error: 'Event tracking temporarily unavailable', retryable: true },
+      { status: 503, headers: noStore },
+    )
   }
 }

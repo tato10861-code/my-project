@@ -8,7 +8,10 @@ export async function GET() {
     return NextResponse.json({ enabled: false }, { status: 503 })
   }
 
-  return NextResponse.json({ enabled: true, publicKey, assistantId }, {
-    headers: { 'Cache-Control': 'private, max-age=300' },
-  })
+  return NextResponse.json(
+    { enabled: true, publicKey, assistantId },
+    {
+      headers: { 'Cache-Control': 'private, max-age=300' },
+    },
+  )
 }
