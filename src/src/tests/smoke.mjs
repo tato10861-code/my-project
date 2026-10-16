@@ -16,6 +16,8 @@ const requiredFiles = [
   'lib/owner.ts',
   'app/api/webhooks/stripe/route.ts',
   'db/migrations/0001_lead_details.sql',
+  'scripts/migrate.mjs',
+  'lib/migrations.ts',
   'app/api/health/route.ts',
   'lib/billing.ts',
   'lib/plans.ts',
