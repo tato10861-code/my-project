@@ -106,11 +106,9 @@ const copy = {
   },
 }
 
-const localizedCopy = {
-  ...copy,
-  fr: { ...copy.en },
-  es: { ...copy.en },
-}
+// Only languages whose page copy is actually translated are offered. (The chat widget has its own,
+// separately translated, French and Spanish.)
+const localizedCopy = copy
 
 type SiteLocale = keyof typeof localizedCopy
 
@@ -197,7 +195,7 @@ export default function Page() {
           {t.nav.map((item, index) => <a key={item} href={index === 0 ? '#market' : index === 2 ? '#intelligence' : index === 3 ? '#story' : '#market'} className="transition hover:text-[#f5f1e8]">{item}</a>)}
         </nav>
         <div className="flex items-center gap-3">
-          <label className="hidden items-center gap-2 rounded-full border border-[#b4c1bf]/20 px-3 py-2 text-xs text-[#b4c1bf] sm:flex"><Languages size={15} /><span className="sr-only">Language</span><select value={locale} onChange={(event) => setLocale(event.target.value as SiteLocale)} className="bg-transparent outline-none"><option value="en" className="text-black">English</option><option value="ar" className="text-black">العربية</option><option value="fr" className="text-black">Français</option><option value="es" className="text-black">Español</option></select></label>
+          <label className="hidden items-center gap-2 rounded-full border border-[#b4c1bf]/20 px-3 py-2 text-xs text-[#b4c1bf] sm:flex"><Languages size={15} /><span className="sr-only">Language</span><select value={locale} onChange={(event) => setLocale(event.target.value as SiteLocale)} className="bg-transparent outline-none"><option value="en" className="text-black">English</option><option value="ar" className="text-black">العربية</option></select></label>
           <button className="hidden text-sm text-[#b4c1bf] transition hover:text-[#f5f1e8] sm:block">{t.login}</button>
           <form action="/api/checkout" method="POST"><input type="hidden" name="product" value="propauto-premium-access" /><button type="submit" className="rounded-full bg-[#d5b77b] px-4 py-2.5 text-xs font-semibold text-[#071014] transition hover:bg-[#ead29d]">{t.cta}</button></form>
           <button onClick={() => setMenuOpen(!menuOpen)} className="grid size-10 place-items-center rounded-full border border-[#b4c1bf]/20 lg:hidden" aria-label="Toggle menu">{menuOpen ? <X size={18} /> : <Menu size={18} />}</button>
