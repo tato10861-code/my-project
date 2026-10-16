@@ -40,8 +40,21 @@ pnpm dev
 
 ## Database
 
-Tables are declared in `lib/db/schema.ts`. Schema changes ship as idempotent SQL
-in `db/migrations/`; see its README for how to apply them.
+Tables are declared in `lib/db/schema.ts`. Schema changes ship as numbered SQL
+files in `db/migrations/`, applied with the migration runner:
+
+```bash
+pnpm db:migrate            # apply pending migrations (use an unpooled DATABASE_URL_UNPOOLED)
+pnpm db:migrate --status   # list applied and pending, change nothing
+```
+
+The runner applies each file once, inside a transaction, and records it in the
+`propauto_migrations` table. It refuses to run if an applied file was edited or
+removed, so add a new numbered file instead of changing an old one. CI builds a
+fresh Postgres from these files on every pull request. Run it after deploying
+code that ships a new migration; the app keeps working until then (rate limits
+fall back to per-instance counting, Stripe deduplication to a lookup-only
+check). See `db/migrations/README.md` for details.
 
 ## Payments
 
@@ -49,7 +62,7 @@ Checkout creates a Stripe Checkout session (`POST /api/checkout`). Paid sessions
 are confirmed by the signed webhook `POST /api/webhooks/stripe`: create the
 endpoint in Stripe for `checkout.session.completed` and
 `checkout.session.async_payment_succeeded`, then set `STRIPE_WEBHOOK_SECRET`.
-Each payment is recorded once and the owner is emailed.
+Each payment is recorded once (a unique index makes concurrent duplicate deliveries safe) and the owner is emailed.
 
 ## Environment
 
@@ -57,11 +70,11 @@ Use `.env.example` as the variable checklist. Keep production secrets in the dep
 
 ## Access
 
-Only the owner account (`lib/owner.ts`) can be created or reach `/admin` and the analytics endpoints. Public endpoints are rate limited per client, validate every input with Zod, and cap request bodies on the bytes actually received.
+Only the owner account (`lib/owner.ts`) can be created or reach `/admin` and the analytics endpoints. Public endpoints are rate limited per client, with counters shared across server instances through Postgres (`propauto_rate_limits`), validate every input with Zod, and cap request bodies on the bytes actually received. State-changing `POST` routes reject requests from other origins. Booking confirmation links are signed, expire after 72 hours and confirm only through a same-origin `POST`, so mail scanners that open the link cannot confirm a booking.
 
 ## Deployment
 
-Vercel builds the app from `main`. CI (`.github/workflows/ci.yml`) runs the checks above plus a secret scan on every push and pull request.
+Vercel builds the app from `main`. CI (`.github/workflows/ci.yml`) runs the checks above, a job that applies every migration to an empty Postgres 16 and confirms a second run is a no-op, and a secret scan, on every push and pull request.
 
 ## Security
 
